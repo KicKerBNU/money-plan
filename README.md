@@ -35,10 +35,7 @@ src/
 │   ├── index.ts              # createI18n — auto-detects browser locale
 │   └── locales/
 │       ├── en-US.ts
-│       ├── pt-BR.ts
-│       ├── fr-FR.ts
-│       ├── it-IT.ts
-│       └── es-ES.ts
+│       └── pt-BR.ts
 ├── plugins/
 │   └── fontawesome.ts        # FA library setup + global component registration
 ├── router/
@@ -62,7 +59,7 @@ src/
 
 **Internationalization**
 - The app detects the browser's preferred language automatically via `navigator.languages`
-- Exact match is tried first (`pt-BR`), then language prefix (`fr` → `fr-FR`), then fallback to `en-US`
+- Exact match is tried first (`pt-BR`), then language prefix (`pt` → `pt-BR`), then fallback to `en-US`
 - All UI text goes through `useI18n` — no hardcoded strings in templates
 - Translation keys are namespaced by feature: `home.features.vite.title`
 

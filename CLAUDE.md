@@ -29,10 +29,7 @@ src/
 │   ├── index.ts        # createI18n instance
 │   └── locales/
 │       ├── en-US.ts
-│       ├── pt-BR.ts
-│       ├── fr-FR.ts
-│       ├── it-IT.ts
-│       └── es-ES.ts
+│       └── pt-BR.ts
 ├── plugins/
 │   └── fontawesome.ts  # Registers FA library + <FontAwesomeIcon> globally
 ├── router/
