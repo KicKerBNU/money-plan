@@ -1,48 +1,151 @@
 export default {
   home: {
-    badge: 'Vue 3 Scaffold',
-    headline: 'Build fast with a',
-    headlineHighlight: 'solid foundation',
+    badge: 'Money Plan',
+    headline: 'Control your money with',
+    headlineHighlight: 'clarity and confidence',
     description:
-      'A Vue 3 scaffold following Domain-Driven Design principles, wired with Pinia, Vue Router, Tailwind CSS, and TypeScript out of the box.',
+      'Track daily expenses, organize every category, and understand exactly where your monthly budget goes in one secure dashboard.',
+    trustNote: 'Private by default. Your records are linked to your secure account.',
     cta: {
-      start: 'Get Started',
-      docs: 'View Docs',
+      login: 'Login and start tracking',
+      howItWorks: 'How it works',
+    },
+    mockup: {
+      month: 'April overview',
+      title: 'Monthly snapshot',
+      status: 'On track',
+      income: 'Income',
+      expenses: 'Expenses',
+      monthlyCosts: 'Monthly costs trend',
+      categories: 'Spending by category',
+      currentMonth: 'Current month',
+      recent: 'Recent activity',
+    },
+    actions: {
+      title: 'What you can do with Money Plan',
+      items: {
+        expenses: 'Add daily expenses with date, amount, category, account, and note.',
+        income: 'Register your monthly income and extra money coming in.',
+        accounts: 'Organize spending by Cash, Bank Accounts, Card, or custom accounts.',
+        categories: 'Use default categories or create new ones that match your real life.',
+        stats: 'See current-month category totals and understand where money goes.',
+        secure: 'Login securely and keep your records connected to your account.',
+      },
     },
     features: {
-      vite: {
-        title: 'Vite',
-        description: 'Lightning-fast dev server and build tool with instant HMR.',
+      tracking: {
+        title: 'Daily Expense Tracking',
+        description: 'Capture every expense in seconds with date, amount, account, category, and note.',
       },
-      tailwind: {
-        title: 'Tailwind CSS 4',
-        description: 'Utility-first CSS with zero config — style at the speed of thought.',
+      categories: {
+        title: 'Smart Categories',
+        description: 'Use default categories from day one and create custom ones as your life evolves.',
       },
-      pinia: {
-        title: 'Pinia',
-        description: 'Intuitive, type-safe state management for Vue 3.',
+      accounts: {
+        title: 'Accounts in One Place',
+        description: 'Organize cash, bank accounts, and cards with a consistent and simple workflow.',
       },
-      router: {
-        title: 'Vue Router 5',
-        description: 'Official router with file-based module route organization.',
-      },
-      ddd: {
-        title: 'DDD Structure',
-        description: 'Feature modules with api, domain, and store layers.',
-      },
-      typescript: {
-        title: 'TypeScript',
-        description: 'Strict typing across every layer of the application.',
-      },
-      storybook: {
-        title: 'Storybook',
-        description: 'Isolated component development and visual testing.',
-      },
-      i18n: {
-        title: 'vue-i18n',
-        description: 'First-class internationalization support for all locales.',
+      monthlyStats: {
+        title: 'Monthly Insights',
+        description: 'Visualize category totals and quickly identify spending patterns each month.',
       },
     },
-    footer: 'Vue Scaffold — DDD structure with Tailwind CSS 4',
+    how: {
+      title: 'How it works',
+      description: 'The product is built around one simple habit: record, organize, review.',
+      steps: {
+        capture: {
+          title: 'Login securely',
+          description: 'Access your private finance space and keep your records protected.',
+        },
+        organize: {
+          title: 'Add income and expenses',
+          description: 'Record money coming in and every daily expense as it happens.',
+        },
+        analyze: {
+          title: 'Review your month',
+          description: 'Use category totals and charts to make better decisions before the month ends.',
+        },
+      },
+    },
+    footer: 'Money Plan — Simple finance control for everyday life',
+  },
+  common: {
+    loading: 'Loading...',
+    unexpectedError: 'Unexpected error',
+    add: 'Add',
+  },
+  theme: {
+    light: 'Light mode',
+    dark: 'Dark mode',
+  },
+  auth: {
+    login: {
+      badge: 'Secure access',
+      title: 'Welcome back',
+      createTitle: 'Create your account',
+      description: 'Sign in to keep your expenses, income, and monthly insights connected to your account.',
+      emailLabel: 'Email',
+      emailPlaceholder: 'Enter your email',
+      passwordLabel: 'Password',
+      passwordPlaceholder: 'At least 6 characters',
+      emailSubmit: 'Login with email',
+      createSubmit: 'Create account',
+      or: 'or',
+      googleButton: 'Sign in with Google',
+      noAccount: "Don't have an account?",
+      hasAccount: 'Already have an account?',
+      createLink: 'Create one',
+      loginLink: 'Login',
+      errors: {
+        invalidCredential: 'Email or password is incorrect.',
+        emailInUse: 'This email is already registered.',
+        weakPassword: 'Use a password with at least 6 characters.',
+        invalidEmail: 'Enter a valid email address.',
+        generic: 'Unable to authenticate. Please try again.',
+      },
+    },
+  },
+  appNav: {
+    income: 'Income',
+    expenses: 'Expenses',
+    stats: 'Stats',
+    logout: 'Logout',
+  },
+  income: {
+    title: 'Income',
+    subtitle: 'Register your monthly and extra incomes.',
+    form: {
+      date: 'Date',
+      amount: 'Amount',
+      note: 'Note',
+      submit: 'Add income',
+    },
+  },
+  expenses: {
+    title: 'Expenses',
+    subtitle: 'Register your daily living expenses.',
+    form: {
+      date: 'Date',
+      amount: 'Amount',
+      category: 'Category',
+      account: 'Account',
+      note: 'Note',
+      submit: 'Add expense',
+    },
+    addAccount: {
+      title: 'Add account',
+      placeholder: 'Account name',
+    },
+    addCategory: {
+      title: 'Add category',
+      placeholder: 'Category name',
+    },
+  },
+  stats: {
+    title: 'Monthly stats',
+    subtitle: 'Current month expenses by category.',
+    refresh: 'Refresh',
+    total: 'Total expenses',
   },
 }

@@ -1,48 +1,151 @@
 export default {
   home: {
-    badge: 'Scaffold Vue 3',
-    headline: 'Construa rápido com uma',
-    headlineHighlight: 'base sólida',
+    badge: 'Money Plan',
+    headline: 'Controle seu dinheiro com',
+    headlineHighlight: 'clareza e confiança',
     description:
-      'Um scaffold Vue 3 seguindo os princípios de Domain-Driven Design, com Pinia, Vue Router, Tailwind CSS e TypeScript prontos para uso.',
+      'Registre suas despesas diárias, organize cada categoria e entenda exatamente para onde vai seu orçamento mensal em um painel seguro.',
+    trustNote: 'Privado por padrão. Seus registros ficam vinculados à sua conta segura.',
     cta: {
-      start: 'Começar',
-      docs: 'Ver Documentação',
+      login: 'Entrar e começar',
+      howItWorks: 'Como funciona',
+    },
+    mockup: {
+      month: 'Resumo de abril',
+      title: 'Visão mensal',
+      status: 'No controle',
+      income: 'Receitas',
+      expenses: 'Despesas',
+      monthlyCosts: 'Evolução dos custos mensais',
+      categories: 'Gastos por categoria',
+      currentMonth: 'Mês atual',
+      recent: 'Atividade recente',
+    },
+    actions: {
+      title: 'O que você pode fazer com o Money Plan',
+      items: {
+        expenses: 'Adicionar despesas diárias com data, valor, categoria, conta e observação.',
+        income: 'Registrar sua receita mensal e entradas extras de dinheiro.',
+        accounts: 'Organizar gastos por Dinheiro, Contas Bancárias, Cartão ou contas personalizadas.',
+        categories: 'Usar categorias padrão ou criar novas categorias para sua rotina real.',
+        stats: 'Ver totais do mês por categoria e entender para onde o dinheiro vai.',
+        secure: 'Entrar com segurança e manter seus registros conectados à sua conta.',
+      },
     },
     features: {
-      vite: {
-        title: 'Vite',
-        description: 'Servidor de desenvolvimento ultrarrápido com HMR instantâneo.',
+      tracking: {
+        title: 'Registro diário de despesas',
+        description: 'Registre cada despesa em segundos com data, valor, conta, categoria e observação.',
       },
-      tailwind: {
-        title: 'Tailwind CSS 4',
-        description: 'CSS utilitário sem configuração — estilos na velocidade do pensamento.',
+      categories: {
+        title: 'Categorias inteligentes',
+        description: 'Use categorias padrão desde o início e crie novas conforme sua rotina evolui.',
       },
-      pinia: {
-        title: 'Pinia',
-        description: 'Gerenciamento de estado intuitivo e tipado para Vue 3.',
+      accounts: {
+        title: 'Contas em um só lugar',
+        description: 'Organize dinheiro, contas bancárias e cartões com um fluxo simples e consistente.',
       },
-      router: {
-        title: 'Vue Router 5',
-        description: 'Roteador oficial com organização de rotas por módulo.',
-      },
-      ddd: {
-        title: 'Estrutura DDD',
-        description: 'Módulos de funcionalidades com camadas api, domain e store.',
-      },
-      typescript: {
-        title: 'TypeScript',
-        description: 'Tipagem estrita em todas as camadas da aplicação.',
-      },
-      storybook: {
-        title: 'Storybook',
-        description: 'Desenvolvimento e testes visuais de componentes isolados.',
-      },
-      i18n: {
-        title: 'vue-i18n',
-        description: 'Suporte de primeira classe à internacionalização para todos os idiomas.',
+      monthlyStats: {
+        title: 'Insights mensais',
+        description: 'Visualize totais por categoria e identifique padrões de gasto ao longo do mês.',
       },
     },
-    footer: 'Vue Scaffold — estrutura DDD com Tailwind CSS 4',
+    how: {
+      title: 'Como funciona',
+      description: 'O produto nasce de um hábito simples: registrar, organizar e revisar.',
+      steps: {
+        capture: {
+          title: 'Entre com segurança',
+          description: 'Acesse seu espaço financeiro privado e mantenha seus registros protegidos.',
+        },
+        organize: {
+          title: 'Adicione receitas e despesas',
+          description: 'Registre o dinheiro que entra e cada despesa diária quando ela acontece.',
+        },
+        analyze: {
+          title: 'Revise seu mês',
+          description: 'Use totais por categoria e gráficos para decidir melhor antes do mês acabar.',
+        },
+      },
+    },
+    footer: 'Money Plan — Controle financeiro simples para o dia a dia',
+  },
+  common: {
+    loading: 'Carregando...',
+    unexpectedError: 'Erro inesperado',
+    add: 'Adicionar',
+  },
+  theme: {
+    light: 'Modo claro',
+    dark: 'Modo escuro',
+  },
+  auth: {
+    login: {
+      badge: 'Acesso seguro',
+      title: 'Bem-vindo de volta',
+      createTitle: 'Crie sua conta',
+      description: 'Entre para manter suas despesas, receitas e insights mensais conectados à sua conta.',
+      emailLabel: 'Email',
+      emailPlaceholder: 'Digite seu email',
+      passwordLabel: 'Senha',
+      passwordPlaceholder: 'Pelo menos 6 caracteres',
+      emailSubmit: 'Entrar com email',
+      createSubmit: 'Criar conta',
+      or: 'ou',
+      googleButton: 'Fazer login com o Google',
+      noAccount: 'Ainda não tem uma conta?',
+      hasAccount: 'Já tem uma conta?',
+      createLink: 'Criar uma',
+      loginLink: 'Entrar',
+      errors: {
+        invalidCredential: 'Email ou senha incorretos.',
+        emailInUse: 'Este email já está cadastrado.',
+        weakPassword: 'Use uma senha com pelo menos 6 caracteres.',
+        invalidEmail: 'Informe um email válido.',
+        generic: 'Não foi possível autenticar. Tente novamente.',
+      },
+    },
+  },
+  appNav: {
+    income: 'Receitas',
+    expenses: 'Despesas',
+    stats: 'Estatísticas',
+    logout: 'Sair',
+  },
+  income: {
+    title: 'Receitas',
+    subtitle: 'Registre suas receitas mensais e extras.',
+    form: {
+      date: 'Data',
+      amount: 'Valor',
+      note: 'Observação',
+      submit: 'Adicionar receita',
+    },
+  },
+  expenses: {
+    title: 'Despesas',
+    subtitle: 'Registre suas despesas do dia a dia.',
+    form: {
+      date: 'Data',
+      amount: 'Valor',
+      category: 'Categoria',
+      account: 'Conta',
+      note: 'Observação',
+      submit: 'Adicionar despesa',
+    },
+    addAccount: {
+      title: 'Adicionar conta',
+      placeholder: 'Nome da conta',
+    },
+    addCategory: {
+      title: 'Adicionar categoria',
+      placeholder: 'Nome da categoria',
+    },
+  },
+  stats: {
+    title: 'Estatísticas mensais',
+    subtitle: 'Despesas do mês atual por categoria.',
+    refresh: 'Atualizar',
+    total: 'Total de despesas',
   },
 }

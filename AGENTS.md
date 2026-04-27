@@ -4,7 +4,7 @@ This file provides guidance for AI coding agents (Cursor, Codex, Claude, etc.) w
 
 ## Project Overview
 
-Vue 3 scaffold using Domain-Driven Design (DDD) folder structure.
+Vue 3 frontend for Money Plan, a personal finance app for tracking daily expenses, income, accounts, categories, and monthly stats.
 
 ## Tech Stack
 
@@ -17,24 +17,30 @@ Vue 3 scaffold using Domain-Driven Design (DDD) folder structure.
 - vue-i18n 11 (`legacy: false`, Composition API mode)
 - FontAwesome 7 (registered globally as `<FontAwesomeIcon>`)
 - Storybook 10
+- Firebase Auth
+- Netlify deployment
 
 ## Folder Structure
 
 ```text
 src/
 ├── modules/            # Feature modules (DDD)
-│   └── <feature>/
-│       ├── api/        # HTTP requests for this feature
-│       ├── domain/     # TypeScript interfaces and types
-│       ├── store/      # Pinia setup store
-│       ├── <feature>.routes.ts
-│       └── <feature>.vue
+│   ├── app/            # App navigation
+│   ├── auth/           # Login + auth store
+│   ├── expenses/       # Expenses UI/API/domain
+│   ├── home/           # Landing page
+│   ├── income/         # Income UI/API/domain
+│   ├── stats/          # Monthly stats UI/API/domain
+│   └── theme/          # Light/dark theme store + toggle
+├── lib/
+│   └── api.ts          # Authenticated API client
 ├── i18n/
 │   ├── index.ts
 │   └── locales/
 │       ├── en-US.ts
 │       └── pt-BR.ts
 ├── plugins/
+│   ├── firebase.ts
 │   └── fontawesome.ts
 ├── router/
 │   └── index.ts
@@ -57,6 +63,10 @@ src/
 - Keep translation keys namespaced by feature (for example: `home.features.vite.title`).
 - Add FontAwesome icons to `src/plugins/fontawesome.ts` before using them.
 - Keep Storybook stories next to the feature component files.
+- Keep authenticated finance screens under `/app/*`.
+- Use `src/lib/api.ts` for backend requests so Firebase ID tokens are attached.
+- Use `src/modules/theme` and semantic theme classes for light/dark styling.
+- Keep user-facing text in both `en-US.ts` and `pt-BR.ts`.
 
 ## Agent Guidelines
 
@@ -74,4 +84,18 @@ npm run build
 npm run preview
 npm run storybook
 npm run build-storybook
+npx netlify deploy --prod --dir=dist
+```
+
+## Backend
+
+Local backend default URL is `http://localhost:3000`. Override with `VITE_API_BASE_URL`.
+
+## Netlify
+
+The frontend is configured with `netlify.toml`. Production deploy command:
+
+```bash
+npm run build
+npx netlify deploy --prod --dir=dist
 ```

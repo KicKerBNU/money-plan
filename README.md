@@ -1,10 +1,10 @@
-# Vue 3 Scaffold
+# money-plan-frontend
 
-A production-ready Vue 3 scaffold built with Domain-Driven Design (DDD), designed to scale cleanly as the application grows. Each feature lives in its own self-contained module with clearly separated layers for API calls, TypeScript contracts, and state management.
+Vue 3 frontend for Money Plan, a personal finance web app for tracking income, daily expenses, accounts, categories, and monthly spending insights.
 
 ## Objective
 
-Provide a solid starting point for Vue 3 projects that enforces a consistent, modular architecture from day one — avoiding the flat component soup that most scaffolds encourage.
+Provide a clean personal finance experience where users can securely sign in, record daily expenses, add income, organize categories/accounts, and review monthly spending stats.
 
 ## Tech Stack
 
@@ -19,25 +19,31 @@ Provide a solid starting point for Vue 3 projects that enforces a consistent, mo
 | [vue-i18n](https://vue-i18n.intlify.dev/) | ^11.0 | Internationalization — auto-detects browser language |
 | [FontAwesome](https://fontawesome.com/) | ^7.0 | Icons — registered globally as `<FontAwesomeIcon>` |
 | [Storybook](https://storybook.js.org/) | ^10.0 | Isolated component development and visual testing |
+| [Firebase](https://firebase.google.com/) | ^12.0 | Frontend authentication |
+| [Netlify](https://www.netlify.com/) | CLI | Production deployment |
 
 ## Folder Structure
 
 ```
 src/
 ├── modules/                  # Feature modules (DDD)
-│   └── <feature>/
-│       ├── api/              # HTTP requests for this feature
-│       ├── domain/           # TypeScript interfaces and types
-│       ├── store/            # Pinia store
-│       ├── <feature>.routes.ts
-│       └── <feature>.vue
+│   ├── app/                  # Authenticated app navigation
+│   ├── auth/                 # Login + Firebase auth store
+│   ├── expenses/             # Expense list/form and account/category helpers
+│   ├── home/                 # Marketing landing page
+│   ├── income/               # Income list/form
+│   ├── stats/                # Monthly stats view
+│   └── theme/                # Light/dark theme store and toggle
 ├── i18n/
 │   ├── index.ts              # createI18n — auto-detects browser locale
 │   └── locales/
 │       ├── en-US.ts
 │       └── pt-BR.ts
 ├── plugins/
+│   ├── firebase.ts           # Firebase app/auth/analytics setup
 │   └── fontawesome.ts        # FA library setup + global component registration
+├── lib/
+│   └── api.ts                # Authenticated API fetch wrapper
 ├── router/
 │   └── index.ts              # Global router — spreads routes from each module
 ├── assets/
@@ -74,6 +80,17 @@ src/
 **Imports**
 - Use the `@/` alias for all absolute imports: `@/modules/home/home.vue`
 
+**Auth**
+- Firebase Auth is initialized in `src/plugins/firebase.ts`
+- Auth state is managed in `src/modules/auth/store/auth.store.ts`
+- Protected `/app/*` routes require an authenticated user
+- API requests use `src/lib/api.ts`, which attaches the Firebase ID token as a Bearer token
+
+**Theme**
+- Light/dark theme is managed in `src/modules/theme/store/theme.store.ts`
+- Theme tokens and semantic classes live in `src/assets/styles/main.css`
+- Prefer semantic theme classes (`theme-page`, `theme-card`, `theme-button-primary`, etc.) over hardcoded dark-only Tailwind classes
+
 ## Getting Started
 
 ```bash
@@ -95,6 +112,46 @@ npm run build            # Type-check + production build
 npm run preview          # Preview production build locally
 npm run storybook        # Storybook at http://localhost:6006
 npm run build-storybook  # Build static Storybook
+```
+
+## Backend Integration
+
+By default, API calls target:
+
+```bash
+http://localhost:3000
+```
+
+Override with a Vite environment variable when needed:
+
+```bash
+VITE_API_BASE_URL=https://your-api.example.com
+```
+
+## Netlify Deployment
+
+This project includes `netlify.toml`:
+
+- build command: `npm run build`
+- publish directory: `dist`
+- SPA fallback redirect to `index.html`
+
+Deploy production from this folder:
+
+```bash
+npx netlify deploy --prod --dir=dist
+```
+
+If you want Netlify to run the build during deploy:
+
+```bash
+npx netlify deploy --prod
+```
+
+Current production site:
+
+```text
+https://money-plan-frontend.netlify.app
 ```
 
 ## Adding a New Feature Module
