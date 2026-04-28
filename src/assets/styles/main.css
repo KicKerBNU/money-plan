@@ -2,19 +2,23 @@
 
 :root {
   color-scheme: dark;
-  --color-page: #020617;
-  --color-surface: rgba(15, 23, 42, 0.78);
-  --color-surface-strong: #0f172a;
-  --color-surface-soft: rgba(2, 6, 23, 0.62);
-  --color-border: rgba(148, 163, 184, 0.18);
-  --color-text: #f8fafc;
-  --color-muted: #94a3b8;
-  --color-subtle: #64748b;
-  --color-primary: #f59e0b;
-  --color-primary-hover: #fbbf24;
-  --color-primary-text: #111827;
-  --color-accent: #14b8a6;
-  --color-accent-soft: rgba(20, 184, 166, 0.12);
+  --color-page: #08090c;
+  --color-surface: #111318;
+  --color-surface-strong: #151820;
+  --color-surface-soft: #1a1d25;
+  --color-border: rgba(148, 163, 184, 0.13);
+  --color-text: #f4f7fb;
+  --color-muted: #818b9d;
+  --color-subtle: #5f6878;
+  --color-primary: #5adcca;
+  --color-primary-hover: #6ee7d8;
+  --color-primary-text: #08201d;
+  --color-accent: #5adcca;
+  --color-accent-soft: rgba(90, 220, 202, 0.1);
+  --color-shell: #08090c;
+  --color-nav: #111318;
+  --color-positive: #42d993;
+  --color-danger: #ef6f82;
   --color-badge-bg: rgba(20, 184, 166, 0.14);
   --color-badge-border: rgba(45, 212, 191, 0.42);
   --color-badge-text: #99f6e4;
@@ -25,18 +29,22 @@
 :root[data-theme='light'] {
   color-scheme: light;
   --color-page: #f8fafc;
-  --color-surface: rgba(255, 255, 255, 0.82);
+  --color-surface: rgba(255, 255, 255, 0.94);
   --color-surface-strong: #ffffff;
-  --color-surface-soft: rgba(241, 245, 249, 0.88);
-  --color-border: rgba(15, 23, 42, 0.1);
-  --color-text: #0f172a;
-  --color-muted: #475569;
-  --color-subtle: #64748b;
-  --color-primary: #0f766e;
-  --color-primary-hover: #0d9488;
+  --color-surface-soft: rgba(239, 241, 236, 0.9);
+  --color-border: rgba(24, 39, 36, 0.08);
+  --color-text: #121827;
+  --color-muted: #718198;
+  --color-subtle: #8a96a8;
+  --color-primary: #2f7f73;
+  --color-primary-hover: #256f65;
   --color-primary-text: #ffffff;
   --color-accent: #f59e0b;
   --color-accent-soft: rgba(15, 118, 110, 0.1);
+  --color-shell: #f3f4ef;
+  --color-nav: rgba(255, 255, 255, 0.96);
+  --color-positive: #059669;
+  --color-danger: #dc2626;
   --color-badge-bg: rgba(15, 118, 110, 0.1);
   --color-badge-border: rgba(15, 118, 110, 0.28);
   --color-badge-text: #0f766e;
@@ -64,6 +72,148 @@ body {
     color: var(--color-text);
   }
 
+  .app-shell {
+    min-height: 100vh;
+    background: var(--color-shell);
+    color: var(--color-text);
+  }
+
+  .app-content {
+    padding: 1rem;
+    padding-bottom: 6.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .app-content {
+      margin-left: 15rem;
+      padding: 2.75rem 2.5rem 2rem;
+    }
+  }
+
+  .app-sidebar {
+    background: var(--color-nav);
+    color: var(--color-text);
+    box-shadow: 1px 0 0 var(--color-border);
+    backdrop-filter: blur(18px);
+  }
+
+  .brand-mark {
+    background: linear-gradient(135deg, #f3c34e, #53dbc8);
+    color: #ffffff;
+    box-shadow: 0 10px 20px rgba(90, 220, 202, 0.14);
+  }
+
+  .app-nav-item {
+    color: var(--color-muted);
+    transition:
+      background-color 180ms ease,
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .app-nav-item:hover {
+    background: rgba(90, 220, 202, 0.08);
+    color: var(--color-text);
+    transform: translateX(2px);
+  }
+
+  .app-nav-item.is-active {
+    background: var(--color-primary);
+    color: var(--color-primary-text);
+    box-shadow: 0 10px 20px rgba(90, 220, 202, 0.18);
+  }
+
+  .app-nav-item.is-disabled {
+    cursor: default;
+    opacity: 0.92;
+  }
+
+  .app-net-card {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+    color: var(--color-text);
+  }
+
+  .mobile-bottom-nav {
+    background: var(--color-nav);
+    backdrop-filter: blur(18px);
+  }
+
+  .mobile-nav-item {
+    color: var(--color-muted);
+    transition:
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .mobile-nav-item.is-active {
+    color: var(--color-primary);
+  }
+
+  .mobile-nav-item.is-disabled {
+    opacity: 0.65;
+  }
+
+  .mobile-nav-item.is-action {
+    align-self: center;
+    justify-self: center;
+    transform: none;
+  }
+
+  .mobile-nav-item.is-action .mobile-nav-icon {
+    height: 3rem;
+    width: 3rem;
+    border-radius: 9999px;
+    background: var(--color-primary);
+    color: var(--color-primary-text);
+    box-shadow: 0 14px 24px rgba(15, 118, 110, 0.28);
+  }
+
+  .mobile-nav-icon {
+    height: 1.1rem;
+    width: 1.1rem;
+  }
+
+  .finance-card {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+  }
+
+  .finance-chip {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .finance-chip.is-active {
+    background: var(--color-primary);
+    color: var(--color-primary-text);
+  }
+
+  .expense-list > * + * {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .income-list > * + * {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .expense-row {
+    transition:
+      background-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .expense-row:hover {
+    background: color-mix(in srgb, var(--color-surface-soft) 58%, transparent);
+  }
+
   .theme-card-soft {
     border: 1px solid var(--color-border);
     background: var(--color-surface-soft);
@@ -88,6 +238,10 @@ body {
     color: var(--color-text);
   }
 
+  .theme-input::placeholder {
+    color: var(--color-subtle);
+  }
+
   .theme-button-primary {
     background: var(--color-primary);
     color: var(--color-primary-text);
@@ -103,6 +257,7 @@ body {
 
   .theme-button-secondary {
     border: 1px solid var(--color-border);
+    background: var(--color-surface);
     color: var(--color-text);
     transition:
       border-color 180ms ease,

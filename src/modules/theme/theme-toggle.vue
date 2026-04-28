@@ -8,10 +8,12 @@ const themeStore = useThemeStore()
 
 <template>
   <button
-    class="theme-button-secondary rounded-xl px-3 py-2 text-sm font-medium"
+    class="theme-button-secondary flex h-10 w-10 items-center justify-center rounded-xl text-sm font-medium"
     type="button"
+    :aria-label="themeStore.isDark ? t('theme.light') : t('theme.dark')"
+    :title="themeStore.isDark ? t('theme.light') : t('theme.dark')"
     @click="themeStore.toggleTheme"
   >
-    {{ themeStore.isDark ? t('theme.light') : t('theme.dark') }}
+    <FontAwesomeIcon icon="gear" />
   </button>
 </template>

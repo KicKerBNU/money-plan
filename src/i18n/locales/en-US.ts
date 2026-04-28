@@ -107,25 +107,63 @@ export default {
     },
   },
   appNav: {
+    brand: 'Money Plan',
+    period: 'April 2026',
+    overview: 'Overview',
     income: 'Income',
     expenses: 'Expenses',
     stats: 'Stats',
+    accounts: 'Accounts',
+    add: 'Add',
+    me: 'Me',
+    netLabel: 'Net April',
+    netValue: '+$2,010',
     logout: 'Logout',
   },
   income: {
     title: 'Income',
-    subtitle: 'Register your monthly and extra incomes.',
+    subtitle: 'Salary, freelance, and extra money in.',
+    summary: {
+      totalIncome: 'Total income · April',
+      details: '4 entries · last on Apr 22',
+    },
+    quickAdd: {
+      title: 'Quick add',
+    },
+    recent: {
+      title: 'Recent income',
+    },
     form: {
       date: 'Date',
       amount: 'Amount',
       note: 'Note',
+      notePlaceholder: 'Note (e.g. Freelance, refund)',
       submit: 'Add income',
     },
   },
   expenses: {
     title: 'Expenses',
-    subtitle: 'Register your daily living expenses.',
+    subtitle: 'Daily spending — {count} entries this month.',
+    searchPlaceholder: 'Search notes or categories',
+    empty: 'No expenses found for this filter.',
+    actions: {
+      addExpense: 'Add expense',
+    },
+    filters: {
+      all: 'All',
+    },
+    summary: {
+      totalSpent: 'Total spent',
+      dailyAverage: 'Daily avg',
+      largestDay: 'Largest day',
+      cashFlow: 'Cash flow',
+    },
+    panels: {
+      byCategory: 'By category',
+      byAccount: 'By account',
+    },
     form: {
+      title: 'New expense',
       date: 'Date',
       amount: 'Amount',
       category: 'Category',

@@ -38,10 +38,11 @@ onMounted(loadStats)
 </script>
 
 <template>
-  <div class="theme-page min-h-screen p-6">
-    <div class="mx-auto max-w-5xl">
-      <FinanceNav />
+  <div class="app-shell">
+    <FinanceNav />
 
+    <main class="app-content">
+      <div class="mx-auto max-w-5xl">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 class="text-3xl font-bold">{{ t('stats.title') }}</h1>
@@ -86,6 +87,7 @@ onMounted(loadStats)
           </div>
         </div>
       </template>
-    </div>
+      </div>
+    </main>
   </div>
 </template>

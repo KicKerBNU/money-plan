@@ -107,25 +107,63 @@ export default {
     },
   },
   appNav: {
+    brand: 'Money Plan',
+    period: 'Abril 2026',
+    overview: 'Resumo',
     income: 'Receitas',
     expenses: 'Despesas',
     stats: 'Estatísticas',
+    accounts: 'Contas',
+    add: 'Adicionar',
+    me: 'Eu',
+    netLabel: 'Saldo abril',
+    netValue: '+US$ 2.010',
     logout: 'Sair',
   },
   income: {
     title: 'Receitas',
-    subtitle: 'Registre suas receitas mensais e extras.',
+    subtitle: 'Salário, freelas e entradas extras.',
+    summary: {
+      totalIncome: 'Receita total · abril',
+      details: '4 lançamentos · último em 22 de abr',
+    },
+    quickAdd: {
+      title: 'Adicionar rápido',
+    },
+    recent: {
+      title: 'Receitas recentes',
+    },
     form: {
       date: 'Data',
       amount: 'Valor',
       note: 'Observação',
+      notePlaceholder: 'Observação (ex: Freela, reembolso)',
       submit: 'Adicionar receita',
     },
   },
   expenses: {
     title: 'Despesas',
-    subtitle: 'Registre suas despesas do dia a dia.',
+    subtitle: 'Gastos diários — {count} lançamentos neste mês.',
+    searchPlaceholder: 'Buscar observações ou categorias',
+    empty: 'Nenhuma despesa encontrada para este filtro.',
+    actions: {
+      addExpense: 'Adicionar despesa',
+    },
+    filters: {
+      all: 'Todos',
+    },
+    summary: {
+      totalSpent: 'Total gasto',
+      dailyAverage: 'Média diária',
+      largestDay: 'Maior dia',
+      cashFlow: 'Fluxo de caixa',
+    },
+    panels: {
+      byCategory: 'Por categoria',
+      byAccount: 'Por conta',
+    },
     form: {
+      title: 'Nova despesa',
       date: 'Data',
       amount: 'Valor',
       category: 'Categoria',
