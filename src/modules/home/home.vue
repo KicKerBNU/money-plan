@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import ThemeToggle from '@/modules/theme/theme-toggle.vue'
 
 const { t } = useI18n()
 
@@ -28,12 +27,8 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
     <div class="floating-orb floating-orb-cyan" />
     <div class="floating-orb floating-orb-amber" />
 
-    <div class="relative mx-auto flex max-w-6xl justify-end px-6 pt-6">
-      <ThemeToggle />
-    </div>
-
     <!-- Hero -->
-    <section class="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-24 lg:grid-cols-[1fr_0.95fr]">
+    <section class="relative mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 sm:py-24 lg:grid-cols-[1fr_0.95fr]">
       <div class="text-center lg:text-left">
         <span class="theme-badge mb-5 inline-flex animate-fade-up rounded-full px-4 py-1.5 text-sm font-medium">
           {{ t('home.badge') }}
