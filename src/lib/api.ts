@@ -27,5 +27,9 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     throw new Error(errorBody.message ?? `Request failed with status ${response.status}`)
   }
 
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   return (await response.json()) as T
 }

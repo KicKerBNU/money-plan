@@ -74,6 +74,10 @@ export default {
     loading: 'Carregando...',
     unexpectedError: 'Erro inesperado',
     add: 'Adicionar',
+    edit: 'Editar',
+    save: 'Salvar',
+    delete: 'Excluir',
+    cancel: 'Cancelar',
   },
   theme: {
     light: 'Modo claro',
@@ -125,7 +129,7 @@ export default {
     subtitle: 'Salário, freelas e entradas extras.',
     summary: {
       totalIncome: 'Receita total · abril',
-      details: '4 lançamentos · último em 22 de abr',
+      details: '{count} lançamentos · último em {date}',
     },
     quickAdd: {
       title: 'Adicionar rápido',
@@ -151,12 +155,34 @@ export default {
     },
     filters: {
       all: 'Todos',
+      range: 'Periodo',
+      from: 'De',
+      to: 'Ate',
+      clearDate: 'Limpar',
+      quickRange: 'Rapido',
+      last3Days: 'Ultimos 3 dias',
+      last7Days: 'Ultimos 7 dias',
+      tripWeek: 'Semana da viagem',
+      tripWeekModalTitle: 'Selecionar periodo da viagem',
+      tripWeekModalDescription: 'Escolha as datas de inicio e fim para acompanhar os gastos da sua viagem.',
+      applyRange: 'Aplicar periodo',
+      selectedDateSpend: 'Gasto em {date}: {amount}',
+      selectedDateRangeSpend: 'Gasto em {date}: {amount}',
     },
     summary: {
       totalSpent: 'Total gasto',
       dailyAverage: 'Média diária',
       largestDay: 'Maior dia',
       cashFlow: 'Fluxo de caixa',
+    },
+    mobile: {
+      spentInApril: 'Gasto em abril',
+      earnedAmount: 'de {amount} recebidos',
+    },
+    emptyMonth: {
+      title: 'Ainda sem despesas neste mes',
+      description: 'Comece adicionando sua primeira despesa para liberar os insights por categoria e os saldos das contas.',
+      cta: 'Adicionar primeira despesa',
     },
     panels: {
       byCategory: 'Por categoria',
@@ -182,8 +208,12 @@ export default {
   },
   stats: {
     title: 'Estatísticas mensais',
-    subtitle: 'Despesas do mês atual por categoria.',
-    refresh: 'Atualizar',
-    total: 'Total de despesas',
+    subtitle: 'Cada pilar é uma categoria. Cada bloco é uma despesa. A altura mostra o que dominou seu mês.',
+    totalCaption: 'gastos em {count} categorias',
+    mobileTotalCaption: '{count} categorias',
+    entryLabel: 'lançamento',
+    brickHint: 'Tom mais claro = maior despesa nessa categoria.',
+    hoverHint: 'Passe o mouse para detalhes.',
+    lineupTitle: 'O ranking',
   },
 }

@@ -4,9 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 1074",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview",
+    "preview": "concurrently -k -n auth,vite -c cyan,green \"yarn preview:auth\" \"yarn preview:vite\"",
+    "preview:auth": "firebase emulators:start --only auth --project money-plan-23efb",
+    "preview:vite": "VITE_USE_FIREBASE_AUTH_EMULATOR=true vite build && vite preview --config vite.config.ts --host 0.0.0.0",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "format": "prettier --write src/"
@@ -36,6 +38,8 @@
     "@vitest/browser-playwright": "^4.1.4",
     "@vitest/coverage-v8": "^4.1.4",
     "@vue/tsconfig": "^0.9.1",
+    "concurrently": "^9.2.1",
+    "firebase-tools": "^15.15.0",
     "playwright": "^1.59.1",
     "prettier": "^3.8.2",
     "prettier-plugin-tailwindcss": "^0.7.2",

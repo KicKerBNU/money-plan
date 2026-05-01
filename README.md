@@ -1,10 +1,51 @@
 # money-plan-frontend
 
-Vue 3 frontend for Money Plan, a personal finance web app for tracking income, daily expenses, accounts, categories, and monthly spending insights.
+Vue 3 frontend for **Money Plan** — a personal finance web app for tracking income, daily expenses, accounts, categories, and monthly spending insights. It talks to the `money-plan-backend` REST API using Firebase-authenticated requests.
+
+## Features
+
+### Authentication
+
+- Email/password and Google sign-in via Firebase Auth
+- Protected app routes; API calls attach `Authorization: Bearer <Firebase ID token>` (`src/lib/api.ts`)
+
+### Home
+
+- Marketing landing page describing product capabilities
+
+### Expenses (`/app/expenses`)
+
+- Loads expenses for the **current calendar month** from `GET /v1/expenses?year=&month=`
+- Summary cards computed on the client: total spent, daily average (`total ÷ days elapsed in month`), largest single-day total, cash flow vs monthly income
+- Search across note (shown as title), category name, account name, and short date label
+- Category chips show up to **5** categories (first in list order) to avoid horizontal overflow
+- **Date range filtering**
+  - Quick presets: last 3 days, last 7 days (anchored to “today” when viewing the current month; otherwise end of selected month)
+  - **Trip week**: modal to pick **start** and **end** dates; list filters to inclusive range and shows spent-in-range summary (respects category chip when set)
+- Inline **edit/delete** on expense rows; add expense opens sidebar form (create vs edit with save/cancel)
+- Empty month: illustrated empty state with CTA to add first expense
+- Sidebar panels when form is open: add/edit/delete **accounts** and **categories** (wired to backend)
+- Mobile: condensed expense cards with same actions
+
+### Income (`/app/income`)
+
+- Loads incomes for the current month from `GET /v1/incomes?year=&month=`
+- Quick add requires **account** selection (`accountId`); totals and “recent income” from API data
+- **Edit/delete** on rows using PUT/DELETE
+
+### Stats (`/app/stats`)
+
+- Loads `GET /v1/stats/monthly-expenses?year=&month=`
+- Pillar visualization uses per-category **entry counts**; percentages and ranking computed on the client
+
+### Shared UX
+
+- Light/dark theme toggle (Pinia + CSS variables)
+- English (`en-US`) and Portuguese (`pt-BR`) via `vue-i18n`
 
 ## Objective
 
-Provide a clean personal finance experience where users can securely sign in, record daily expenses, add income, organize categories/accounts, and review monthly spending stats.
+Provide a clean personal finance experience where users can securely sign in, record expenses and income, organize categories and accounts, filter spending by period (including travel ranges), and review monthly stats.
 
 ## Tech Stack
 
@@ -29,10 +70,10 @@ src/
 ├── modules/                  # Feature modules (DDD)
 │   ├── app/                  # Authenticated app navigation
 │   ├── auth/                 # Login + Firebase auth store
-│   ├── expenses/             # Expense list/form and account/category helpers
+│   ├── expenses/             # Expenses UI + api/domain + CRUD filters
 │   ├── home/                 # Marketing landing page
-│   ├── income/               # Income list/form
-│   ├── stats/                # Monthly stats view
+│   ├── income/               # Income UI + api/domain + CRUD
+│   ├── stats/                # Monthly stats + API client
 │   └── theme/                # Light/dark theme store and toggle
 ├── i18n/
 │   ├── index.ts              # createI18n — auto-detects browser locale
@@ -43,7 +84,7 @@ src/
 │   ├── firebase.ts           # Firebase app/auth/analytics setup
 │   └── fontawesome.ts        # FA library setup + global component registration
 ├── lib/
-│   └── api.ts                # Authenticated API fetch wrapper
+│   └── api.ts                # Authenticated fetch (Bearer token, handles 204)
 ├── router/
 │   └── index.ts              # Global router — spreads routes from each module
 ├── assets/
@@ -56,99 +97,98 @@ src/
 ## Key Conventions
 
 **Modules**
+
 - No `components/` at the `src` root — every component belongs to a feature module
 - Each module declares its own routes in `<feature>.routes.ts`; the global router spreads them all
-- TypeScript contracts (interfaces, types) live in the module's `domain/` folder
+- TypeScript contracts live in the module's `domain/` folder; HTTP wrappers in `api/`
 
 **State**
+
 - Pinia stores use the Setup Store style (`defineStore` with `ref` / `computed`)
 
 **Internationalization**
-- The app detects the browser's preferred language automatically via `navigator.languages`
-- Exact match is tried first (`pt-BR`), then language prefix (`pt` → `pt-BR`), then fallback to `en-US`
-- All UI text goes through `useI18n` — no hardcoded strings in templates
-- Translation keys are namespaced by feature: `home.features.vite.title`
+
+- The app detects the browser's preferred language (`navigator.languages`)
+- Exact match first (`pt-BR`), then prefix (`pt` → `pt-BR`), fallback `en-US`
+- UI copy goes through `useI18n`; translation keys are namespaced by feature (e.g. `expenses.filters`)
 
 **Icons**
-- Add icons to the FA library in `src/plugins/fontawesome.ts`
-- Use them in templates as `<FontAwesomeIcon icon="icon-name" />`
+
+- Register icons in `src/plugins/fontawesome.ts`
+- Use `<FontAwesomeIcon icon="icon-name" />` in templates
 
 **Storybook**
-- Stories live alongside their component inside the module folder
-- Global plugins (Pinia, i18n, FA, Tailwind) are registered in `.storybook/preview.ts`
+
+- Stories live alongside components; global plugins in `.storybook/preview.ts`
 
 **Imports**
-- Use the `@/` alias for all absolute imports: `@/modules/home/home.vue`
+
+- Use `@/` for absolute imports: `@/modules/home/home.vue`
 
 **Auth**
-- Firebase Auth is initialized in `src/plugins/firebase.ts`
-- Auth state is managed in `src/modules/auth/store/auth.store.ts`
+
+- Firebase Auth in `src/plugins/firebase.ts`; state in `src/modules/auth/store/auth.store.ts`
 - Protected `/app/*` routes require an authenticated user
-- API requests use `src/lib/api.ts`, which attaches the Firebase ID token as a Bearer token
+- `src/lib/api.ts` attaches the Firebase ID token
 
 **Theme**
-- Light/dark theme is managed in `src/modules/theme/store/theme.store.ts`
-- Theme tokens and semantic classes live in `src/assets/styles/main.css`
-- Prefer semantic theme classes (`theme-page`, `theme-card`, `theme-button-primary`, etc.) over hardcoded dark-only Tailwind classes
+
+- Tokens and semantic classes in `src/assets/styles/main.css`
+- Prefer semantic classes (`theme-page`, `finance-card`, `theme-button-primary`, etc.)
 
 ## Getting Started
 
 ```bash
-# Install dependencies
 npm install
-
-# Start dev server
 npm run dev
-
-# Start Storybook
-npm run storybook
 ```
 
 ## Available Commands
 
 ```bash
-npm run dev              # Dev server at http://localhost:5173
-npm run build            # Type-check + production build
-npm run preview          # Preview production build locally
+npm run dev              # Dev server (default port 1074 — see package.json)
+npm run build            # vue-tsc + production build
+npm run preview          # Production preview + Firebase Auth emulator (see package.json)
 npm run storybook        # Storybook at http://localhost:6006
-npm run build-storybook  # Build static Storybook
+npm run build-storybook  # Static Storybook build
+npm run format           # Prettier write src/
 ```
+
+## Mobile Preview
+
+Use `yarn preview` when testing the production build on a phone (Firebase Auth emulator + Vite preview). See terminal output for the network URL and emulator ports.
 
 ## Backend Integration
 
-By default, API calls target:
-
-```bash
-http://localhost:3000
-```
-
-Override with a Vite environment variable when needed:
+Base URL defaults to `http://localhost:3000`. Override:
 
 ```bash
 VITE_API_BASE_URL=https://your-api.example.com
 ```
 
+### API surface used by the frontend
+
+| Area | Methods | Notes |
+|------|---------|--------|
+| Expenses | `GET`, `POST`, `PUT`, `DELETE` `/v1/expenses` | List uses `year` + `month`; optional server-side `startDate`, `endDate`, `categoryId` available for tighter queries |
+| Incomes | `GET`, `POST`, `PUT`, `DELETE` `/v1/incomes` | List uses `year` + `month`; body includes `accountId` |
+| Accounts | `GET`, `POST`, `PUT`, `DELETE` `/v1/accounts/{id}` | List returns `initialBalance` and `currentBalance` |
+| Categories | `GET`, `POST`, `PUT`, `DELETE` `/v1/categories/{id}` | |
+| Stats | `GET` `/v1/stats/monthly-expenses` | Query: `year`, `month` |
+| Profile | `GET` `/v1/me` | Optional |
+
+Keep backend and OpenAPI in sync; see `money-plan-backend/README.md` for full query rules.
+
 ## Netlify Deployment
 
-This project includes `netlify.toml`:
-
-- build command: `npm run build`
-- publish directory: `dist`
-- SPA fallback redirect to `index.html`
-
-Deploy production from this folder:
+This project may include `netlify.toml` with SPA fallback. Typical flow:
 
 ```bash
+npm run build
 npx netlify deploy --prod --dir=dist
 ```
 
-If you want Netlify to run the build during deploy:
-
-```bash
-npx netlify deploy --prod
-```
-
-Current production site:
+Production site (if configured):
 
 ```text
 https://money-plan-frontend.netlify.app
@@ -156,8 +196,8 @@ https://money-plan-frontend.netlify.app
 
 ## Adding a New Feature Module
 
-1. Create the folder `src/modules/<feature>/`
-2. Add the sub-folders: `api/`, `domain/`, `store/`
-3. Create `<feature>.routes.ts` and `<feature>.vue`
-4. Import and spread the routes in `src/router/index.ts`
-5. Add translation keys to every locale file under `src/i18n/locales/`
+1. Create `src/modules/<feature>/`
+2. Add `api/`, `domain/`, `store/` as needed
+3. Add `<feature>.routes.ts` and `<feature>.vue`
+4. Spread routes in `src/router/index.ts`
+5. Add keys to every file under `src/i18n/locales/`

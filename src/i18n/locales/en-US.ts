@@ -74,6 +74,10 @@ export default {
     loading: 'Loading...',
     unexpectedError: 'Unexpected error',
     add: 'Add',
+    edit: 'Edit',
+    save: 'Save',
+    delete: 'Delete',
+    cancel: 'Cancel',
   },
   theme: {
     light: 'Light mode',
@@ -125,7 +129,7 @@ export default {
     subtitle: 'Salary, freelance, and extra money in.',
     summary: {
       totalIncome: 'Total income · April',
-      details: '4 entries · last on Apr 22',
+      details: '{count} entries · last on {date}',
     },
     quickAdd: {
       title: 'Quick add',
@@ -151,12 +155,34 @@ export default {
     },
     filters: {
       all: 'All',
+      range: 'Range',
+      from: 'From',
+      to: 'To',
+      clearDate: 'Clear',
+      quickRange: 'Quick',
+      last3Days: 'Last 3 days',
+      last7Days: 'Last 7 days',
+      tripWeek: 'Trip week',
+      tripWeekModalTitle: 'Select trip range',
+      tripWeekModalDescription: 'Choose the start and end dates to track spending for your travel period.',
+      applyRange: 'Apply range',
+      selectedDateSpend: 'Spent on {date}: {amount}',
+      selectedDateRangeSpend: 'Spent in {date}: {amount}',
     },
     summary: {
       totalSpent: 'Total spent',
       dailyAverage: 'Daily avg',
       largestDay: 'Largest day',
       cashFlow: 'Cash flow',
+    },
+    mobile: {
+      spentInApril: 'Spent in April',
+      earnedAmount: 'of {amount} earned',
+    },
+    emptyMonth: {
+      title: 'No expenses yet this month',
+      description: 'Start by adding your first expense to unlock category insights and account balances.',
+      cta: 'Add first expense',
     },
     panels: {
       byCategory: 'By category',
@@ -182,8 +208,12 @@ export default {
   },
   stats: {
     title: 'Monthly stats',
-    subtitle: 'Current month expenses by category.',
-    refresh: 'Refresh',
-    total: 'Total expenses',
+    subtitle: 'Each pillar is a category. Each brick is one expense. Stack height shows what dominated your month.',
+    totalCaption: 'spent across {count} categories',
+    mobileTotalCaption: '{count} categories',
+    entryLabel: 'entry',
+    brickHint: 'Brighter shade = larger expense in that category.',
+    hoverHint: 'Hover for details.',
+    lineupTitle: 'The line-up',
   },
 }

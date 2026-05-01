@@ -2,6 +2,8 @@ export interface Account {
   id: number
   name: string
   isDefault: boolean
+  initialBalance: number
+  currentBalance: number
 }
 
 export interface Category {

@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAnalytics, isSupported } from 'firebase/analytics'
-import { getAuth } from 'firebase/auth'
+import { connectAuthEmulator, getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC8SlRdxkXVwWkwgiNOyrAcBygTlJWxGAw',
@@ -14,6 +14,12 @@ const firebaseConfig = {
 
 export const firebaseApp = initializeApp(firebaseConfig)
 export const firebaseAuth = getAuth(firebaseApp)
+
+if (import.meta.env.VITE_USE_FIREBASE_AUTH_EMULATOR === 'true') {
+  connectAuthEmulator(firebaseAuth, `http://${window.location.hostname}:9099`, {
+    disableWarnings: true,
+  })
+}
 
 export async function initializeFirebaseAnalytics() {
   if (typeof window === 'undefined') return

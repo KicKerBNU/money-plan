@@ -3,8 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
   faArrowRightFromBracket,
   faArrowTrendUp,
+  faBagShopping,
+  faBasketShopping,
   faBolt,
   faBuildingColumns,
+  faBus,
   faChartColumn,
   faChartPie,
   faPalette,
@@ -18,7 +21,11 @@ import {
   faCode,
   faBook,
   faGlobe,
+  faHeartPulse,
+  faHouse,
+  faIdCard,
   faSun,
+  faUtensils,
   faUser,
   faWallet,
 } from '@fortawesome/free-solid-svg-icons'
@@ -27,8 +34,11 @@ import type { App } from 'vue'
 library.add(
   faArrowRightFromBracket,
   faArrowTrendUp,
+  faBagShopping,
+  faBasketShopping,
   faBolt,
   faBuildingColumns,
+  faBus,
   faChartColumn,
   faChartPie,
   faDatabase,
@@ -42,7 +52,11 @@ library.add(
   faCode,
   faBook,
   faGlobe,
+  faHeartPulse,
+  faHouse,
+  faIdCard,
   faSun,
+  faUtensils,
   faUser,
   faWallet
 )

@@ -2,6 +2,7 @@ export interface MonthlyCategoryTotal {
   categoryId: number
   categoryName: string
   totalAmount: number
+  entryCount: number
 }
 
 export interface MonthlyExpensesStats {

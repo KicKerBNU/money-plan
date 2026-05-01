@@ -1,24 +1,53 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
+import { fetchAccounts } from '@/modules/expenses/api/expenses.api'
+import type { Account } from '@/modules/expenses/domain/expenses.types'
+import { createIncome, deleteIncome, fetchIncomesByPeriod, updateIncome } from './api/income.api'
+import type { IncomeEntry } from './domain/income.types'
 
 const { t, locale } = useI18n()
-
-const form = ref({
-  date: '2026-04-27',
-  amount: '',
-  note: '',
+const isLoading = ref(true)
+const errorMessage = ref<string | null>(null)
+const accounts = ref<Account[]>([])
+const incomeEntries = ref<IncomeEntry[]>([])
+const today = new Date()
+const period = ref({
+  year: today.getFullYear(),
+  month: today.getMonth() + 1,
 })
 
-const incomeEntries = [
-  { id: 1, date: 'APR 22', note: 'Side gig — workshop', amount: 480 },
-  { id: 2, date: 'APR 15', note: 'Refund — flight', amount: 75 },
-  { id: 3, date: 'APR 8', note: 'Freelance — landing page', amount: 320 },
-  { id: 4, date: 'APR 1', note: 'Salary — April', amount: 4200 },
-]
+const form = ref({
+  date: toInputDate(new Date()),
+  amount: '',
+  accountId: null as number | null,
+  note: '',
+})
+const editingIncomeId = ref<number | null>(null)
 
-const totalIncome = 5075
+const totalIncome = computed(() => incomeEntries.value.reduce((sum, entry) => sum + entry.amount, 0))
+const lastEntryLabel = computed(() => {
+  if (!incomeEntries.value.length) return '-'
+  const latest = incomeEntries.value.reduce((max, current) => (current.date > max.date ? current : max))
+  return new Intl.DateTimeFormat(locale.value, {
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(`${latest.date}T00:00:00`))
+})
+const incomeRows = computed(() =>
+  incomeEntries.value.map((entry) => {
+    const date = new Date(`${entry.date}T00:00:00`)
+    return {
+      ...entry,
+      dateLabel: new Intl.DateTimeFormat(locale.value, {
+        month: 'short',
+        day: 'numeric',
+      }).format(date).toUpperCase(),
+      title: entry.note?.trim() || entry.accountName || 'Income',
+    }
+  })
+)
 
 function formatMoney(value: number) {
   const hasCents = !Number.isInteger(value)
@@ -31,34 +60,127 @@ function formatMoney(value: number) {
   }).format(value)
 }
 
-function submitIncome() {
+function toInputDate(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+async function loadIncomeData() {
+  isLoading.value = true
+  errorMessage.value = null
+
+  try {
+    const [incomesData, accountsData] = await Promise.all([
+      fetchIncomesByPeriod(period.value.year, period.value.month),
+      fetchAccounts(),
+    ])
+
+    incomeEntries.value = incomesData
+    accounts.value = accountsData
+
+    if (!form.value.accountId && accountsData.length > 0) {
+      form.value.accountId = accountsData[0].id
+    }
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function submitIncome() {
+  if (!form.value.amount || !form.value.accountId) return
+
+  const amount = Number(form.value.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
+
+  try {
+    if (editingIncomeId.value) {
+      await updateIncome(editingIncomeId.value, {
+        date: form.value.date,
+        amount,
+        accountId: form.value.accountId,
+        note: form.value.note.trim() || undefined,
+      })
+    } else {
+      await createIncome({
+        date: form.value.date,
+        amount,
+        accountId: form.value.accountId,
+        note: form.value.note.trim() || undefined,
+      })
+    }
+
+    await loadIncomeData()
+    resetIncomeForm()
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  }
+}
+
+function resetIncomeForm() {
+  editingIncomeId.value = null
   form.value.amount = ''
   form.value.note = ''
 }
+
+function startEditIncome(entry: IncomeEntry) {
+  editingIncomeId.value = entry.id
+  form.value.date = entry.date
+  form.value.amount = String(entry.amount)
+  form.value.accountId = entry.accountId ?? accounts.value[0]?.id ?? null
+  form.value.note = entry.note ?? ''
+}
+
+async function removeIncome(incomeId: number) {
+  if (!window.confirm('Delete this income?')) return
+
+  try {
+    await deleteIncome(incomeId)
+    if (editingIncomeId.value === incomeId) {
+      resetIncomeForm()
+    }
+    await loadIncomeData()
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  }
+}
+
+onMounted(() => {
+  void loadIncomeData()
+})
 </script>
 
 <template>
   <div class="app-shell">
     <FinanceNav />
 
-    <main class="app-content">
+    <main class="app-content app-mobile-screen">
       <div class="mx-auto max-w-5xl">
-        <header class="pt-9 lg:pt-0">
-          <p class="theme-muted text-sm font-bold">{{ t('appNav.brand') }} · {{ t('appNav.period') }}</p>
-          <h1 class="mt-0.5 text-[2rem] font-black leading-tight tracking-tight">{{ t('income.title') }}</h1>
-          <p class="theme-muted mt-1 text-sm">{{ t('income.subtitle') }}</p>
+        <header class="mobile-page-header pt-9 lg:pt-0">
+          <p class="theme-muted text-xs font-bold uppercase tracking-wide lg:text-sm lg:normal-case lg:tracking-normal">
+            {{ t('appNav.period') }}
+          </p>
+          <h1 class="mt-0.5 text-xl font-black leading-tight tracking-tight lg:text-[2rem]">
+            {{ t('income.title') }}
+          </h1>
+          <p class="theme-muted mt-1 hidden text-sm lg:block">{{ t('income.subtitle') }}</p>
         </header>
 
-        <section class="mt-6 grid gap-4 lg:grid-cols-[1fr_1fr]">
-          <article class="finance-card rounded-2xl p-6">
+        <section class="mt-4 grid gap-4 lg:mt-6 lg:grid-cols-[1fr_1fr]">
+          <article class="income-hero-card rounded-2xl p-5 lg:p-6">
             <p class="theme-muted text-xs font-semibold">{{ t('income.summary.totalIncome') }}</p>
             <strong class="mt-2 block text-[2.2rem] font-black leading-none" style="color: var(--color-positive)">
               +{{ formatMoney(totalIncome) }}
             </strong>
-            <p class="theme-muted mt-3 text-xs">{{ t('income.summary.details') }}</p>
+            <p class="theme-muted mt-3 text-xs">
+              {{ t('income.summary.details', { count: incomeEntries.length, date: lastEntryLabel }) }}
+            </p>
           </article>
 
-          <form class="finance-card rounded-2xl p-5" @submit.prevent="submitIncome">
+          <form class="finance-card hidden rounded-2xl p-5 lg:block" @submit.prevent="submitIncome">
             <h2 class="text-xs font-bold">{{ t('income.quickAdd.title') }}</h2>
             <div class="mt-3 grid grid-cols-[1fr_auto] gap-2">
               <input
@@ -77,13 +199,26 @@ function submitIncome() {
               class="theme-input mt-2 min-h-9 w-full rounded-lg px-3 text-sm"
               :placeholder="t('income.form.notePlaceholder')"
             />
+            <select v-model="form.accountId" class="theme-input mt-2 min-h-9 w-full rounded-lg px-3 text-sm">
+              <option v-for="account in accounts" :key="account.id" :value="account.id">
+                {{ account.name }}
+              </option>
+            </select>
             <button class="theme-button-primary mt-3 min-h-9 w-full rounded-lg px-4 text-sm font-bold">
-              {{ t('income.form.submit') }}
+              {{ editingIncomeId ? t('common.save') : t('income.form.submit') }}
+            </button>
+            <button
+              v-if="editingIncomeId"
+              type="button"
+              class="theme-button-secondary mt-2 min-h-9 w-full rounded-lg px-4 text-sm font-bold"
+              @click="resetIncomeForm"
+            >
+              {{ t('common.cancel') }}
             </button>
           </form>
         </section>
 
-        <section class="finance-card mt-6 overflow-hidden rounded-2xl">
+        <section class="finance-card mt-4 hidden overflow-hidden rounded-2xl lg:mt-6 lg:block">
           <div class="theme-border flex items-center justify-between border-b px-4 py-3">
             <h2 class="theme-muted text-xs font-black uppercase tracking-wide">
               {{ t('income.recent.title') }}
@@ -94,18 +229,52 @@ function submitIncome() {
           </div>
 
           <div class="income-list">
+            <p v-if="isLoading" class="theme-muted p-6 text-center text-sm">{{ t('common.loading') }}</p>
+            <p v-else-if="errorMessage" class="p-6 text-center text-sm" style="color: var(--color-danger)">
+              {{ errorMessage }}
+            </p>
             <article
-              v-for="entry in incomeEntries"
+              v-for="entry in incomeRows"
               :key="entry.id"
-              class="grid grid-cols-[4.5rem_1fr_auto] items-center gap-4 px-4 py-3.5 text-sm"
+              class="grid grid-cols-[4.5rem_1fr_auto_auto] items-center gap-4 px-4 py-3.5 text-sm"
             >
-              <span class="theme-muted text-[0.68rem] font-bold tracking-wide">{{ entry.date }}</span>
-              <span class="font-bold">{{ entry.note }}</span>
+              <span class="theme-muted text-[0.68rem] font-bold tracking-wide">{{ entry.dateLabel }}</span>
+              <span class="font-bold">{{ entry.title }}</span>
               <strong class="font-black" style="color: var(--color-positive)">
                 +{{ formatMoney(entry.amount) }}
               </strong>
+              <div class="flex items-center gap-2">
+                <button class="theme-muted text-xs font-bold" @click="startEditIncome(entry)">
+                  {{ t('common.edit') }}
+                </button>
+                <button class="text-xs font-bold" style="color: var(--color-danger)" @click="removeIncome(entry.id)">
+                  {{ t('common.delete') }}
+                </button>
+              </div>
             </article>
           </div>
+        </section>
+
+        <section class="mobile-entry-list mt-4 space-y-3 lg:hidden">
+          <article v-for="entry in incomeRows" :key="entry.id" class="mobile-entry-card rounded-xl p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h2 class="text-sm font-black">{{ entry.title }}</h2>
+                <p class="theme-muted mt-1 text-[0.68rem]">{{ entry.dateLabel }}</p>
+              </div>
+              <strong class="text-xs font-black" style="color: var(--color-positive)">
+                +{{ formatMoney(entry.amount) }}
+              </strong>
+            </div>
+            <div class="mt-2 flex justify-end gap-2">
+              <button class="theme-muted text-xs font-bold" @click="startEditIncome(entry)">
+                {{ t('common.edit') }}
+              </button>
+              <button class="text-xs font-bold" style="color: var(--color-danger)" @click="removeIncome(entry.id)">
+                {{ t('common.delete') }}
+              </button>
+            </div>
+          </article>
         </section>
       </div>
     </main>
