@@ -79,6 +79,9 @@ export default {
     delete: 'Excluir',
     cancel: 'Cancelar',
   },
+  toast: {
+    saveSuccess: 'Salvo com sucesso.',
+  },
   theme: {
     light: 'Modo claro',
     dark: 'Modo escuro',

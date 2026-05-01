@@ -427,8 +427,8 @@ async function submitExpense() {
 
     await loadExpensesData()
     resetExpenseForm()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 
@@ -438,8 +438,8 @@ async function submitAccount() {
     await createAccount(newAccountName.value.trim())
     newAccountName.value = ''
     await loadExpensesData()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 
@@ -449,8 +449,8 @@ async function submitCategory() {
     await createCategory(newCategoryName.value.trim())
     newCategoryName.value = ''
     await loadExpensesData()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 
@@ -513,8 +513,8 @@ async function removeExpense(expenseId: number) {
       resetExpenseForm()
     }
     await loadExpensesData()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 
@@ -566,8 +566,8 @@ async function submitRenameModal() {
 
     closeRenameModal()
     await loadExpensesData()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 
@@ -577,8 +577,8 @@ async function removeAccount(accountId: number) {
   try {
     await deleteAccount(accountId)
     await loadExpensesData()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 
@@ -588,8 +588,8 @@ async function removeCategory(categoryId: number) {
   try {
     await deleteCategory(categoryId)
     await loadExpensesData()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 

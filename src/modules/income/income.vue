@@ -115,8 +115,8 @@ async function submitIncome() {
 
     await loadIncomeData()
     resetIncomeForm()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 
@@ -143,8 +143,8 @@ async function removeIncome(incomeId: number) {
       resetIncomeForm()
     }
     await loadIncomeData()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
   }
 }
 

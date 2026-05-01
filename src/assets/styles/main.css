@@ -266,14 +266,16 @@ body {
     display: flex;
     flex-direction: column-reverse;
     justify-content: flex-start;
+    align-items: stretch;
     width: 4.5rem;
     height: 13.5rem;
   }
 
   .stats-brick {
+    box-sizing: border-box;
     width: 100%;
     min-height: 0.35rem;
-    max-height: 2rem;
+    flex-shrink: 0;
     border-radius: 0.2rem;
     background: color-mix(in srgb, var(--category-color) 62%, white);
     box-shadow: 0 0 18px color-mix(in srgb, var(--category-color) 22%, transparent);
