@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import { fetchIncomesByPeriod } from '@/modules/income/api/income.api'
@@ -18,9 +19,12 @@ import {
   updateCategory,
   updateExpense,
 } from './api/expenses.api'
+import { categoryIconForName } from '@/lib/categoryIcons'
 import type { Account, Category, Expense } from './domain/expenses.types'
 
 const { t, locale } = useI18n()
+const route = useRoute()
+const router = useRouter()
 const searchQuery = ref('')
 const selectedCategoryId = ref<'all' | number>('all')
 const selectedDateFrom = ref('')
@@ -31,7 +35,7 @@ const tripRangeForm = ref({
   startDate: '',
   endDate: '',
 })
-const isExpenseFormOpen = ref(false)
+const isExpenseModalOpen = ref(false)
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
 const expenses = ref<Expense[]>([])
@@ -55,6 +59,14 @@ const form = ref({
 const newAccountName = ref('')
 const newCategoryName = ref('')
 const editingExpenseId = ref<number | null>(null)
+
+type RenameTarget =
+  | { type: 'account'; id: number; initialBalance: number; previousName: string }
+  | { type: 'category'; id: number; previousName: string }
+
+const isRenameModalOpen = ref(false)
+const renameTarget = ref<RenameTarget | null>(null)
+const renameNameInput = ref('')
 
 const currentMonthLabel = computed(() =>
   new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }).format(
@@ -91,6 +103,24 @@ const cashFlowLabel = computed(() => {
 })
 
 const expensesSubtitle = computed(() => t('expenses.subtitle', { count: summary.value.entriesCount }))
+
+const expenseModalTitle = computed(() =>
+  editingExpenseId.value ? t('expenses.form.editTitle') : t('expenses.form.title')
+)
+
+const renameModalTitle = computed(() => {
+  if (!renameTarget.value) return ''
+  return renameTarget.value.type === 'account'
+    ? t('expenses.renameModal.editAccount')
+    : t('expenses.renameModal.editCategory')
+})
+
+const renameModalNameLabel = computed(() => {
+  if (!renameTarget.value) return ''
+  return renameTarget.value.type === 'account'
+    ? t('expenses.renameModal.accountNameLabel')
+    : t('expenses.renameModal.categoryNameLabel')
+})
 
 const filteredExpenses = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -183,8 +213,20 @@ const expensesList = computed(() =>
 )
 
 const categoryColors = ['#8b5cf6', '#14b8a6', '#ef4444', '#ec4899', '#f59e0b', '#38bdf8']
-const maxVisibleFilters = 5
-const visibleFilterCategories = computed(() => categories.value.slice(0, maxVisibleFilters))
+
+/** Canonical catch-all from seed; keep last in lists regardless of legacy is_default flags on other defaults. */
+function isCatchAllOtherCategory(category: { name: string }): boolean {
+  return category.name.localeCompare('Other', locale.value, { sensitivity: 'base' }) === 0
+}
+
+const sortedCategories = computed(() =>
+  [...categories.value].sort((a, b) => {
+    const aLast = isCatchAllOtherCategory(a) ? 1 : 0
+    const bLast = isCatchAllOtherCategory(b) ? 1 : 0
+    if (aLast !== bLast) return aLast - bLast
+    return a.name.localeCompare(b.name, locale.value, { sensitivity: 'base' })
+  })
+)
 
 function getCategoryColor(index: number) {
   return categoryColors[index % categoryColors.length]
@@ -289,25 +331,68 @@ async function loadExpensesData() {
   errorMessage.value = null
 
   try {
-    const [expensesData, incomesData, categoriesData, accountsData] = await Promise.all([
+    const settled = await Promise.allSettled([
       fetchExpensesByPeriod(period.value.year, period.value.month),
       fetchIncomesByPeriod(period.value.year, period.value.month),
       fetchCategories(),
       fetchAccounts(),
     ])
 
-    expenses.value = expensesData
-    incomes.value = incomesData
-    categories.value = categoriesData
-    accounts.value = accountsData
+    const failures: string[] = []
 
-    if (!form.value.categoryId && categoriesData.length > 0) {
-      form.value.categoryId = categoriesData[0].id
+    const expensesResult = settled[0]
+    if (expensesResult.status === 'fulfilled') {
+      expenses.value = expensesResult.value
+    } else {
+      failures.push(
+        expensesResult.reason instanceof Error
+          ? expensesResult.reason.message
+          : t('common.unexpectedError'),
+      )
     }
 
-    if (!form.value.accountId && accountsData.length > 0) {
-      form.value.accountId = accountsData[0].id
+    const incomesResult = settled[1]
+    if (incomesResult.status === 'fulfilled') {
+      incomes.value = incomesResult.value
+    } else {
+      failures.push(
+        incomesResult.reason instanceof Error
+          ? incomesResult.reason.message
+          : t('common.unexpectedError'),
+      )
     }
+
+    const categoriesResult = settled[2]
+    if (categoriesResult.status === 'fulfilled') {
+      const categoriesData = categoriesResult.value
+      categories.value = categoriesData
+      if (!form.value.categoryId && categoriesData.length > 0) {
+        form.value.categoryId = categoriesData[0].id
+      }
+    } else {
+      failures.push(
+        categoriesResult.reason instanceof Error
+          ? categoriesResult.reason.message
+          : t('common.unexpectedError'),
+      )
+    }
+
+    const accountsResult = settled[3]
+    if (accountsResult.status === 'fulfilled') {
+      const accountsData = accountsResult.value
+      accounts.value = accountsData
+      if (!form.value.accountId && accountsData.length > 0) {
+        form.value.accountId = accountsData[0].id
+      }
+    } else {
+      failures.push(
+        accountsResult.reason instanceof Error
+          ? accountsResult.reason.message
+          : t('common.unexpectedError'),
+      )
+    }
+
+    errorMessage.value = failures.length > 0 ? failures.join(' · ') : null
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
   } finally {
@@ -371,9 +456,42 @@ async function submitCategory() {
 
 function resetExpenseForm() {
   editingExpenseId.value = null
+  form.value.date = toInputDate(new Date())
   form.value.amount = ''
   form.value.note = ''
-  isExpenseFormOpen.value = false
+  if (categories.value.length > 0) {
+    form.value.categoryId = categories.value[0].id
+  }
+  if (accounts.value.length > 0) {
+    form.value.accountId = accounts.value[0].id
+  }
+  isExpenseModalOpen.value = false
+}
+
+function openNewExpenseModal() {
+  editingExpenseId.value = null
+  form.value.date = toInputDate(new Date())
+  form.value.amount = ''
+  form.value.note = ''
+  if (categories.value.length > 0) {
+    form.value.categoryId = categories.value[0].id
+  }
+  if (accounts.value.length > 0) {
+    form.value.accountId = accounts.value[0].id
+  }
+  isExpenseModalOpen.value = true
+}
+
+function consumeNewExpenseQuery() {
+  if (route.query.new !== '1') return
+  openNewExpenseModal()
+  const rest = { ...route.query }
+  delete rest.new
+  void router.replace({ path: route.path, query: rest })
+}
+
+function closeExpenseModal() {
+  resetExpenseForm()
 }
 
 function startEditExpense(expense: Expense) {
@@ -383,7 +501,7 @@ function startEditExpense(expense: Expense) {
   form.value.categoryId = expense.categoryId
   form.value.accountId = expense.accountId
   form.value.note = expense.note ?? ''
-  isExpenseFormOpen.value = true
+  isExpenseModalOpen.value = true
 }
 
 async function removeExpense(expenseId: number) {
@@ -400,12 +518,53 @@ async function removeExpense(expenseId: number) {
   }
 }
 
-async function renameAccount(account: Account) {
-  const nextName = window.prompt('Account name', account.name)
-  if (!nextName || nextName.trim() === account.name) return
+function openRenameAccountModal(account: Account) {
+  renameTarget.value = {
+    type: 'account',
+    id: account.id,
+    initialBalance: account.initialBalance,
+    previousName: account.name,
+  }
+  renameNameInput.value = account.name
+  isRenameModalOpen.value = true
+}
+
+function openRenameCategoryModal(category: Category) {
+  renameTarget.value = {
+    type: 'category',
+    id: category.id,
+    previousName: category.name,
+  }
+  renameNameInput.value = category.name
+  isRenameModalOpen.value = true
+}
+
+function closeRenameModal() {
+  isRenameModalOpen.value = false
+  renameTarget.value = null
+  renameNameInput.value = ''
+}
+
+async function submitRenameModal() {
+  const target = renameTarget.value
+  if (!target) return
+
+  const trimmed = renameNameInput.value.trim()
+  if (!trimmed) return
+
+  if (trimmed === target.previousName) {
+    closeRenameModal()
+    return
+  }
 
   try {
-    await updateAccount(account.id, { name: nextName.trim(), initialBalance: account.initialBalance })
+    if (target.type === 'account') {
+      await updateAccount(target.id, { name: trimmed, initialBalance: target.initialBalance })
+    } else {
+      await updateCategory(target.id, trimmed)
+    }
+
+    closeRenameModal()
     await loadExpensesData()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
@@ -417,18 +576,6 @@ async function removeAccount(accountId: number) {
 
   try {
     await deleteAccount(accountId)
-    await loadExpensesData()
-  } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
-  }
-}
-
-async function renameCategory(category: Category) {
-  const nextName = window.prompt('Category name', category.name)
-  if (!nextName || nextName.trim() === category.name) return
-
-  try {
-    await updateCategory(category.id, nextName.trim())
     await loadExpensesData()
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
@@ -448,7 +595,13 @@ async function removeCategory(categoryId: number) {
 
 onMounted(() => {
   void loadExpensesData()
+  consumeNewExpenseQuery()
 })
+
+watch(
+  () => route.query.new,
+  () => consumeNewExpenseQuery()
+)
 </script>
 
 <template>
@@ -503,8 +656,10 @@ onMounted(() => {
           </article>
         </section>
 
-        <section class="mt-4 grid gap-5 lg:mt-6 xl:grid-cols-[minmax(0,1fr)_18.5rem]">
-          <div class="finance-card hidden overflow-hidden rounded-2xl lg:block">
+        <section class="mt-4 grid gap-5 lg:mt-6">
+          <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_18.5rem] xl:items-stretch xl:gap-5">
+            <div class="flex min-h-0 min-w-0 flex-col gap-5 xl:h-full">
+          <div class="finance-card hidden min-h-0 overflow-hidden rounded-2xl lg:flex lg:flex-col lg:min-h-0 xl:h-full xl:flex-1">
             <div class="theme-border flex flex-col gap-3 border-b p-4 md:flex-row md:items-center">
               <input
                 v-model="searchQuery"
@@ -514,7 +669,8 @@ onMounted(() => {
               />
               <button
                 class="theme-button-primary flex min-h-10 items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold"
-                @click="isExpenseFormOpen = !isExpenseFormOpen"
+                type="button"
+                @click="openNewExpenseModal"
               >
                 <FontAwesomeIcon icon="plus" />
                 {{ t('expenses.actions.addExpense') }}
@@ -525,15 +681,17 @@ onMounted(() => {
               <div class="flex gap-2 overflow-x-auto">
                 <button
                   :class="[
-                    'finance-chip shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold',
+                    'finance-chip flex shrink-0 items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold',
                     { 'is-active': selectedCategoryId === 'all' },
                   ]"
+                  type="button"
                   @click="selectedCategoryId = 'all'"
                 >
+                  <FontAwesomeIcon icon="layer-group" class="text-[0.7rem] opacity-90" />
                   {{ t('expenses.filters.all') }}
                 </button>
                 <button
-                  v-for="(category, index) in visibleFilterCategories"
+                  v-for="(category, index) in sortedCategories"
                   :key="category.id"
                   :class="[
                     'finance-chip flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold',
@@ -541,7 +699,11 @@ onMounted(() => {
                   ]"
                   @click="selectedCategoryId = category.id"
                 >
-                  <span class="h-2 w-2 rounded-full" :style="{ backgroundColor: getCategoryColor(index) }" />
+                  <FontAwesomeIcon
+                    class="text-[0.65rem]"
+                    :icon="categoryIconForName(category.name)"
+                    :style="{ color: getCategoryColor(index) }"
+                  />
                   {{ category.name }}
                 </button>
               </div>
@@ -587,7 +749,7 @@ onMounted(() => {
               </span>
             </div>
 
-            <div class="expense-list">
+            <div class="expense-list flex min-h-0 flex-col xl:flex-1 xl:overflow-y-auto">
               <p v-if="isLoading" class="theme-muted p-6 text-center text-sm">
                 {{ t('common.loading') }}
               </p>
@@ -596,7 +758,7 @@ onMounted(() => {
               </p>
               <div
                 v-else-if="!expenses.length"
-                class="flex flex-col items-center justify-center px-6 py-12 text-center"
+                class="flex flex-col items-center justify-center px-6 py-12 text-center xl:flex-1 xl:justify-center xl:py-8"
               >
                 <div
                   class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
@@ -610,7 +772,7 @@ onMounted(() => {
                 </p>
                 <button
                   class="theme-button-primary mt-5 rounded-xl px-4 py-2.5 text-sm font-bold"
-                  @click="isExpenseFormOpen = true"
+                  @click="openNewExpenseModal"
                 >
                   {{ t('expenses.emptyMonth.cta') }}
                 </button>
@@ -624,7 +786,7 @@ onMounted(() => {
                   class="flex h-9 w-9 items-center justify-center rounded-xl"
                   :style="{ backgroundColor: `${getExpenseColor(expense)}18`, color: getExpenseColor(expense) }"
                 >
-                  <FontAwesomeIcon icon="receipt" />
+                  <FontAwesomeIcon :icon="categoryIconForName(expense.categoryName)" />
                 </div>
                 <div>
                   <h2 class="text-sm font-black">{{ expense.title }}</h2>
@@ -665,7 +827,7 @@ onMounted(() => {
                   class="flex h-9 w-9 items-center justify-center rounded-xl"
                   :style="{ backgroundColor: `${getExpenseColor(expense)}18`, color: getExpenseColor(expense) }"
                 >
-                  <FontAwesomeIcon icon="receipt" />
+                  <FontAwesomeIcon :icon="categoryIconForName(expense.categoryName)" />
                 </div>
                 <div>
                   <h2 class="text-sm font-black">{{ expense.title }}</h2>
@@ -700,7 +862,7 @@ onMounted(() => {
               <p class="theme-muted mt-2 text-xs">{{ t('expenses.emptyMonth.description') }}</p>
               <button
                 class="theme-button-primary mt-4 rounded-xl px-4 py-2 text-xs font-bold"
-                @click="isExpenseFormOpen = true"
+                @click="openNewExpenseModal"
               >
                 {{ t('expenses.emptyMonth.cta') }}
               </button>
@@ -709,183 +871,305 @@ onMounted(() => {
               {{ t('expenses.empty') }}
             </p>
           </section>
+            </div>
 
-          <aside class="hidden space-y-5 lg:block">
-            <form
-              v-if="isExpenseFormOpen"
-              class="finance-card grid gap-3 rounded-2xl p-5"
-              @submit.prevent="submitExpense"
-            >
-              <h2 class="text-lg font-black">{{ t('expenses.form.title') }}</h2>
-              <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                <label class="text-sm font-semibold">
-                  {{ t('expenses.form.date') }}
-                  <input v-model="form.date" type="date" class="theme-input mt-1 w-full rounded-xl p-3" />
-                </label>
-                <label class="text-sm font-semibold">
-                  {{ t('expenses.form.amount') }}
-                  <input
-                    v-model="form.amount"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    class="theme-input mt-1 w-full rounded-xl p-3"
-                  />
-                </label>
-                <label class="text-sm font-semibold">
-                  {{ t('expenses.form.category') }}
-                  <select v-model="form.categoryId" class="theme-input mt-1 w-full rounded-xl p-3">
-                    <option v-for="category in categories" :key="category.id" :value="category.id">
-                      {{ category.name }}
-                    </option>
-                  </select>
-                </label>
-                <label class="text-sm font-semibold">
-                  {{ t('expenses.form.account') }}
-                  <select v-model="form.accountId" class="theme-input mt-1 w-full rounded-xl p-3">
-                    <option v-for="account in accounts" :key="account.id" :value="account.id">
-                      {{ account.name }}
-                    </option>
-                  </select>
-                </label>
+          <aside class="hidden min-h-0 w-full max-w-[18.5rem] shrink-0 lg:flex lg:flex-col lg:gap-5 xl:h-full xl:min-h-0">
+            <section class="finance-card flex min-h-0 flex-col overflow-hidden rounded-2xl xl:flex-1">
+              <div class="shrink-0 px-4 pb-2 pt-4">
+                <h2 class="theme-muted text-xs font-black uppercase tracking-wide">
+                  {{ t('expenses.panels.byCategory') }}
+                </h2>
               </div>
-              <label class="text-sm font-semibold">
-                {{ t('expenses.form.note') }}
-                <input v-model="form.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
-              </label>
-              <div class="flex gap-2">
-                <button class="theme-button-primary flex-1 rounded-2xl px-4 py-3 font-bold">
-                  {{ editingExpenseId ? t('common.save') : t('expenses.form.submit') }}
-                </button>
-                <button
-                  v-if="editingExpenseId"
-                  type="button"
-                  class="theme-button-secondary rounded-2xl px-4 py-3 font-bold"
-                  @click="resetExpenseForm"
+              <div class="flex min-h-0 flex-1 flex-col px-4 pb-4">
+                <div
+                  v-if="isLoading"
+                  class="flex min-h-0 flex-1 flex-col justify-center py-8"
                 >
-                  {{ t('common.cancel') }}
-                </button>
-              </div>
-            </form>
-
-            <section class="finance-card rounded-2xl p-4">
-              <h2 class="theme-muted text-xs font-black uppercase tracking-wide">
-                {{ t('expenses.panels.byCategory') }}
-              </h2>
-              <div class="mt-4 space-y-3.5">
-                <div v-for="(category, index) in categoryTotals" :key="category.name">
-                  <div class="mb-1 flex justify-between text-sm">
-                    <span class="flex items-center gap-2">
-                      <span
-                        class="h-2.5 w-2.5 rounded-full"
-                        :style="{ backgroundColor: getCategoryColor(index) }"
-                      />
-                      {{ category.name }}
-                    </span>
-                    <strong>{{ formatMoney(category.total) }}</strong>
+                  <p class="theme-muted text-center text-sm">{{ t('common.loading') }}</p>
+                </div>
+                <div
+                  v-else-if="!categoryTotals.length"
+                  class="flex min-h-0 min-w-0 flex-1 basis-0 flex-col items-center justify-center rounded-xl px-4 py-8 text-center sm:px-5 sm:py-10"
+                  style="
+                    background: var(--color-surface-soft);
+                    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-border) 55%, transparent);
+                  "
+                >
+                  <div
+                    class="mb-3 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                    style="background: color-mix(in srgb, var(--color-primary) 14%, transparent)"
+                  >
+                    <FontAwesomeIcon icon="chart-pie" class="text-lg" style="color: var(--color-primary)" />
                   </div>
-                  <div class="h-2 rounded-full" style="background: var(--color-surface-soft)">
-                    <div
-                      class="h-2 rounded-full"
-                      :style="{
-                        width: `${(category.total / maxCategoryTotal) * 100}%`,
-                        backgroundColor: getCategoryColor(index),
-                      }"
-                    />
+                  <p class="max-w-[15rem] text-sm font-black leading-snug">{{ t('expenses.panels.byCategoryEmptyTitle') }}</p>
+                  <p class="theme-muted mt-2 max-w-[15rem] text-xs leading-relaxed">
+                    {{ t('expenses.panels.byCategoryEmptyDescription') }}
+                  </p>
+                  <div class="mt-6 flex w-full max-w-[12rem] shrink-0 flex-col gap-2 opacity-[0.38]" aria-hidden="true">
+                    <div class="h-2 rounded-full bg-[var(--color-border)]" style="width: 92%" />
+                    <div class="h-2 rounded-full bg-[var(--color-border)]" style="width: 58%" />
+                    <div class="h-2 rounded-full bg-[var(--color-border)]" style="width: 74%" />
+                  </div>
+                </div>
+                <div v-else class="min-h-0 flex-1 space-y-3.5 overflow-y-auto pr-0.5">
+                  <div v-for="(category, index) in categoryTotals" :key="category.name">
+                    <div class="mb-1 flex justify-between text-sm">
+                      <span class="flex items-center gap-2">
+                        <span
+                          class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-[0.7rem]"
+                          :style="{
+                            backgroundColor: `${getCategoryColor(index)}22`,
+                            color: getCategoryColor(index),
+                          }"
+                        >
+                          <FontAwesomeIcon :icon="categoryIconForName(category.name)" />
+                        </span>
+                        {{ category.name }}
+                      </span>
+                      <strong>{{ formatMoney(category.total) }}</strong>
+                    </div>
+                    <div class="h-2 rounded-full" style="background: var(--color-surface-soft)">
+                      <div
+                        class="h-2 rounded-full"
+                        :style="{
+                          width: `${(category.total / maxCategoryTotal) * 100}%`,
+                          backgroundColor: getCategoryColor(index),
+                        }"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </section>
 
-            <section class="finance-card rounded-2xl p-4">
-              <h2 class="theme-muted text-xs font-black uppercase tracking-wide">
+            <section class="finance-card flex min-h-0 flex-col rounded-2xl p-4 xl:flex-1">
+              <h2 class="theme-muted shrink-0 text-xs font-black uppercase tracking-wide">
                 {{ t('expenses.panels.byAccount') }}
               </h2>
-              <div class="mt-4 space-y-3">
+              <div class="mt-4 flex min-h-0 flex-1 flex-col">
                 <div
-                  v-for="account in accounts"
-                  :key="account.id"
-                  class="flex justify-between border-b pb-2 text-sm last:border-b-0 last:pb-0"
-                  style="border-color: var(--color-border)"
+                  v-if="isLoading"
+                  class="flex flex-1 flex-col justify-center py-6"
                 >
-                  <span class="theme-muted flex items-center gap-2">
-                    <FontAwesomeIcon icon="building-columns" class="text-xs" />
-                    {{ account.name }}
-                  </span>
-                  <strong :style="{ color: account.currentBalance < 0 ? 'var(--color-danger)' : undefined }">
-                    {{ account.currentBalance < 0 ? '-' : '' }}{{ formatMoney(account.currentBalance) }}
-                  </strong>
+                  <p class="theme-muted text-center text-sm">{{ t('common.loading') }}</p>
+                </div>
+                <div v-else class="flex flex-1 flex-col justify-start space-y-3 overflow-y-auto">
+                  <div
+                    v-for="account in accounts"
+                    :key="account.id"
+                    class="flex justify-between border-b pb-2 text-sm last:border-b-0 last:pb-0"
+                    style="border-color: var(--color-border)"
+                  >
+                    <span class="theme-muted flex items-center gap-2">
+                      <FontAwesomeIcon icon="building-columns" class="text-xs" />
+                      {{ account.name }}
+                    </span>
+                    <strong :style="{ color: account.currentBalance < 0 ? 'var(--color-danger)' : undefined }">
+                      {{ account.currentBalance < 0 ? '-' : '' }}{{ formatMoney(account.currentBalance) }}
+                    </strong>
+                  </div>
                 </div>
               </div>
             </section>
+          </aside>
+          </div>
 
-            <div v-if="isExpenseFormOpen" class="grid gap-4">
-              <form class="finance-card rounded-[2rem] p-5" @submit.prevent="submitAccount">
-                <h2 class="font-bold">{{ t('expenses.addAccount.title') }}</h2>
-                <div class="mt-3 flex gap-2">
+          <div class="finance-card overflow-hidden rounded-2xl">
+            <div class="grid lg:grid-cols-2">
+              <form
+                class="flex flex-col border-b p-5 sm:p-6 lg:border-r lg:border-b-0"
+                style="border-color: var(--color-border)"
+                @submit.prevent="submitAccount"
+              >
+                <div class="mb-4 flex items-center gap-3">
+                  <span
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-[1.05rem]"
+                    style="
+                      background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+                      color: var(--color-primary);
+                    "
+                  >
+                    <FontAwesomeIcon icon="building-columns" />
+                  </span>
+                  <h2 class="min-w-0 text-base font-black leading-tight tracking-tight">
+                    {{ t('expenses.addAccount.title') }}
+                  </h2>
+                </div>
+
+                <div
+                  class="flex gap-2 rounded-2xl p-1.5 ring-1 ring-inset"
+                  style="
+                    background: var(--color-surface-soft);
+                    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-border) 65%, transparent);
+                    --tw-ring-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+                  "
+                >
                   <input
                     v-model="newAccountName"
                     type="text"
-                    class="theme-input min-w-0 flex-1 rounded-xl p-3"
+                    class="theme-input min-h-10 min-w-0 flex-1 rounded-xl border-0 bg-transparent px-3 py-2 text-sm shadow-none ring-0 focus:ring-0"
                     :placeholder="t('expenses.addAccount.placeholder')"
                   />
-                  <button class="theme-button-secondary rounded-xl px-4 font-bold">{{ t('common.add') }}</button>
+                  <button
+                    type="submit"
+                    class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-bold"
+                    :aria-label="t('common.add')"
+                  >
+                    <FontAwesomeIcon icon="plus" />
+                  </button>
                 </div>
-                <div class="mt-4 space-y-2">
-                  <div v-for="account in accounts" :key="account.id" class="flex items-center justify-between text-sm">
-                    <span>{{ account.name }}</span>
-                    <div class="flex gap-2">
-                      <button type="button" class="theme-muted text-xs font-bold" @click="renameAccount(account)">
-                        {{ t('common.edit') }}
+
+                <ul class="mt-4 flex max-h-[14rem] flex-col gap-1 overflow-y-auto pr-0.5">
+                  <li
+                    v-for="account in accounts"
+                    :key="account.id"
+                    class="group flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                  >
+                    <span class="flex min-w-0 flex-1 items-center gap-2 truncate">
+                      <span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[0.7rem] opacity-90"
+                        style="
+                          background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+                          color: var(--color-primary);
+                        "
+                      >
+                        <FontAwesomeIcon icon="wallet" />
+                      </span>
+                      <span class="truncate font-semibold">{{ account.name }}</span>
+                    </span>
+                    <div
+                      class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                    >
+                      <button
+                        type="button"
+                        class="theme-muted group/tooltip relative cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
+                        :aria-label="t('common.edit')"
+                        @click="openRenameAccountModal(account)"
+                      >
+                        <FontAwesomeIcon icon="pen-to-square" />
+                        <span
+                          class="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          style="background: var(--color-text); color: var(--color-surface-strong)"
+                          role="tooltip"
+                        >
+                          {{ t('common.edit') }}
+                        </span>
                       </button>
                       <button
                         type="button"
-                        class="text-xs font-bold"
+                        class="group/tooltip relative cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
                         style="color: var(--color-danger)"
+                        :aria-label="t('common.delete')"
                         @click="removeAccount(account.id)"
                       >
-                        {{ t('common.delete') }}
+                        <FontAwesomeIcon icon="trash-can" />
+                        <span
+                          class="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          style="background: var(--color-text); color: var(--color-surface-strong)"
+                          role="tooltip"
+                        >
+                          {{ t('common.delete') }}
+                        </span>
                       </button>
                     </div>
-                  </div>
-                </div>
+                  </li>
+                </ul>
               </form>
-              <form class="finance-card rounded-[2rem] p-5" @submit.prevent="submitCategory">
-                <h2 class="font-bold">{{ t('expenses.addCategory.title') }}</h2>
-                <div class="mt-3 flex gap-2">
+
+              <form class="flex flex-col p-5 sm:p-6" @submit.prevent="submitCategory">
+                <div class="mb-4 flex items-center gap-3">
+                  <span
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-[1.05rem]"
+                    style="background: color-mix(in srgb, #8b5cf6 22%, transparent); color: #a78bfa"
+                  >
+                    <FontAwesomeIcon icon="layer-group" />
+                  </span>
+                  <h2 class="min-w-0 text-base font-black leading-tight tracking-tight">
+                    {{ t('expenses.addCategory.title') }}
+                  </h2>
+                </div>
+
+                <div
+                  class="flex gap-2 rounded-2xl p-1.5 ring-1 ring-inset"
+                  style="
+                    background: var(--color-surface-soft);
+                    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-border) 65%, transparent);
+                    --tw-ring-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+                  "
+                >
                   <input
                     v-model="newCategoryName"
                     type="text"
-                    class="theme-input min-w-0 flex-1 rounded-xl p-3"
+                    class="theme-input min-h-10 min-w-0 flex-1 rounded-xl border-0 bg-transparent px-3 py-2 text-sm shadow-none ring-0 focus:ring-0"
                     :placeholder="t('expenses.addCategory.placeholder')"
                   />
-                  <button class="theme-button-secondary rounded-xl px-4 font-bold">{{ t('common.add') }}</button>
-                </div>
-                <div class="mt-4 space-y-2">
-                  <div
-                    v-for="category in categories"
-                    :key="category.id"
-                    class="flex items-center justify-between text-sm"
+                  <button
+                    type="submit"
+                    class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-bold"
+                    :aria-label="t('common.add')"
                   >
-                    <span>{{ category.name }}</span>
-                    <div class="flex gap-2">
-                      <button type="button" class="theme-muted text-xs font-bold" @click="renameCategory(category)">
-                        {{ t('common.edit') }}
+                    <FontAwesomeIcon icon="plus" />
+                  </button>
+                </div>
+
+                <ul class="mt-4 flex min-h-0 max-h-[18rem] flex-col gap-1 overflow-y-auto overscroll-contain pr-0.5">
+                  <li
+                    v-for="(category, catIndex) in sortedCategories"
+                    :key="category.id"
+                    class="group flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-[color-mix(in_srgb,#8b5cf6_10%,transparent)]"
+                  >
+                    <span class="flex min-w-0 flex-1 items-center gap-2 truncate">
+                      <span
+                        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[0.65rem]"
+                        :style="{
+                          backgroundColor: `${getCategoryColor(catIndex)}22`,
+                          color: getCategoryColor(catIndex),
+                        }"
+                      >
+                        <FontAwesomeIcon :icon="categoryIconForName(category.name)" />
+                      </span>
+                      <span class="truncate font-semibold">{{ category.name }}</span>
+                    </span>
+                    <div
+                      class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+                    >
+                      <button
+                        type="button"
+                        class="theme-muted group/tooltip relative cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
+                        :aria-label="t('common.edit')"
+                        @click="openRenameCategoryModal(category)"
+                      >
+                        <FontAwesomeIcon icon="pen-to-square" />
+                        <span
+                          class="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          style="background: var(--color-text); color: var(--color-surface-strong)"
+                          role="tooltip"
+                        >
+                          {{ t('common.edit') }}
+                        </span>
                       </button>
                       <button
                         type="button"
-                        class="text-xs font-bold"
+                        class="group/tooltip relative cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
                         style="color: var(--color-danger)"
+                        :aria-label="t('common.delete')"
                         @click="removeCategory(category.id)"
                       >
-                        {{ t('common.delete') }}
+                        <FontAwesomeIcon icon="trash-can" />
+                        <span
+                          class="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          style="background: var(--color-text); color: var(--color-surface-strong)"
+                          role="tooltip"
+                        >
+                          {{ t('common.delete') }}
+                        </span>
                       </button>
                     </div>
-                  </div>
-                </div>
+                  </li>
+                </ul>
               </form>
             </div>
-          </aside>
+          </div>
         </section>
       </div>
 
@@ -930,6 +1214,115 @@ onMounted(() => {
               {{ t('expenses.filters.applyRange') }}
             </button>
           </div>
+        </div>
+      </div>
+
+      <div
+        v-if="isExpenseModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="expense-modal-title"
+        @click.self="closeExpenseModal"
+      >
+        <div class="finance-card max-h-[min(90vh,44rem)] w-full max-w-md overflow-y-auto rounded-2xl p-5 shadow-xl">
+          <h2 id="expense-modal-title" class="text-lg font-black">{{ expenseModalTitle }}</h2>
+          <form class="mt-4 grid gap-3" @submit.prevent="submitExpense">
+            <div class="grid gap-3 sm:grid-cols-2">
+              <label class="text-sm font-semibold">
+                {{ t('expenses.form.date') }}
+                <input v-model="form.date" type="date" class="theme-input mt-1 w-full rounded-xl p-3" required />
+              </label>
+              <label class="text-sm font-semibold">
+                {{ t('expenses.form.amount') }}
+                <input
+                  v-model="form.amount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="theme-input mt-1 w-full rounded-xl p-3"
+                  required
+                />
+              </label>
+            </div>
+            <fieldset class="min-w-0 border-0 p-0">
+              <legend class="text-sm font-semibold">{{ t('expenses.form.category') }}</legend>
+              <div
+                class="theme-border mt-2 flex max-h-[11rem] flex-wrap gap-2 overflow-y-auto rounded-xl border p-2"
+              >
+                <button
+                  v-for="category in sortedCategories"
+                  :key="category.id"
+                  type="button"
+                  :class="[
+                    'finance-chip flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold',
+                    { 'is-active': form.categoryId === category.id },
+                  ]"
+                  @click="form.categoryId = category.id"
+                  :aria-pressed="form.categoryId === category.id"
+                >
+                  <FontAwesomeIcon :icon="categoryIconForName(category.name)" class="text-[0.65rem] opacity-95" />
+                  <span class="max-w-[9rem] truncate">{{ category.name }}</span>
+                </button>
+              </div>
+            </fieldset>
+            <label class="text-sm font-semibold">
+              {{ t('expenses.form.account') }}
+              <select v-model="form.accountId" class="theme-input mt-1 w-full rounded-xl p-3" required>
+                <option v-for="account in accounts" :key="account.id" :value="account.id">
+                  {{ account.name }}
+                </option>
+              </select>
+            </label>
+            <label class="text-sm font-semibold">
+              {{ t('expenses.form.note') }}
+              <input v-model="form.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
+            </label>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 font-bold" @click="closeExpenseModal">
+                {{ t('common.cancel') }}
+              </button>
+              <button type="submit" class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-bold">
+                {{ editingExpenseId ? t('common.save') : t('expenses.form.submit') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div
+        v-if="isRenameModalOpen && renameTarget"
+        class="fixed inset-0 z-[52] flex items-center justify-center bg-black/40 px-4 py-8"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="rename-modal-title"
+        @click.self="closeRenameModal"
+      >
+        <div class="finance-card w-full max-w-md rounded-2xl p-5 shadow-xl">
+          <h2 id="rename-modal-title" class="text-lg font-black">{{ renameModalTitle }}</h2>
+          <form class="mt-4 grid gap-3" @submit.prevent="submitRenameModal">
+            <label class="text-sm font-semibold">
+              {{ renameModalNameLabel }}
+              <input
+                v-model="renameNameInput"
+                type="text"
+                class="theme-input mt-1 w-full rounded-xl p-3"
+                autofocus
+              />
+            </label>
+            <div class="flex flex-wrap gap-2 pt-1">
+              <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 font-bold" @click="closeRenameModal">
+                {{ t('common.cancel') }}
+              </button>
+              <button
+                type="submit"
+                class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-bold"
+                :disabled="!renameNameInput.trim()"
+              >
+                {{ t('common.save') }}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </main>

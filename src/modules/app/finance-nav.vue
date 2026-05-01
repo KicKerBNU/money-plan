@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { useRoute } from 'vue-router'
+import { useRoute, type RouteLocationRaw } from 'vue-router'
 import MoneyPlanMark from '@/modules/app/money-plan-mark.vue'
 import ThemeToggle from '@/modules/theme/theme-toggle.vue'
 
@@ -11,7 +11,7 @@ interface NavItem {
   key: string
   label: string
   icon: string
-  to: string
+  to: RouteLocationRaw
   disabled?: boolean
   isAction?: boolean
 }
@@ -27,13 +27,18 @@ const navItems: NavItem[] = [
 const mobileNavItems: NavItem[] = [
   navItems[1],
   navItems[2],
-  { key: 'add', label: 'appNav.add', icon: 'plus', to: '/app/expenses', isAction: true },
+  { key: 'add', label: 'appNav.add', icon: 'plus', to: { path: '/app/expenses', query: { new: '1' } }, isAction: true },
   navItems[3],
   { key: 'me', label: 'appNav.me', icon: 'user', to: '/app/expenses', disabled: true },
 ]
 
+function itemPath(to: RouteLocationRaw): string {
+  return typeof to === 'string' ? to : to.path ?? '/'
+}
+
 function isActive(item: NavItem) {
-  return !item.disabled && route.path === item.to
+  if (item.disabled || item.isAction) return false
+  return route.path === itemPath(item.to)
 }
 
 function handleNavClick(event: MouseEvent, item: NavItem) {

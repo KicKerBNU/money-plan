@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
+import { categoryIconForName } from '@/lib/categoryIcons'
 import { fetchMonthlyExpensesStats } from './api/stats.api'
 import type { MonthlyCategoryTotal } from './domain/stats.types'
 
@@ -17,22 +18,8 @@ const totalSpent = ref(0)
 const statsCategories = ref<MonthlyCategoryTotal[]>([])
 
 const colorPalette = ['#a855f7', '#45c6b5', '#ef4444', '#ec4899', '#f59e0b', '#38bdf8', '#8b5cf6', '#94a3b8']
-const iconByKeyword: Array<{ keyword: string; icon: string }> = [
-  { keyword: 'rent', icon: 'house' },
-  { keyword: 'grocery', icon: 'basket-shopping' },
-  { keyword: 'food', icon: 'utensils' },
-  { keyword: 'health', icon: 'heart-pulse' },
-  { keyword: 'shop', icon: 'bag-shopping' },
-  { keyword: 'util', icon: 'bolt' },
-  { keyword: 'transport', icon: 'bus' },
-  { keyword: 'entertain', icon: 'id-card' },
-  { keyword: 'subscript', icon: 'receipt' },
-]
-
 const categories = computed(() =>
   statsCategories.value.map((category, index) => {
-    const normalized = category.categoryName.toLowerCase()
-    const iconMatch = iconByKeyword.find((item) => normalized.includes(item.keyword))
     const percent = totalSpent.value > 0 ? (category.totalAmount / totalSpent.value) * 100 : 0
 
     return {
@@ -42,7 +29,7 @@ const categories = computed(() =>
       entries: category.entryCount,
       percent,
       color: colorPalette[index % colorPalette.length],
-      icon: iconMatch?.icon ?? 'receipt',
+      icon: categoryIconForName(category.categoryName),
     }
   })
 )

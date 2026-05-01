@@ -187,9 +187,13 @@ export default {
     panels: {
       byCategory: 'Por categoria',
       byAccount: 'Por conta',
+      byCategoryEmptyTitle: 'Nada para mostrar ainda',
+      byCategoryEmptyDescription:
+        'Este painel é preenchido pelas suas despesas. Adicione lançamentos para ver como o gasto se divide entre categorias neste mês.',
     },
     form: {
       title: 'Nova despesa',
+      editTitle: 'Editar despesa',
       date: 'Data',
       amount: 'Valor',
       category: 'Categoria',
@@ -204,6 +208,12 @@ export default {
     addCategory: {
       title: 'Adicionar categoria',
       placeholder: 'Nome da categoria',
+    },
+    renameModal: {
+      editAccount: 'Renomear conta',
+      editCategory: 'Renomear categoria',
+      accountNameLabel: 'Nome da conta',
+      categoryNameLabel: 'Nome da categoria',
     },
   },
   stats: {

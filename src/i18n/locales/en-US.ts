@@ -187,9 +187,13 @@ export default {
     panels: {
       byCategory: 'By category',
       byAccount: 'By account',
+      byCategoryEmptyTitle: 'Nothing to show yet',
+      byCategoryEmptyDescription:
+        'This chart fills in from your expenses. Add a few entries to see how spending splits across categories this month.',
     },
     form: {
       title: 'New expense',
+      editTitle: 'Edit expense',
       date: 'Date',
       amount: 'Amount',
       category: 'Category',
@@ -204,6 +208,12 @@ export default {
     addCategory: {
       title: 'Add category',
       placeholder: 'Category name',
+    },
+    renameModal: {
+      editAccount: 'Rename account',
+      editCategory: 'Rename category',
+      accountNameLabel: 'Account name',
+      categoryNameLabel: 'Category name',
     },
   },
   stats: {
