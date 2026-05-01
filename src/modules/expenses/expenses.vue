@@ -228,6 +228,69 @@ const sortedCategories = computed(() =>
   })
 )
 
+const MAX_CATEGORY_FILTER_CHIPS = 4
+
+/** Deterministic shuffle so filler chips stay stable for the same period + category set */
+function seededShuffle<T>(items: T[], seed: number): T[] {
+  const arr = [...items]
+  let state = seed >>> 0
+  if (state === 0) state = 1
+  const nextRand = () => {
+    state = (1664525 * state + 1013904223) >>> 0
+    return state / 4294967296
+  }
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(nextRand() * (i + 1))
+    ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
+/** Quick filters: spend-ranked categories (max 4), active selection preserved; remaining slots filled from a period-seeded shuffle so you always see 4 distinct chips when you have ≥4 categories */
+const categoryFilterChips = computed(() => {
+  if (!categories.value.length) return []
+
+  const ordered = categoryTotals.value
+  const ids = new Set<number>()
+  const rows: { categoryId: number; name: string; total: number }[] = []
+
+  const pushRow = (row: { categoryId: number; name: string; total: number }) => {
+    if (rows.length >= MAX_CATEGORY_FILTER_CHIPS || ids.has(row.categoryId)) return
+    rows.push(row)
+    ids.add(row.categoryId)
+  }
+
+  const sel = selectedCategoryId.value
+  if (typeof sel === 'number') {
+    const fromTotals = ordered.find((t) => t.categoryId === sel)
+    if (fromTotals) {
+      pushRow(fromTotals)
+    } else {
+      const cat = categories.value.find((c) => c.id === sel)
+      if (cat) pushRow({ categoryId: cat.id, name: cat.name, total: 0 })
+    }
+  }
+
+  for (const row of ordered) {
+    if (rows.length >= MAX_CATEGORY_FILTER_CHIPS) break
+    pushRow(row)
+  }
+
+  const remainingSlots = MAX_CATEGORY_FILTER_CHIPS - rows.length
+  if (remainingSlots > 0) {
+    const extras = sortedCategories.value.filter((c) => !ids.has(c.id))
+    const idSum = categories.value.reduce((s, c) => s + c.id, 0)
+    const seed = period.value.year * 10_000 + period.value.month * 100 + (idSum % 997)
+    const shuffled = seededShuffle(extras, seed)
+    for (const cat of shuffled) {
+      if (rows.length >= MAX_CATEGORY_FILTER_CHIPS) break
+      pushRow({ categoryId: cat.id, name: cat.name, total: 0 })
+    }
+  }
+
+  return [...rows].sort((a, b) => b.total - a.total)
+})
+
 function getCategoryColor(index: number) {
   return categoryColors[index % categoryColors.length]
 }
@@ -659,7 +722,7 @@ watch(
         <section class="mt-4 grid gap-5 lg:mt-6">
           <div class="grid gap-5 xl:grid-cols-[minmax(0,1fr)_18.5rem] xl:items-stretch xl:gap-5">
             <div class="flex min-h-0 min-w-0 flex-col gap-5 xl:h-full">
-          <div class="finance-card hidden min-h-0 overflow-hidden rounded-2xl lg:flex lg:flex-col lg:min-h-0 xl:h-full xl:flex-1">
+          <div class="finance-card hidden min-h-0 rounded-2xl lg:flex lg:flex-col lg:min-h-0 xl:h-full xl:flex-1">
             <div class="theme-border flex flex-col gap-3 border-b p-4 md:flex-row md:items-center">
               <input
                 v-model="searchQuery"
@@ -691,20 +754,21 @@ watch(
                   {{ t('expenses.filters.all') }}
                 </button>
                 <button
-                  v-for="(category, index) in sortedCategories"
-                  :key="category.id"
+                  v-for="(chip, index) in categoryFilterChips"
+                  :key="chip.categoryId"
                   :class="[
                     'finance-chip flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold',
-                    { 'is-active': selectedCategoryId === category.id },
+                    { 'is-active': selectedCategoryId === chip.categoryId },
                   ]"
-                  @click="selectedCategoryId = category.id"
+                  type="button"
+                  @click="selectedCategoryId = chip.categoryId"
                 >
                   <FontAwesomeIcon
                     class="text-[0.65rem]"
-                    :icon="categoryIconForName(category.name)"
+                    :icon="categoryIconForName(chip.name)"
                     :style="{ color: getCategoryColor(index) }"
                   />
-                  {{ category.name }}
+                  {{ chip.name }}
                 </button>
               </div>
             </div>
@@ -797,12 +861,37 @@ watch(
                 <strong class="text-sm font-black" style="color: var(--color-danger)">
                   -{{ formatMoney(expense.amount) }}
                 </strong>
-                <div class="flex items-center gap-2">
-                  <button class="theme-muted text-xs font-bold" @click="startEditExpense(expense)">
-                    {{ t('common.edit') }}
+                <div class="flex items-center gap-0.5">
+                  <button
+                    type="button"
+                    class="theme-muted group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
+                    :aria-label="t('common.edit')"
+                    @click="startEditExpense(expense)"
+                  >
+                    <FontAwesomeIcon icon="pen-to-square" />
+                    <span
+                      class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                      style="background: var(--color-text); color: var(--color-surface-strong)"
+                      role="tooltip"
+                    >
+                      {{ t('common.edit') }}
+                    </span>
                   </button>
-                  <button class="text-xs font-bold" style="color: var(--color-danger)" @click="removeExpense(expense.id)">
-                    {{ t('common.delete') }}
+                  <button
+                    type="button"
+                    class="group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
+                    style="color: var(--color-danger)"
+                    :aria-label="t('common.delete')"
+                    @click="removeExpense(expense.id)"
+                  >
+                    <FontAwesomeIcon icon="trash-can" />
+                    <span
+                      class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                      style="background: var(--color-text); color: var(--color-surface-strong)"
+                      role="tooltip"
+                    >
+                      {{ t('common.delete') }}
+                    </span>
                   </button>
                 </div>
               </article>
@@ -839,12 +928,37 @@ watch(
                   -{{ formatMoney(expense.amount) }}
                 </strong>
               </div>
-              <div class="mt-2 flex justify-end gap-2">
-                <button class="theme-muted text-xs font-bold" @click="startEditExpense(expense)">
-                  {{ t('common.edit') }}
+              <div class="mt-2 flex justify-end gap-0.5">
+                <button
+                  type="button"
+                  class="theme-muted group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
+                  :aria-label="t('common.edit')"
+                  @click="startEditExpense(expense)"
+                >
+                  <FontAwesomeIcon icon="pen-to-square" />
+                  <span
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    style="background: var(--color-text); color: var(--color-surface-strong)"
+                    role="tooltip"
+                  >
+                    {{ t('common.edit') }}
+                  </span>
                 </button>
-                <button class="text-xs font-bold" style="color: var(--color-danger)" @click="removeExpense(expense.id)">
-                  {{ t('common.delete') }}
+                <button
+                  type="button"
+                  class="group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
+                  style="color: var(--color-danger)"
+                  :aria-label="t('common.delete')"
+                  @click="removeExpense(expense.id)"
+                >
+                  <FontAwesomeIcon icon="trash-can" />
+                  <span
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    style="background: var(--color-text); color: var(--color-surface-strong)"
+                    role="tooltip"
+                  >
+                    {{ t('common.delete') }}
+                  </span>
                 </button>
               </div>
             </article>
@@ -1023,7 +1137,7 @@ watch(
                   <li
                     v-for="account in accounts"
                     :key="account.id"
-                    class="group flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                    class="group relative z-0 flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:z-40 hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
                   >
                     <span class="flex min-w-0 flex-1 items-center gap-2 truncate">
                       <span
@@ -1048,7 +1162,7 @@ watch(
                       >
                         <FontAwesomeIcon icon="pen-to-square" />
                         <span
-                          class="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                           style="background: var(--color-text); color: var(--color-surface-strong)"
                           role="tooltip"
                         >
@@ -1064,7 +1178,7 @@ watch(
                       >
                         <FontAwesomeIcon icon="trash-can" />
                         <span
-                          class="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                           style="background: var(--color-text); color: var(--color-surface-strong)"
                           role="tooltip"
                         >
@@ -1116,7 +1230,7 @@ watch(
                   <li
                     v-for="(category, catIndex) in sortedCategories"
                     :key="category.id"
-                    class="group flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:bg-[color-mix(in_srgb,#8b5cf6_10%,transparent)]"
+                    class="group relative z-0 flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors hover:z-40 hover:bg-[color-mix(in_srgb,#8b5cf6_10%,transparent)]"
                   >
                     <span class="flex min-w-0 flex-1 items-center gap-2 truncate">
                       <span
@@ -1141,7 +1255,7 @@ watch(
                       >
                         <FontAwesomeIcon icon="pen-to-square" />
                         <span
-                          class="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                           style="background: var(--color-text); color: var(--color-surface-strong)"
                           role="tooltip"
                         >
@@ -1157,7 +1271,7 @@ watch(
                       >
                         <FontAwesomeIcon icon="trash-can" />
                         <span
-                          class="pointer-events-none absolute bottom-[calc(100%+6px)] left-1/2 z-[60] -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                           style="background: var(--color-text); color: var(--color-surface-strong)"
                           role="tooltip"
                         >

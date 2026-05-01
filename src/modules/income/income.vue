@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { formatMonthYear } from '@/lib/dateDisplay'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import { fetchAccounts } from '@/modules/expenses/api/expenses.api'
 import type { Account } from '@/modules/expenses/domain/expenses.types'
@@ -25,6 +26,10 @@ const form = ref({
   note: '',
 })
 const editingIncomeId = ref<number | null>(null)
+
+const periodMonthLabel = computed(() =>
+  formatMonthYear(locale.value, period.value.year, period.value.month)
+)
 
 const totalIncome = computed(() => incomeEntries.value.reduce((sum, entry) => sum + entry.amount, 0))
 const lastEntryLabel = computed(() => {
@@ -161,7 +166,7 @@ onMounted(() => {
       <div class="mx-auto max-w-5xl">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <p class="theme-muted text-xs font-bold uppercase tracking-wide lg:text-sm lg:normal-case lg:tracking-normal">
-            {{ t('appNav.period') }}
+            {{ periodMonthLabel }}
           </p>
           <h1 class="mt-0.5 text-xl font-black leading-tight tracking-tight lg:text-[2rem]">
             {{ t('income.title') }}
@@ -218,7 +223,7 @@ onMounted(() => {
           </form>
         </section>
 
-        <section class="finance-card mt-4 hidden overflow-hidden rounded-2xl lg:mt-6 lg:block">
+        <section class="finance-card mt-4 hidden rounded-2xl lg:mt-6 lg:block">
           <div class="theme-border flex items-center justify-between border-b px-4 py-3">
             <h2 class="theme-muted text-xs font-black uppercase tracking-wide">
               {{ t('income.recent.title') }}
@@ -236,19 +241,44 @@ onMounted(() => {
             <article
               v-for="entry in incomeRows"
               :key="entry.id"
-              class="grid grid-cols-[4.5rem_1fr_auto_auto] items-center gap-4 px-4 py-3.5 text-sm"
+              class="income-entry-row grid grid-cols-[4.5rem_1fr_auto_auto] items-center gap-4 px-4 py-3.5 text-sm"
             >
               <span class="theme-muted text-[0.68rem] font-bold tracking-wide">{{ entry.dateLabel }}</span>
               <span class="font-bold">{{ entry.title }}</span>
               <strong class="font-black" style="color: var(--color-positive)">
                 +{{ formatMoney(entry.amount) }}
               </strong>
-              <div class="flex items-center gap-2">
-                <button class="theme-muted text-xs font-bold" @click="startEditIncome(entry)">
-                  {{ t('common.edit') }}
+              <div class="flex items-center gap-0.5">
+                <button
+                  type="button"
+                  class="theme-muted group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
+                  :aria-label="t('common.edit')"
+                  @click="startEditIncome(entry)"
+                >
+                  <FontAwesomeIcon icon="pen-to-square" />
+                  <span
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    style="background: var(--color-text); color: var(--color-surface-strong)"
+                    role="tooltip"
+                  >
+                    {{ t('common.edit') }}
+                  </span>
                 </button>
-                <button class="text-xs font-bold" style="color: var(--color-danger)" @click="removeIncome(entry.id)">
-                  {{ t('common.delete') }}
+                <button
+                  type="button"
+                  class="group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
+                  style="color: var(--color-danger)"
+                  :aria-label="t('common.delete')"
+                  @click="removeIncome(entry.id)"
+                >
+                  <FontAwesomeIcon icon="trash-can" />
+                  <span
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    style="background: var(--color-text); color: var(--color-surface-strong)"
+                    role="tooltip"
+                  >
+                    {{ t('common.delete') }}
+                  </span>
                 </button>
               </div>
             </article>
@@ -266,12 +296,37 @@ onMounted(() => {
                 +{{ formatMoney(entry.amount) }}
               </strong>
             </div>
-            <div class="mt-2 flex justify-end gap-2">
-              <button class="theme-muted text-xs font-bold" @click="startEditIncome(entry)">
-                {{ t('common.edit') }}
+            <div class="mt-2 flex justify-end gap-0.5">
+              <button
+                type="button"
+                class="theme-muted group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
+                :aria-label="t('common.edit')"
+                @click="startEditIncome(entry)"
+              >
+                <FontAwesomeIcon icon="pen-to-square" />
+                <span
+                  class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                  style="background: var(--color-text); color: var(--color-surface-strong)"
+                  role="tooltip"
+                >
+                  {{ t('common.edit') }}
+                </span>
               </button>
-              <button class="text-xs font-bold" style="color: var(--color-danger)" @click="removeIncome(entry.id)">
-                {{ t('common.delete') }}
+              <button
+                type="button"
+                class="group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
+                style="color: var(--color-danger)"
+                :aria-label="t('common.delete')"
+                @click="removeIncome(entry.id)"
+              >
+                <FontAwesomeIcon icon="trash-can" />
+                <span
+                  class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                  style="background: var(--color-text); color: var(--color-surface-strong)"
+                  role="tooltip"
+                >
+                  {{ t('common.delete') }}
+                </span>
               </button>
             </div>
           </article>

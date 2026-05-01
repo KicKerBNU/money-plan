@@ -1,11 +1,67 @@
 <script setup lang="ts">
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, type RouteLocationRaw } from 'vue-router'
 import MoneyPlanMark from '@/modules/app/money-plan-mark.vue'
 import ThemeToggle from '@/modules/theme/theme-toggle.vue'
+import { formatMonthYear } from '@/lib/dateDisplay'
+import { fetchExpensesByPeriod } from '@/modules/expenses/api/expenses.api'
+import { fetchIncomesByPeriod } from '@/modules/income/api/income.api'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
+
+function calendarYearMonth() {
+  const now = new Date()
+  return { year: now.getFullYear(), month: now.getMonth() + 1 }
+}
+
+const navMonthLabel = computed(() => {
+  const { year, month } = calendarYearMonth()
+  return formatMonthYear(locale.value, year, month)
+})
+
+const cashFlowNet = ref<number | null>(null)
+const cashFlowLoading = ref(true)
+
+function formatCashFlowMoney(value: number) {
+  const absoluteValue = Math.abs(value)
+  const hasCents = !Number.isInteger(absoluteValue)
+  const formatted = new Intl.NumberFormat(locale.value, {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: hasCents ? 2 : 0,
+    maximumFractionDigits: 2,
+  }).format(absoluteValue)
+  return `${value >= 0 ? '+' : '-'}${formatted}`
+}
+
+async function loadNavCashFlow() {
+  cashFlowLoading.value = true
+  const { year, month } = calendarYearMonth()
+  try {
+    const [expenses, incomes] = await Promise.all([
+      fetchExpensesByPeriod(year, month),
+      fetchIncomesByPeriod(year, month),
+    ])
+    const spent = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+    const earned = incomes.reduce((sum, income) => sum + income.amount, 0)
+    cashFlowNet.value = earned - spent
+  } catch {
+    cashFlowNet.value = null
+  } finally {
+    cashFlowLoading.value = false
+  }
+}
+
+onMounted(() => void loadNavCashFlow())
+
+watch(locale, () => void loadNavCashFlow())
+
+watch(
+  () => route.fullPath,
+  () => void loadNavCashFlow()
+)
 
 interface NavItem {
   key: string
@@ -56,7 +112,7 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
       </span>
       <span>
         <strong class="block text-[0.95rem] font-black leading-tight">{{ t('appNav.brand') }}</strong>
-        <span class="theme-muted text-[0.7rem] font-semibold">{{ t('appNav.period') }}</span>
+        <span class="theme-muted text-[0.7rem] font-semibold">{{ navMonthLabel }}</span>
       </span>
     </RouterLink>
 
@@ -78,8 +134,22 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
     </nav>
 
     <div class="app-net-card rounded-xl p-3.5">
-      <p class="theme-muted text-[0.7rem] font-bold">{{ t('appNav.netLabel') }}</p>
-      <strong class="mt-0.5 block text-lg font-black text-emerald-500">{{ t('appNav.netValue') }}</strong>
+      <p class="theme-muted text-[0.7rem] font-bold">{{ t('appNav.cashFlow') }}</p>
+      <strong
+        class="mt-0.5 block text-lg font-black"
+        :style="{
+          color:
+            cashFlowNet !== null && cashFlowNet < 0 ? 'var(--color-danger)' : 'var(--color-positive)',
+        }"
+      >
+        {{
+          cashFlowLoading
+            ? '…'
+            : cashFlowNet === null
+              ? '—'
+              : formatCashFlowMoney(cashFlowNet)
+        }}
+      </strong>
     </div>
   </aside>
 

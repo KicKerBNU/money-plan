@@ -99,3 +99,7 @@ The frontend is configured with `netlify.toml`. Production deploy command:
 npm run build
 npx netlify deploy --prod --dir=dist
 ```
+
+## UI conventions
+
+See `.cursor/rules/ui-interactions.mdc` (always applied in Cursor). Summary: enabled `<button>` elements use a pointer cursor (also enforced in global CSS); row/toolbar **Edit** and **Delete** are icon-only with `aria-label` and hover/focus tooltips, never visible text labels.

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import FinanceNav from '@/modules/app/finance-nav.vue'
 import { categoryIconForName } from '@/lib/categoryIcons'
+import { formatMonthYear } from '@/lib/dateDisplay'
+import FinanceNav from '@/modules/app/finance-nav.vue'
 import { fetchMonthlyExpensesStats } from './api/stats.api'
 import type { MonthlyCategoryTotal } from './domain/stats.types'
 
@@ -16,6 +17,10 @@ const period = ref({
 })
 const totalSpent = ref(0)
 const statsCategories = ref<MonthlyCategoryTotal[]>([])
+
+const periodMonthLabel = computed(() =>
+  formatMonthYear(locale.value, period.value.year, period.value.month)
+)
 
 const colorPalette = ['#a855f7', '#45c6b5', '#ef4444', '#ec4899', '#f59e0b', '#38bdf8', '#8b5cf6', '#94a3b8']
 const categories = computed(() =>
@@ -89,7 +94,7 @@ onMounted(() => {
         <header class="mobile-page-header flex items-start justify-between gap-4 pt-9 lg:pt-0">
           <div>
             <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
-              {{ t('appNav.brand') }} · {{ t('appNav.period') }}
+              {{ t('appNav.brand') }} · {{ periodMonthLabel }}
             </p>
             <h1 class="mt-1 text-2xl font-black leading-tight tracking-tight lg:text-[2rem]">
               {{ t('stats.title') }}

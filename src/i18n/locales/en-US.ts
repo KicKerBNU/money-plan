@@ -115,7 +115,6 @@ export default {
   },
   appNav: {
     brand: 'Money Plan',
-    period: 'April 2026',
     overview: 'Overview',
     income: 'Income',
     expenses: 'Expenses',
@@ -123,8 +122,7 @@ export default {
     accounts: 'Accounts',
     add: 'Add',
     me: 'Me',
-    netLabel: 'Net April',
-    netValue: '+$2,010',
+    cashFlow: 'Cash flow',
     logout: 'Logout',
   },
   income: {

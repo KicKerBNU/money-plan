@@ -115,7 +115,6 @@ export default {
   },
   appNav: {
     brand: 'Money Plan',
-    period: 'Abril 2026',
     overview: 'Resumo',
     income: 'Receitas',
     expenses: 'Despesas',
@@ -123,8 +122,7 @@ export default {
     accounts: 'Contas',
     add: 'Adicionar',
     me: 'Eu',
-    netLabel: 'Saldo abril',
-    netValue: '+US$ 2.010',
+    cashFlow: 'Fluxo do mês',
     logout: 'Sair',
   },
   income: {

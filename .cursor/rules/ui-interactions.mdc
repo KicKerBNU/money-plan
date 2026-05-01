@@ -1,0 +1,19 @@
+---
+description: Button cursors and Edit/Delete presentation for Money Plan frontend
+alwaysApply: true
+---
+
+# UI interactions (Money Plan frontend)
+
+## Buttons and pointer cursor
+
+- Any interactive control implemented as a `<button>` (or equivalent actionable control) MUST show an obvious pointer cursor on hover when the control is enabled.
+- Prefer the global base styles in `src/assets/styles/main.css` (`button:enabled { cursor: pointer }`, disabled → `not-allowed`) so new screens stay consistent without repeating `cursor-pointer` on every element.
+
+## Edit and Delete actions
+
+- Do **not** show the words “Edit” or “Delete” as the visible label on row actions or icon strips.
+- Always use **icons** (`pen-to-square`, `trash-can`, etc.) with:
+  - **`aria-label`** set from `t('common.edit')` / `t('common.delete')` for accessibility, and
+  - a **hover/focus tooltip** (same pattern as account/category rows in `expenses.vue`: `group/tooltip`, absolutely positioned span with **`top-full mt-1.5`** below the icon button—not above—so the first row in an `overflow-y-auto` list isn’t clipped at the top), `role="tooltip"`, **`z-[10050]`** or higher on the bubble so it stays above cards, modals layers, and the toaster (`z-[1000]`). **Stacked lists:** rows below paint over siblings—elevate the **whole hovered row** with `position: relative`, base `z-index: 0`, and `:hover { z-index: 40 }` (see `.expense-row`, `.mobile-entry-card`, `.income-entry-row`; sidebar `<li>` use `hover:z-40`). Avoid `overflow-hidden` on the card wrapper around those lists when possible so bubbles aren’t clipped.
+- Modal titles, page headings, and form labels may still mention editing (e.g. rename modal); this rule applies to **primary row/toolbar actions**, not instructional copy.
