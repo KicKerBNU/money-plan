@@ -17,3 +17,13 @@ alwaysApply: true
   - **`aria-label`** set from `t('common.edit')` / `t('common.delete')` for accessibility, and
   - a **hover/focus tooltip** (same pattern as account/category rows in `expenses.vue`: `group/tooltip`, absolutely positioned span with **`top-full mt-1.5`** below the icon button—not above—so the first row in an `overflow-y-auto` list isn’t clipped at the top), `role="tooltip"`, **`z-[10050]`** or higher on the bubble so it stays above cards, modals layers, and the toaster (`z-[1000]`). **Stacked lists:** rows below paint over siblings—elevate the **whole hovered row** with `position: relative`, base `z-index: 0`, and `:hover { z-index: 40 }` (see `.expense-row`, `.mobile-entry-card`, `.income-entry-row`; sidebar `<li>` use `hover:z-40`). Avoid `overflow-hidden` on the card wrapper around those lists when possible so bubbles aren’t clipped.
 - Modal titles, page headings, and form labels may still mention editing (e.g. rename modal); this rule applies to **primary row/toolbar actions**, not instructional copy.
+
+## Modal dialogs
+
+- Every overlay modal MUST include a **close control in the top-right** of the modal panel (next to the title row): icon **`xmark`** only, **`aria-label`** from `t('common.close')`, calling the same close handler as backdrop dismiss.
+- Use a header row: `flex items-start justify-between gap-3` with `h2` (`min-w-0 flex-1`) + close `button` (`h-9 w-9`, muted hover background). See trip range, expense, and rename modals in `expenses.vue`.
+- Prefer `role="dialog"`, `aria-modal="true"`, and `aria-labelledby` pointing at the title `id`.
+
+## Destructive confirmations
+
+- Do **not** use `window.confirm` for delete or other destructive actions. Use the shared **`openConfirmModal()`** from `@/utils/confirmModal` and the global **`ConfirmModal`** (`App.vue`). Provide **`title`**, **`message`**, **`confirmLabel`** (e.g. `t('common.delete')`), **`cancelLabel`** (`t('common.cancel')`). The overlay uses **`z-[1100]`** (above app modals, below toasts).

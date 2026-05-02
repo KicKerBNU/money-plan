@@ -78,6 +78,8 @@ export default {
     save: 'Save',
     delete: 'Delete',
     cancel: 'Cancel',
+    close: 'Close',
+    saving: 'Saving…',
   },
   toast: {
     saveSuccess: 'Saved successfully.',
@@ -124,6 +126,7 @@ export default {
     me: 'Me',
     cashFlow: 'Cash flow',
     logout: 'Logout',
+    settingsMenu: 'Settings and account',
   },
   income: {
     title: 'Income',
@@ -144,6 +147,10 @@ export default {
       note: 'Note',
       notePlaceholder: 'Note (e.g. Freelance, refund)',
       submit: 'Add income',
+    },
+    confirmDelete: {
+      title: 'Delete income?',
+      body: 'This income entry will be removed. This cannot be undone.',
     },
   },
   expenses: {
@@ -215,6 +222,14 @@ export default {
       editCategory: 'Rename category',
       accountNameLabel: 'Account name',
       categoryNameLabel: 'Category name',
+    },
+    confirmDelete: {
+      expenseTitle: 'Delete expense?',
+      expenseBody: 'This expense will be removed. This cannot be undone.',
+      accountTitle: 'Delete account?',
+      accountBody: 'The account will be deleted only if no expenses are linked to it.',
+      categoryTitle: 'Delete category?',
+      categoryBody: 'The category will be deleted only if no expenses are linked to it.',
     },
   },
   stats: {

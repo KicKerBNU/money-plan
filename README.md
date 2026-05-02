@@ -61,7 +61,7 @@ Provide a clean personal finance experience where users can securely sign in, re
 | [FontAwesome](https://fontawesome.com/) | ^7.0 | Icons — registered globally as `<FontAwesomeIcon>` |
 | [Storybook](https://storybook.js.org/) | ^10.0 | Isolated component development and visual testing |
 | [Firebase](https://firebase.google.com/) | ^12.0 | Frontend authentication |
-| [Netlify](https://www.netlify.com/) | CLI | Production deployment |
+| [Netlify](https://www.netlify.com/) | Git-linked CI + optional CLI | Production deploy on push to production branch (see **Netlify Deployment**) |
 
 ## Folder Structure
 
@@ -181,14 +181,20 @@ Keep backend and OpenAPI in sync; see `money-plan-backend/README.md` for full qu
 
 ## Netlify Deployment
 
-This project may include `netlify.toml` with SPA fallback. Typical flow:
+**Continuous deployment (recommended)** — Link the GitHub repository to Netlify (Site → Add → Import from Git). Netlify installs a webhook on the repo; **every push to the production branch** (for example `master`) triggers a new production build and deploy. **GitHub Actions are not required** for this.
+
+**Monorepo:** If the Netlify site is connected at the **repository root** (parent of this folder), set **Site configuration → Build settings → Base directory** to `money-plan-frontend` so builds run from this package.
+
+**Build settings** are defined in `netlify.toml` at the root of this package (`npm run build`, publish `dist`, SPA fallback to `/index.html`).
+
+**Manual CLI deploy** (optional):
 
 ```bash
 npm run build
 npx netlify deploy --prod --dir=dist
 ```
 
-Production site (if configured):
+Production site (when configured):
 
 ```text
 https://money-plan-frontend.netlify.app

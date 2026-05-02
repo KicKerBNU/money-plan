@@ -8,7 +8,7 @@ export interface ToastEntry {
   message: string
 }
 
-const AUTO_DISMISS_MS = 5200
+const AUTO_DISMISS_MS = 3000
 const MAX_VISIBLE = 5
 
 let seq = 0

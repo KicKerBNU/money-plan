@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { getDefaultAccountId } from '@/lib/defaultAccount'
 import { formatMonthYear } from '@/lib/dateDisplay'
+import { openConfirmModal } from '@/utils/confirmModal'
 import FinanceNav from '@/modules/app/finance-nav.vue'
+import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 import { fetchAccounts } from '@/modules/expenses/api/expenses.api'
 import type { Account } from '@/modules/expenses/domain/expenses.types'
 import { createIncome, deleteIncome, fetchIncomesByPeriod, updateIncome } from './api/income.api'
 import type { IncomeEntry } from './domain/income.types'
 
 const { t, locale } = useI18n()
+const cashFlowStore = useCashFlowStore()
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
 const accounts = ref<Account[]>([])
@@ -86,7 +90,8 @@ async function loadIncomeData() {
     accounts.value = accountsData
 
     if (!form.value.accountId && accountsData.length > 0) {
-      form.value.accountId = accountsData[0].id
+      const id = getDefaultAccountId(accountsData)
+      if (id !== undefined) form.value.accountId = id
     }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
@@ -120,6 +125,7 @@ async function submitIncome() {
 
     await loadIncomeData()
     resetIncomeForm()
+    void cashFlowStore.refresh()
   } catch {
     /* Errors shown via global toast from apiFetch */
   }
@@ -135,12 +141,18 @@ function startEditIncome(entry: IncomeEntry) {
   editingIncomeId.value = entry.id
   form.value.date = entry.date
   form.value.amount = String(entry.amount)
-  form.value.accountId = entry.accountId ?? accounts.value[0]?.id ?? null
+  form.value.accountId = entry.accountId ?? getDefaultAccountId(accounts.value) ?? null
   form.value.note = entry.note ?? ''
 }
 
 async function removeIncome(incomeId: number) {
-  if (!window.confirm('Delete this income?')) return
+  const ok = await openConfirmModal({
+    title: t('income.confirmDelete.title'),
+    message: t('income.confirmDelete.body'),
+    confirmLabel: t('common.delete'),
+    cancelLabel: t('common.cancel'),
+  })
+  if (!ok) return
 
   try {
     await deleteIncome(incomeId)
@@ -148,6 +160,7 @@ async function removeIncome(incomeId: number) {
       resetIncomeForm()
     }
     await loadIncomeData()
+    void cashFlowStore.refresh()
   } catch {
     /* Errors shown via global toast from apiFetch */
   }

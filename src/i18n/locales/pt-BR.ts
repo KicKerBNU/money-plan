@@ -78,6 +78,8 @@ export default {
     save: 'Salvar',
     delete: 'Excluir',
     cancel: 'Cancelar',
+    close: 'Fechar',
+    saving: 'Salvando…',
   },
   toast: {
     saveSuccess: 'Salvo com sucesso.',
@@ -124,6 +126,7 @@ export default {
     me: 'Eu',
     cashFlow: 'Fluxo do mês',
     logout: 'Sair',
+    settingsMenu: 'Configurações e conta',
   },
   income: {
     title: 'Receitas',
@@ -144,6 +147,10 @@ export default {
       note: 'Observação',
       notePlaceholder: 'Observação (ex: Freela, reembolso)',
       submit: 'Adicionar receita',
+    },
+    confirmDelete: {
+      title: 'Excluir receita?',
+      body: 'Este lançamento será removido. Esta ação não pode ser desfeita.',
     },
   },
   expenses: {
@@ -215,6 +222,14 @@ export default {
       editCategory: 'Renomear categoria',
       accountNameLabel: 'Nome da conta',
       categoryNameLabel: 'Nome da categoria',
+    },
+    confirmDelete: {
+      expenseTitle: 'Excluir despesa?',
+      expenseBody: 'Esta despesa será removida. Esta ação não pode ser desfeita.',
+      accountTitle: 'Excluir conta?',
+      accountBody: 'A conta só será excluída se não houver despesas vinculadas a ela.',
+      categoryTitle: 'Excluir categoria?',
+      categoryBody: 'A categoria só será excluída se não houver despesas vinculadas a ela.',
     },
   },
   stats: {

@@ -55,8 +55,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 .toast-enter-active,
 .toast-leave-active {
   transition:
-    opacity 220ms ease,
-    transform 220ms ease;
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
 .toast-enter-from,
@@ -66,6 +66,6 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 }
 
 .toast-move {
-  transition: transform 240ms ease;
+  transition: transform 180ms ease;
 }
 </style>

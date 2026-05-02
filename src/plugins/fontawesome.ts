@@ -34,6 +34,7 @@ import {
   faGlobe,
   faIdCard,
   faShirt,
+  faSpinner,
   faSun,
   faTag,
   faTrashCan,
@@ -42,6 +43,7 @@ import {
   faUsers,
   faWallet,
   faWandMagicSparkles,
+  faXmark,
 } from '@fortawesome/free-solid-svg-icons'
 import type { App } from 'vue'
 
@@ -79,6 +81,7 @@ library.add(
   faGlobe,
   faIdCard,
   faShirt,
+  faSpinner,
   faSun,
   faTag,
   faTrashCan,
@@ -86,7 +89,8 @@ library.add(
   faUser,
   faUsers,
   faWallet,
-  faWandMagicSparkles
+  faWandMagicSparkles,
+  faXmark,
 )
 
 export function registerFontAwesome(app: App) {

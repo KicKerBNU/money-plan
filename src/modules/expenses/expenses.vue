@@ -19,12 +19,16 @@ import {
   updateCategory,
   updateExpense,
 } from './api/expenses.api'
+import { getDefaultAccountId } from '@/lib/defaultAccount'
 import { categoryIconForName } from '@/lib/categoryIcons'
+import { openConfirmModal } from '@/utils/confirmModal'
+import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 import type { Account, Category, Expense } from './domain/expenses.types'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
+const cashFlowStore = useCashFlowStore()
 const searchQuery = ref('')
 const selectedCategoryId = ref<'all' | number>('all')
 const selectedDateFrom = ref('')
@@ -59,6 +63,7 @@ const form = ref({
 const newAccountName = ref('')
 const newCategoryName = ref('')
 const editingExpenseId = ref<number | null>(null)
+const isExpenseSubmitting = ref(false)
 
 type RenameTarget =
   | { type: 'account'; id: number; initialBalance: number; previousName: string }
@@ -219,14 +224,40 @@ function isCatchAllOtherCategory(category: { name: string }): boolean {
   return category.name.localeCompare('Other', locale.value, { sensitivity: 'base' }) === 0
 }
 
-const sortedCategories = computed(() =>
-  [...categories.value].sort((a, b) => {
+/** Matches backend dedupe: same visible name (trim + locale-aware lower). */
+function categoryNameKey(name: string): string {
+  return name.trim().toLocaleLowerCase(locale.value)
+}
+
+/** When duplicate category rows share a name, use the lowest id (same keeper as migration v004). */
+function canonicalCategoryId(categoryId: number | null): number | null {
+  if (categoryId == null) return null
+  const row = categories.value.find((c) => c.id === categoryId)
+  if (!row) return categoryId
+  const key = categoryNameKey(row.name)
+  let bestId = row.id
+  for (const c of categories.value) {
+    if (categoryNameKey(c.name) !== key) continue
+    if (c.id < bestId) bestId = c.id
+  }
+  return bestId
+}
+
+const sortedCategories = computed(() => {
+  const byKey = new Map<string, Category>()
+  for (const c of categories.value) {
+    const key = categoryNameKey(c.name)
+    const prev = byKey.get(key)
+    if (!prev || c.id < prev.id) byKey.set(key, c)
+  }
+  const deduped = [...byKey.values()]
+  return deduped.sort((a, b) => {
     const aLast = isCatchAllOtherCategory(a) ? 1 : 0
     const bLast = isCatchAllOtherCategory(b) ? 1 : 0
     if (aLast !== bLast) return aLast - bLast
     return a.name.localeCompare(b.name, locale.value, { sensitivity: 'base' })
   })
-)
+})
 
 const MAX_CATEGORY_FILTER_CHIPS = 4
 
@@ -430,7 +461,7 @@ async function loadExpensesData() {
       const categoriesData = categoriesResult.value
       categories.value = categoriesData
       if (!form.value.categoryId && categoriesData.length > 0) {
-        form.value.categoryId = categoriesData[0].id
+        form.value.categoryId = sortedCategories.value[0]?.id ?? categoriesData[0].id
       }
     } else {
       failures.push(
@@ -445,7 +476,8 @@ async function loadExpensesData() {
       const accountsData = accountsResult.value
       accounts.value = accountsData
       if (!form.value.accountId && accountsData.length > 0) {
-        form.value.accountId = accountsData[0].id
+        const id = getDefaultAccountId(accountsData)
+        if (id !== undefined) form.value.accountId = id
       }
     } else {
       failures.push(
@@ -464,17 +496,22 @@ async function loadExpensesData() {
 }
 
 async function submitExpense() {
+  if (isExpenseSubmitting.value) return
   if (!form.value.amount || !form.value.categoryId || !form.value.accountId) return
 
   const amount = Number(form.value.amount)
   if (!Number.isFinite(amount) || amount <= 0) return
 
+  isExpenseSubmitting.value = true
   try {
+    const categoryId = canonicalCategoryId(form.value.categoryId)
+    if (categoryId == null) return
+
     if (editingExpenseId.value) {
       await updateExpense(editingExpenseId.value, {
         date: form.value.date,
         amount,
-        categoryId: form.value.categoryId,
+        categoryId,
         accountId: form.value.accountId,
         note: form.value.note.trim() || undefined,
       })
@@ -482,16 +519,19 @@ async function submitExpense() {
       await createExpense({
         date: form.value.date,
         amount,
-        categoryId: form.value.categoryId,
+        categoryId,
         accountId: form.value.accountId,
         note: form.value.note.trim() || undefined,
       })
     }
 
-    await loadExpensesData()
     resetExpenseForm()
+    void loadExpensesData()
+    void cashFlowStore.refresh()
   } catch {
     /* Errors shown via global toast from apiFetch */
+  } finally {
+    isExpenseSubmitting.value = false
   }
 }
 
@@ -522,11 +562,12 @@ function resetExpenseForm() {
   form.value.date = toInputDate(new Date())
   form.value.amount = ''
   form.value.note = ''
-  if (categories.value.length > 0) {
-    form.value.categoryId = categories.value[0].id
+  if (sortedCategories.value.length > 0) {
+    form.value.categoryId = sortedCategories.value[0].id
   }
-  if (accounts.value.length > 0) {
-    form.value.accountId = accounts.value[0].id
+  const defaultAccountId = getDefaultAccountId(accounts.value)
+  if (defaultAccountId !== undefined) {
+    form.value.accountId = defaultAccountId
   }
   isExpenseModalOpen.value = false
 }
@@ -536,11 +577,12 @@ function openNewExpenseModal() {
   form.value.date = toInputDate(new Date())
   form.value.amount = ''
   form.value.note = ''
-  if (categories.value.length > 0) {
-    form.value.categoryId = categories.value[0].id
+  if (sortedCategories.value.length > 0) {
+    form.value.categoryId = sortedCategories.value[0].id
   }
-  if (accounts.value.length > 0) {
-    form.value.accountId = accounts.value[0].id
+  const defaultAccountId = getDefaultAccountId(accounts.value)
+  if (defaultAccountId !== undefined) {
+    form.value.accountId = defaultAccountId
   }
   isExpenseModalOpen.value = true
 }
@@ -554,6 +596,7 @@ function consumeNewExpenseQuery() {
 }
 
 function closeExpenseModal() {
+  if (isExpenseSubmitting.value) return
   resetExpenseForm()
 }
 
@@ -561,14 +604,20 @@ function startEditExpense(expense: Expense) {
   editingExpenseId.value = expense.id
   form.value.date = expense.date
   form.value.amount = String(expense.amount)
-  form.value.categoryId = expense.categoryId
+  form.value.categoryId = canonicalCategoryId(expense.categoryId)
   form.value.accountId = expense.accountId
   form.value.note = expense.note ?? ''
   isExpenseModalOpen.value = true
 }
 
 async function removeExpense(expenseId: number) {
-  if (!window.confirm('Delete this expense?')) return
+  const ok = await openConfirmModal({
+    title: t('expenses.confirmDelete.expenseTitle'),
+    message: t('expenses.confirmDelete.expenseBody'),
+    confirmLabel: t('common.delete'),
+    cancelLabel: t('common.cancel'),
+  })
+  if (!ok) return
 
   try {
     await deleteExpense(expenseId)
@@ -576,6 +625,7 @@ async function removeExpense(expenseId: number) {
       resetExpenseForm()
     }
     await loadExpensesData()
+    void cashFlowStore.refresh()
   } catch {
     /* Errors shown via global toast from apiFetch */
   }
@@ -635,7 +685,13 @@ async function submitRenameModal() {
 }
 
 async function removeAccount(accountId: number) {
-  if (!window.confirm('Delete this account?')) return
+  const ok = await openConfirmModal({
+    title: t('expenses.confirmDelete.accountTitle'),
+    message: t('expenses.confirmDelete.accountBody'),
+    confirmLabel: t('common.delete'),
+    cancelLabel: t('common.cancel'),
+  })
+  if (!ok) return
 
   try {
     await deleteAccount(accountId)
@@ -646,7 +702,13 @@ async function removeAccount(accountId: number) {
 }
 
 async function removeCategory(categoryId: number) {
-  if (!window.confirm('Delete this category?')) return
+  const ok = await openConfirmModal({
+    title: t('expenses.confirmDelete.categoryTitle'),
+    message: t('expenses.confirmDelete.categoryBody'),
+    confirmLabel: t('common.delete'),
+    cancelLabel: t('common.cancel'),
+  })
+  if (!ok) return
 
   try {
     await deleteCategory(categoryId)
@@ -664,6 +726,16 @@ onMounted(() => {
 watch(
   () => route.query.new,
   () => consumeNewExpenseQuery()
+)
+
+/** Merge duplicate category ids in the expense modal so chips match selection (until DB migration runs). */
+watch(
+  () => categories.value.map((c) => `${c.id}:${c.name}`).join('|'),
+  () => {
+    if (!isExpenseModalOpen.value || form.value.categoryId == null) return
+    const canon = canonicalCategoryId(form.value.categoryId)
+    if (canon !== form.value.categoryId) form.value.categoryId = canon
+  }
 )
 </script>
 
@@ -988,7 +1060,7 @@ watch(
             </div>
 
           <aside class="hidden min-h-0 w-full max-w-[18.5rem] shrink-0 lg:flex lg:flex-col lg:gap-5 xl:h-full xl:min-h-0">
-            <section class="finance-card flex min-h-0 flex-col overflow-hidden rounded-2xl xl:flex-1">
+            <section class="finance-card flex min-h-0 flex-col overflow-hidden rounded-2xl lg:min-h-[min(52vh,26rem)] lg:flex-[3]">
               <div class="shrink-0 px-4 pb-2 pt-4">
                 <h2 class="theme-muted text-xs font-black uppercase tracking-wide">
                   {{ t('expenses.panels.byCategory') }}
@@ -1025,7 +1097,7 @@ watch(
                     <div class="h-2 rounded-full bg-[var(--color-border)]" style="width: 74%" />
                   </div>
                 </div>
-                <div v-else class="min-h-0 flex-1 space-y-3.5 overflow-y-auto pr-0.5">
+                <div v-else class="min-h-0 flex-1 space-y-3.5 overflow-y-auto overflow-x-hidden pr-0.5 [scrollbar-gutter:stable]">
                   <div v-for="(category, index) in categoryTotals" :key="category.name">
                     <div class="mb-1 flex justify-between text-sm">
                       <span class="flex items-center gap-2">
@@ -1056,7 +1128,7 @@ watch(
               </div>
             </section>
 
-            <section class="finance-card flex min-h-0 flex-col rounded-2xl p-4 xl:flex-1">
+            <section class="finance-card flex min-h-0 flex-col rounded-2xl p-4 lg:flex-[2]">
               <h2 class="theme-muted shrink-0 text-xs font-black uppercase tracking-wide">
                 {{ t('expenses.panels.byAccount') }}
               </h2>
@@ -1290,10 +1362,25 @@ watch(
       <div
         v-if="isTripRangeModalOpen"
         class="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="trip-range-modal-title"
         @click.self="closeTripRangeModal"
       >
         <div class="finance-card w-full max-w-md rounded-2xl p-5">
-          <h2 class="text-lg font-black">{{ t('expenses.filters.tripWeekModalTitle') }}</h2>
+          <div class="flex items-start justify-between gap-3">
+            <h2 id="trip-range-modal-title" class="min-w-0 flex-1 text-lg font-black">
+              {{ t('expenses.filters.tripWeekModalTitle') }}
+            </h2>
+            <button
+              type="button"
+              class="theme-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)]"
+              :aria-label="t('common.close')"
+              @click="closeTripRangeModal"
+            >
+              <FontAwesomeIcon icon="xmark" />
+            </button>
+          </div>
           <p class="theme-muted mt-1 text-sm">{{ t('expenses.filters.tripWeekModalDescription') }}</p>
 
           <div class="mt-4 grid gap-3">
@@ -1337,12 +1424,23 @@ watch(
         role="dialog"
         aria-modal="true"
         aria-labelledby="expense-modal-title"
-        @click.self="closeExpenseModal"
+        @click.self="!isExpenseSubmitting && closeExpenseModal()"
       >
         <div class="finance-card max-h-[min(90vh,44rem)] w-full max-w-md overflow-y-auto rounded-2xl p-5 shadow-xl">
-          <h2 id="expense-modal-title" class="text-lg font-black">{{ expenseModalTitle }}</h2>
+          <div class="flex items-start justify-between gap-3">
+            <h2 id="expense-modal-title" class="min-w-0 flex-1 text-lg font-black">{{ expenseModalTitle }}</h2>
+            <button
+              type="button"
+              class="theme-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)] disabled:pointer-events-none disabled:opacity-40"
+              :aria-label="t('common.close')"
+              :disabled="isExpenseSubmitting"
+              @click="closeExpenseModal"
+            >
+              <FontAwesomeIcon icon="xmark" />
+            </button>
+          </div>
           <form class="mt-4 grid gap-3" @submit.prevent="submitExpense">
-            <div class="grid gap-3 sm:grid-cols-2">
+            <fieldset class="grid gap-3 border-0 p-0 sm:grid-cols-2" :disabled="isExpenseSubmitting">
               <label class="text-sm font-semibold">
                 {{ t('expenses.form.date') }}
                 <input v-model="form.date" type="date" class="theme-input mt-1 w-full rounded-xl p-3" required />
@@ -1358,12 +1456,10 @@ watch(
                   required
                 />
               </label>
-            </div>
-            <fieldset class="min-w-0 border-0 p-0">
+            </fieldset>
+            <fieldset class="min-w-0 border-0 p-0" :disabled="isExpenseSubmitting">
               <legend class="text-sm font-semibold">{{ t('expenses.form.category') }}</legend>
-              <div
-                class="theme-border mt-2 flex max-h-[11rem] flex-wrap gap-2 overflow-y-auto rounded-xl border p-2"
-              >
+              <div class="theme-border mt-2 flex flex-wrap gap-2 rounded-xl border p-2">
                 <button
                   v-for="category in sortedCategories"
                   :key="category.id"
@@ -1380,24 +1476,43 @@ watch(
                 </button>
               </div>
             </fieldset>
-            <label class="text-sm font-semibold">
-              {{ t('expenses.form.account') }}
-              <select v-model="form.accountId" class="theme-input mt-1 w-full rounded-xl p-3" required>
-                <option v-for="account in accounts" :key="account.id" :value="account.id">
-                  {{ account.name }}
-                </option>
-              </select>
-            </label>
-            <label class="text-sm font-semibold">
-              {{ t('expenses.form.note') }}
-              <input v-model="form.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
-            </label>
+            <fieldset class="border-0 p-0" :disabled="isExpenseSubmitting">
+              <label class="text-sm font-semibold">
+                {{ t('expenses.form.account') }}
+                <select v-model="form.accountId" class="theme-input mt-1 w-full rounded-xl p-3" required>
+                  <option v-for="account in accounts" :key="account.id" :value="account.id">
+                    {{ account.name }}
+                  </option>
+                </select>
+              </label>
+              <label class="mt-3 block text-sm font-semibold">
+                {{ t('expenses.form.note') }}
+                <input v-model="form.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
+              </label>
+            </fieldset>
             <div class="flex flex-wrap gap-2 pt-1">
-              <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 font-bold" @click="closeExpenseModal">
+              <button
+                type="button"
+                class="theme-button-secondary rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-50"
+                :disabled="isExpenseSubmitting"
+                @click="closeExpenseModal"
+              >
                 {{ t('common.cancel') }}
               </button>
-              <button type="submit" class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-bold">
-                {{ editingExpenseId ? t('common.save') : t('expenses.form.submit') }}
+              <button
+                type="submit"
+                class="theme-button-primary flex min-w-[8rem] flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-60"
+                :disabled="isExpenseSubmitting"
+                :aria-busy="isExpenseSubmitting"
+              >
+                <FontAwesomeIcon v-if="isExpenseSubmitting" icon="spinner" class="h-4 w-4 shrink-0 animate-spin" />
+                {{
+                  isExpenseSubmitting
+                    ? t('common.saving')
+                    : editingExpenseId
+                      ? t('common.save')
+                      : t('expenses.form.submit')
+                }}
               </button>
             </div>
           </form>
@@ -1413,7 +1528,17 @@ watch(
         @click.self="closeRenameModal"
       >
         <div class="finance-card w-full max-w-md rounded-2xl p-5 shadow-xl">
-          <h2 id="rename-modal-title" class="text-lg font-black">{{ renameModalTitle }}</h2>
+          <div class="flex items-start justify-between gap-3">
+            <h2 id="rename-modal-title" class="min-w-0 flex-1 text-lg font-black">{{ renameModalTitle }}</h2>
+            <button
+              type="button"
+              class="theme-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)]"
+              :aria-label="t('common.close')"
+              @click="closeRenameModal"
+            >
+              <FontAwesomeIcon icon="xmark" />
+            </button>
+          </div>
           <form class="mt-4 grid gap-3" @submit.prevent="submitRenameModal">
             <label class="text-sm font-semibold">
               {{ renameModalNameLabel }}

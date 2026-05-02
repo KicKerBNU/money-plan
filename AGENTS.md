@@ -18,7 +18,22 @@ Vue 3 frontend for Money Plan, a personal finance app for tracking daily expense
 - FontAwesome 7 (registered globally as `<FontAwesomeIcon>`)
 - Storybook 10
 - Firebase Auth
-- Netlify deployment
+- Netlify — production via GitHub-linked continuous deployment (details below)
+
+## Netlify
+
+**Production deploys:** Link the repo in Netlify (**Import from Git**). Netlify’s Git integration triggers a **production deploy on every push** to the configured **production branch** (commonly `master`). **GitHub Actions are not required** for that workflow unless you add them separately.
+
+**Monorepo:** If Netlify is attached at the repo root (parent of `money-plan-frontend`), set the Netlify **base directory** to `money-plan-frontend`.
+
+**Config:** `netlify.toml` in this package defines build (`npm run build`), publish dir (`dist`), and SPA redirects.
+
+**Manual CLI deploy** (optional):
+
+```bash
+npm run build
+npx netlify deploy --prod --dir=dist
+```
 
 ## Folder Structure
 
@@ -89,17 +104,8 @@ npx netlify deploy --prod --dir=dist
 
 ## Backend
 
-Local backend default URL is `http://localhost:3000`. Override with `VITE_API_BASE_URL`.
-
-## Netlify
-
-The frontend is configured with `netlify.toml`. Production deploy command:
-
-```bash
-npm run build
-npx netlify deploy --prod --dir=dist
-```
+Local backend default URL is `http://localhost:3000`. Override with `VITE_API_BASE_URL`. Persistence is PostgreSQL on **Supabase** (`DATABASE_URL` in the backend `.env`); see `money-plan-backend/README.md`. Workspace-level agent notes (including optional Supabase skills under `.agents/skills/`) are in the repo root **`AGENTS.md`**.
 
 ## UI conventions
 
-See `.cursor/rules/ui-interactions.mdc` (always applied in Cursor). Summary: enabled `<button>` elements use a pointer cursor (also enforced in global CSS); row/toolbar **Edit** and **Delete** are icon-only with `aria-label` and hover/focus tooltips, never visible text labels.
+See `.cursor/rules/ui-interactions.mdc` (always applied in Cursor). Summary: enabled `<button>` elements use a pointer cursor (also enforced in global CSS); row/toolbar **Edit** and **Delete** are icon-only with `aria-label` and hover/focus tooltips, never visible text labels; **modals** include a top-right **xmark** close button with `aria-label` `common.close`; **destructive actions** use `openConfirmModal()` + global **ConfirmModal**, not `window.confirm`.

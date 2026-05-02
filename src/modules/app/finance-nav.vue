@@ -1,28 +1,22 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useRoute, type RouteLocationRaw } from 'vue-router'
 import MoneyPlanMark from '@/modules/app/money-plan-mark.vue'
-import ThemeToggle from '@/modules/theme/theme-toggle.vue'
+import AppSettingsMenu from '@/modules/app/app-settings-menu.vue'
 import { formatMonthYear } from '@/lib/dateDisplay'
-import { fetchExpensesByPeriod } from '@/modules/expenses/api/expenses.api'
-import { fetchIncomesByPeriod } from '@/modules/income/api/income.api'
+import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 
 const { t, locale } = useI18n()
 const route = useRoute()
-
-function calendarYearMonth() {
-  const now = new Date()
-  return { year: now.getFullYear(), month: now.getMonth() + 1 }
-}
+const cashFlowStore = useCashFlowStore()
+const { cashFlowNet, loading: cashFlowLoading } = storeToRefs(cashFlowStore)
 
 const navMonthLabel = computed(() => {
-  const { year, month } = calendarYearMonth()
+  const { year, month } = cashFlowStore.calendarYearMonth()
   return formatMonthYear(locale.value, year, month)
 })
-
-const cashFlowNet = ref<number | null>(null)
-const cashFlowLoading = ref(true)
 
 function formatCashFlowMoney(value: number) {
   const absoluteValue = Math.abs(value)
@@ -36,32 +30,9 @@ function formatCashFlowMoney(value: number) {
   return `${value >= 0 ? '+' : '-'}${formatted}`
 }
 
-async function loadNavCashFlow() {
-  cashFlowLoading.value = true
-  const { year, month } = calendarYearMonth()
-  try {
-    const [expenses, incomes] = await Promise.all([
-      fetchExpensesByPeriod(year, month),
-      fetchIncomesByPeriod(year, month),
-    ])
-    const spent = expenses.reduce((sum, expense) => sum + expense.amount, 0)
-    const earned = incomes.reduce((sum, income) => sum + income.amount, 0)
-    cashFlowNet.value = earned - spent
-  } catch {
-    cashFlowNet.value = null
-  } finally {
-    cashFlowLoading.value = false
-  }
-}
+onMounted(() => void cashFlowStore.refresh())
 
-onMounted(() => void loadNavCashFlow())
-
-watch(locale, () => void loadNavCashFlow())
-
-watch(
-  () => route.fullPath,
-  () => void loadNavCashFlow()
-)
+watch(locale, () => void cashFlowStore.refresh())
 
 interface NavItem {
   key: string
@@ -154,7 +125,7 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
   </aside>
 
   <div class="fixed right-4 top-4 z-30">
-    <ThemeToggle />
+    <AppSettingsMenu />
   </div>
 
   <nav
