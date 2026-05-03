@@ -1,3 +1,7 @@
+# Production builds need the Railway API origin (Vite inlines at build time):
+# Netlify → Environment variables → Production → VITE_API_BASE_URL=https://money-plan-backend-production.up.railway.app
+# (no trailing slash). See money-plan-frontend/.env.example and README.md.
+
 [build]
   command = "npm run build"
   publish = "dist"

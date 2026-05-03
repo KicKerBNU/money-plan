@@ -160,10 +160,14 @@ Use `yarn preview` when testing the production build on a phone (Firebase Auth e
 
 ## Backend Integration
 
-Base URL defaults to `http://localhost:3000`. Override:
+Base URL defaults to `http://localhost:3000` in development (`src/lib/api.ts`). For **production** (API on Railway), set **`VITE_API_BASE_URL`** to your Railway HTTPS origin (**no trailing slash**).
+
+**Netlify (recommended):** Site configuration → **Environment variables** → add **`VITE_API_BASE_URL`** for the **Production** context with value `https://money-plan-backend-production.up.railway.app`, then trigger a new deploy (the variable is baked in at `npm run build`).
+
+**Local `.env` files:** See **`.env.example`**. For a local production build against Railway, use **`.env.production.local`** (gitignored) with the same variable.
 
 ```bash
-VITE_API_BASE_URL=https://your-api.example.com
+VITE_API_BASE_URL=https://money-plan-backend-production.up.railway.app
 ```
 
 ### API surface used by the frontend
@@ -185,7 +189,7 @@ Keep backend and OpenAPI in sync; see `money-plan-backend/README.md` for full qu
 
 **Monorepo:** If the Netlify site is connected at the **repository root** (parent of this folder), set **Site configuration → Build settings → Base directory** to `money-plan-frontend` so builds run from this package.
 
-**Build settings** are defined in `netlify.toml` at the root of this package (`npm run build`, publish `dist`, SPA fallback to `/index.html`).
+**Build settings** are defined in `netlify.toml` at the root of this package (`npm run build`, publish `dist`, SPA fallback to `/index.html`). Ensure **`VITE_API_BASE_URL`** is set for Production so the built app calls Railway instead of localhost (see [Backend Integration](#backend-integration)).
 
 **Manual CLI deploy** (optional):
 

@@ -104,7 +104,7 @@ npx netlify deploy --prod --dir=dist
 
 ## Backend
 
-Local backend default URL is `http://localhost:3000`. Override with `VITE_API_BASE_URL`. Persistence is PostgreSQL on **Supabase** (`DATABASE_URL` in the backend `.env`); see `money-plan-backend/README.md`. Workspace-level agent notes (including optional Supabase skills under `.agents/skills/`) are in the repo root **`AGENTS.md`**.
+`src/lib/api.ts` uses **`VITE_API_BASE_URL`** with default **`http://localhost:3000`**. For **Netlify production**, set **`VITE_API_BASE_URL`** to **`https://money-plan-backend-production.up.railway.app`** (Environment variables → Production); redeploy so Vite bakes it into the build. See **`.env.example`** for local overrides / `.env.production.local`. Persistence is PostgreSQL on **Supabase** (`DATABASE_URL` in the backend `.env`); see `money-plan-backend/README.md`. Workspace overview: repo root **`AGENTS.md`**.
 
 ## UI conventions
 
