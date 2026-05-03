@@ -4,6 +4,8 @@ import { authRoutes } from '@/modules/auth/auth.routes'
 import { expensesRoutes } from '@/modules/expenses/expenses.routes'
 import { homeRoutes } from '@/modules/home/home.routes'
 import { incomeRoutes } from '@/modules/income/income.routes'
+import { accountsRoutes } from '@/modules/accounts/accounts.routes'
+import { overviewRoutes } from '@/modules/overview/overview.routes'
 import { statsRoutes } from '@/modules/stats/stats.routes'
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 
@@ -14,6 +16,8 @@ export const router = createRouter({
     ...authRoutes,
     ...incomeRoutes,
     ...expensesRoutes,
+    ...accountsRoutes,
+    ...overviewRoutes,
     ...statsRoutes,
     { path: '/app', redirect: '/app/expenses' },
   ],

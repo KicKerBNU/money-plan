@@ -44,19 +44,19 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { key: 'overview', label: 'appNav.overview', icon: 'chart-pie', to: '/app/expenses', disabled: true },
+  { key: 'overview', label: 'appNav.overview', icon: 'chart-pie', to: '/app/overview' },
   { key: 'expenses', label: 'appNav.expenses', icon: 'receipt', to: '/app/expenses' },
   { key: 'income', label: 'appNav.income', icon: 'arrow-trend-up', to: '/app/income' },
   { key: 'stats', label: 'appNav.stats', icon: 'chart-column', to: '/app/stats' },
-  { key: 'accounts', label: 'appNav.accounts', icon: 'building-columns', to: '/app/expenses', disabled: true },
+  { key: 'accounts', label: 'appNav.accounts', icon: 'building-columns', to: '/app/accounts' },
 ]
 
 const mobileNavItems: NavItem[] = [
+  navItems[0],
   navItems[1],
   navItems[2],
   { key: 'add', label: 'appNav.add', icon: 'plus', to: { path: '/app/expenses', query: { new: '1' } }, isAction: true },
   navItems[3],
-  { key: 'me', label: 'appNav.me', icon: 'user', to: '/app/expenses', disabled: true },
 ]
 
 function itemPath(to: RouteLocationRaw): string {

@@ -15,6 +15,12 @@ export async function fetchExpensesByPeriod(year: number, month: number) {
   return response.data
 }
 
+export async function fetchExpensesByDateRange(startDate: string, endDate: string) {
+  const q = new URLSearchParams({ startDate, endDate })
+  const response = await apiFetch<DataResponse<Expense[]>>(`/v1/expenses?${q.toString()}`)
+  return response.data
+}
+
 export async function fetchAccounts() {
   const response = await apiFetch<DataResponse<Account[]>>('/v1/accounts')
   return response.data
@@ -69,6 +75,14 @@ export async function updateAccount(accountId: number, payload: { name: string; 
   const response = await apiFetch<DataResponse<Account>>(`/v1/accounts/${accountId}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
+  })
+  return response.data
+}
+
+export async function setAccountDefault(accountId: number) {
+  const response = await apiFetch<DataResponse<Account>>(`/v1/accounts/${accountId}/default`, {
+    method: 'PATCH',
+    body: JSON.stringify({}),
   })
   return response.data
 }

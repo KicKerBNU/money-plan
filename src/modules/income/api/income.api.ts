@@ -15,6 +15,12 @@ export async function fetchIncomesByPeriod(year: number, month: number) {
   return response.data
 }
 
+export async function fetchIncomesByDateRange(startDate: string, endDate: string) {
+  const q = new URLSearchParams({ startDate, endDate })
+  const response = await apiFetch<DataResponse<IncomeEntry[]>>(`/v1/incomes?${q.toString()}`)
+  return response.data
+}
+
 export async function createIncome(payload: { date: string; amount: number; accountId: number; note?: string }) {
   const response = await apiFetch<DataResponse<IncomeEntry>>('/v1/incomes', {
     method: 'POST',

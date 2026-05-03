@@ -40,11 +40,13 @@ npx netlify deploy --prod --dir=dist
 ```text
 src/
 ├── modules/            # Feature modules (DDD)
+│   ├── accounts/       # Dedicated accounts screen (/app/accounts); API helpers in expenses.api
 │   ├── app/            # App navigation
 │   ├── auth/           # Login + auth store
 │   ├── expenses/       # Expenses UI/API/domain
 │   ├── home/           # Landing page
 │   ├── income/         # Income UI/API/domain
+│   ├── overview/       # Consolidated dashboard (/app/overview), period presets + chart
 │   ├── stats/          # Monthly stats UI/API/domain
 │   └── theme/          # Light/dark theme store + toggle
 ├── lib/
