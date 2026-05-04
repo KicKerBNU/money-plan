@@ -21,4 +21,6 @@ export interface Expense {
   accountId: number
   accountName: string
   note: string | null
+  /** Present after user reorders list for a month; drives API sort order with date fallback. */
+  manualSort?: number | null
 }

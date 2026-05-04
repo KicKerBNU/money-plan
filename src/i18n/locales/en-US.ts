@@ -161,6 +161,11 @@ export default {
     actions: {
       addExpense: 'Add expense',
     },
+    list: {
+      reorderHint:
+        'Drag the grip on each row to reorder this month’s expenses (clear search, category filters, and date range first). Order is saved automatically.',
+      dragHandleAria: 'Drag to reorder expense',
+    },
     filters: {
       all: 'All',
       range: 'Range',

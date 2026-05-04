@@ -15,6 +15,7 @@ import {
   fetchAccounts,
   fetchCategories,
   fetchExpensesByPeriod,
+  reorderExpensesForMonth,
   updateAccount,
   updateCategory,
   updateExpense,
@@ -143,6 +144,77 @@ const filteredExpenses = computed(() => {
     return matchesCategory && matchesDateFrom && matchesDateTo && matchesSearch
   })
 })
+
+/** Full month list with default filters — safe to persist manual order for `period`. */
+const expensesReorderEligible = computed(() => {
+  return (
+    !searchQuery.value.trim() &&
+    selectedCategoryId.value === 'all' &&
+    !selectedDateFrom.value &&
+    !selectedDateTo.value &&
+    filteredExpenses.value.length > 1
+  )
+})
+
+const dragExpenseFromIndex = ref<number | null>(null)
+const dragExpenseOverIndex = ref<number | null>(null)
+const isPersistingExpenseOrder = ref(false)
+
+function onExpenseDragStart(index: number, event: DragEvent) {
+  if (!expensesReorderEligible.value || isPersistingExpenseOrder.value) return
+  dragExpenseFromIndex.value = index
+  event.dataTransfer?.setData('text/plain', String(index))
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move'
+}
+
+function onExpenseDragEnd() {
+  dragExpenseFromIndex.value = null
+  dragExpenseOverIndex.value = null
+}
+
+function onExpenseDragOver(index: number, event: DragEvent) {
+  if (!expensesReorderEligible.value || isPersistingExpenseOrder.value) return
+  event.preventDefault()
+  if (event.dataTransfer) event.dataTransfer.dropEffect = 'move'
+  dragExpenseOverIndex.value = index
+}
+
+async function onExpenseDrop(targetIndex: number) {
+  const from = dragExpenseFromIndex.value
+  dragExpenseOverIndex.value = null
+  dragExpenseFromIndex.value = null
+
+  if (
+    from === null ||
+    from === targetIndex ||
+    !expensesReorderEligible.value ||
+    isPersistingExpenseOrder.value
+  ) {
+    return
+  }
+
+  const arr = [...filteredExpenses.value]
+  const [item] = arr.splice(from, 1)
+  arr.splice(targetIndex, 0, item)
+  const orderedIds = arr.map((e) => e.id)
+
+  const idToExpense = new Map(expenses.value.map((e) => [e.id, e]))
+  const snapshot = [...expenses.value]
+  const reordered = orderedIds.map((id) => idToExpense.get(id)).filter((row): row is Expense => row != null)
+  if (reordered.length !== orderedIds.length) return
+  expenses.value = reordered
+
+  isPersistingExpenseOrder.value = true
+  try {
+    expenses.value = await reorderExpensesForMonth(period.value.year, period.value.month, orderedIds)
+    void cashFlowStore.refresh()
+  } catch {
+    expenses.value = snapshot
+    await loadExpensesData()
+  } finally {
+    isPersistingExpenseOrder.value = false
+  }
+}
 
 const selectedRangeSpent = computed(() => {
   if (!selectedDateFrom.value && !selectedDateTo.value) return 0
@@ -420,6 +492,35 @@ function getDaysElapsedInMonth(year: number, month: number) {
   return isCurrentMonth ? now.getDate() : getDaysInMonth(year, month)
 }
 
+function expenseBelongsToCalendarMonth(dateStr: string, year: number, month: number): boolean {
+  const parts = dateStr.split('-').map(Number)
+  const [y, m] = parts
+  return parts.length >= 2 && Number.isFinite(y) && Number.isFinite(m) && y === year && m === month
+}
+
+function optimisticExpenseFromForm(previous: Expense, payload: {
+  date: string
+  amount: number
+  categoryId: number
+  accountId: number
+  note: string | null
+}) {
+  const category = categories.value.find((c) => c.id === payload.categoryId)
+  const account = accounts.value.find((a) => a.id === payload.accountId)
+
+  return {
+    id: previous.id,
+    date: payload.date,
+    amount: payload.amount,
+    categoryId: payload.categoryId,
+    categoryName: category?.name ?? previous.categoryName,
+    accountId: payload.accountId,
+    accountName: account?.name ?? previous.accountName,
+    note: payload.note,
+    manualSort: previous.manualSort,
+  }
+}
+
 async function loadExpensesData() {
   isLoading.value = true
   errorMessage.value = null
@@ -508,13 +609,57 @@ async function submitExpense() {
     if (categoryId == null) return
 
     if (editingExpenseId.value) {
-      await updateExpense(editingExpenseId.value, {
+      const expenseId = editingExpenseId.value
+      const trimmedNote = form.value.note.trim()
+      const payload = {
         date: form.value.date,
         amount,
         categoryId,
         accountId: form.value.accountId,
-        note: form.value.note.trim() || undefined,
-      })
+        note: trimmedNote || undefined,
+      }
+
+      const previous = expenses.value.find((e) => e.id === expenseId)
+      if (!previous) return
+
+      const snapshot = [...expenses.value]
+      const optimisticNote = trimmedNote === '' ? null : trimmedNote
+
+      const viewYear = period.value.year
+      const viewMonth = period.value.month
+
+      if (expenseBelongsToCalendarMonth(payload.date, viewYear, viewMonth)) {
+        const merged = optimisticExpenseFromForm(previous, {
+          ...payload,
+          note: optimisticNote,
+        })
+        expenses.value = expenses.value.map((e) => (e.id === expenseId ? merged : e))
+      } else {
+        expenses.value = expenses.value.filter((e) => e.id !== expenseId)
+      }
+
+      resetExpenseForm()
+
+      try {
+        const updated = await updateExpense(expenseId, payload)
+
+        if (expenseBelongsToCalendarMonth(updated.date, viewYear, viewMonth)) {
+          const i = expenses.value.findIndex((e) => e.id === updated.id)
+          if (i >= 0) {
+            const next = [...expenses.value]
+            next[i] = updated
+            expenses.value = next
+          } else {
+            void loadExpensesData()
+          }
+        } else {
+          expenses.value = expenses.value.filter((e) => e.id !== updated.id)
+        }
+        void cashFlowStore.refresh()
+      } catch {
+        /* Errors shown via global toast from apiFetch */
+        expenses.value = snapshot
+      }
     } else {
       await createExpense({
         date: form.value.date,
@@ -523,11 +668,11 @@ async function submitExpense() {
         accountId: form.value.accountId,
         note: form.value.note.trim() || undefined,
       })
-    }
 
-    resetExpenseForm()
-    void loadExpensesData()
-    void cashFlowStore.refresh()
+      resetExpenseForm()
+      void loadExpensesData()
+      void cashFlowStore.refresh()
+    }
   } catch {
     /* Errors shown via global toast from apiFetch */
   } finally {
@@ -619,15 +764,19 @@ async function removeExpense(expenseId: number) {
   })
   if (!ok) return
 
+  const snapshot = [...expenses.value]
+  expenses.value = expenses.value.filter((e) => e.id !== expenseId)
+
+  if (editingExpenseId.value === expenseId) {
+    resetExpenseForm()
+  }
+
   try {
     await deleteExpense(expenseId)
-    if (editingExpenseId.value === expenseId) {
-      resetExpenseForm()
-    }
-    await loadExpensesData()
     void cashFlowStore.refresh()
   } catch {
     /* Errors shown via global toast from apiFetch */
+    expenses.value = snapshot
   }
 }
 
@@ -913,11 +1062,41 @@ watch(
                   {{ t('expenses.emptyMonth.cta') }}
                 </button>
               </div>
-              <article
-                v-for="expense in filteredExpenses"
-                :key="expense.id"
-                class="expense-row grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 px-4 py-3.5"
+              <p
+                v-if="!isLoading && !errorMessage && expenses.length && expensesReorderEligible"
+                class="theme-muted theme-border hidden border-b px-4 py-2 text-xs leading-relaxed lg:block"
               >
+                {{ t('expenses.list.reorderHint') }}
+              </p>
+              <article
+                v-for="(expense, index) in filteredExpenses"
+                :key="expense.id"
+                class="expense-row grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 px-4 py-3.5 transition-[opacity,box-shadow] lg:grid-cols-[auto_auto_1fr_auto_auto]"
+                :class="{
+                  'opacity-55': dragExpenseFromIndex === index,
+                  'outline outline-2 outline-offset-2':
+                    dragExpenseOverIndex === index &&
+                    dragExpenseFromIndex !== null &&
+                    dragExpenseFromIndex !== index,
+                }"
+                style="outline-color: var(--color-primary)"
+                @dragover="onExpenseDragOver(index, $event)"
+                @drop.prevent="onExpenseDrop(index)"
+              >
+                <span
+                  class="hidden touch-none shrink-0 cursor-grab items-center justify-center rounded-lg px-1 py-2 active:cursor-grabbing lg:flex"
+                  :class="{
+                    'pointer-events-none opacity-40': !expensesReorderEligible || isPersistingExpenseOrder,
+                  }"
+                  role="button"
+                  tabindex="0"
+                  :draggable="expensesReorderEligible && !isPersistingExpenseOrder"
+                  :aria-label="t('expenses.list.dragHandleAria')"
+                  @dragstart.stop="onExpenseDragStart(index, $event)"
+                  @dragend.stop="onExpenseDragEnd()"
+                >
+                  <FontAwesomeIcon icon="grip-vertical" class="theme-muted text-sm" />
+                </span>
                 <div
                   class="flex h-9 w-9 items-center justify-center rounded-xl"
                   :style="{ backgroundColor: `${getExpenseColor(expense)}18`, color: getExpenseColor(expense) }"

@@ -161,6 +161,11 @@ export default {
     actions: {
       addExpense: 'Adicionar despesa',
     },
+    list: {
+      reorderHint:
+        'Arraste o ícone em cada linha para reordenar as despesas do mês (limpe busca, filtros de categoria e intervalo de datas primeiro). A ordem é salva automaticamente.',
+      dragHandleAria: 'Arrastar para reordenar despesa',
+    },
     filters: {
       all: 'Todos',
       range: 'Periodo',

@@ -85,6 +85,10 @@ src/
 - Use `src/modules/theme` and semantic theme classes for light/dark styling.
 - Keep user-facing text in both `en-US.ts` and `pt-BR.ts`.
 
+## Mutations and server sync
+
+Use **optimistic updates** for user-driven mutations whenever the predicted UI state is clear (creates, updates, deletes, reorder, toggles): apply the change to local/Pinia state **immediately**, then call the API; on success, reconcile with the response if needed (or refresh ancillary data); on failure, **revert** the optimistic state and refetch if necessary so the UI matches the server. Avoid waiting on the network before updating lists and summaries when the UX would feel laggy — this is the default expectation for Money Plan frontend work.
+
 ## Agent Guidelines
 
 - Prefer minimal, targeted edits over broad refactors.

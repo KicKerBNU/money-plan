@@ -15,6 +15,14 @@ export async function fetchExpensesByPeriod(year: number, month: number) {
   return response.data
 }
 
+export async function reorderExpensesForMonth(year: number, month: number, orderedIds: number[]) {
+  const response = await apiFetch<DataResponse<Expense[]>>('/v1/expenses/order', {
+    method: 'PATCH',
+    body: JSON.stringify({ year, month, orderedIds }),
+  })
+  return response.data
+}
+
 export async function fetchExpensesByDateRange(startDate: string, endDate: string) {
   const q = new URLSearchParams({ startDate, endDate })
   const response = await apiFetch<DataResponse<Expense[]>>(`/v1/expenses?${q.toString()}`)
