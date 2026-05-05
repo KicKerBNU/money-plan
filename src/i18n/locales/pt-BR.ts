@@ -1,10 +1,10 @@
 export default {
   home: {
     badge: 'Money Plan',
-    headline: 'Controle seu dinheiro com',
-    headlineHighlight: 'clareza e confiança',
+    headline: 'Fale com seu dinheiro. ',
+    headlineHighlight: 'Ele finalmente tem as respostas',
     description:
-      'Registre suas despesas diárias, organize cada categoria e entenda exatamente para onde vai seu orçamento mensal em um painel seguro.',
+      'Centralize receitas, despesas e contas em um painel seguro—e converse com o assistente de despesas. Ele responde em linguagem simples usando os seus próprios lançamentos: totais, tendências e comparativos, para você enxergar para onde vai o seu dinheiro.',
     trustNote: 'Privado por padrão. Seus registros ficam vinculados à sua conta segura.',
     cta: {
       login: 'Entrar e começar',
@@ -127,7 +127,7 @@ export default {
     cashFlow: 'Fluxo do mês',
     logout: 'Sair',
     settingsMenu: 'Configurações e conta',
-    chatbot: 'Chat despesas',
+    chatbot: 'Chatbot',
   },
   chatbot: {
     title: 'Assistente de despesas',

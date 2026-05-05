@@ -252,8 +252,6 @@ const selectedRangeLabel = computed(() => {
   return ''
 })
 
-const mobileExpenses = computed(() => filteredExpenses.value.slice(0, 4))
-
 const categoryTotals = computed(() => {
   const totals = new Map<number, { categoryId: number; name: string; total: number }>()
   for (const expense of expenses.value) {
@@ -1168,7 +1166,7 @@ watch(
               {{ errorMessage }}
             </p>
             <template v-else>
-            <article v-for="expense in mobileExpenses" :key="expense.id" class="mobile-entry-card rounded-xl p-3">
+            <article v-for="expense in filteredExpenses" :key="expense.id" class="mobile-entry-card rounded-xl p-3">
               <div class="mb-2 flex items-center justify-between">
                 <span class="text-xs font-black">{{ expense.dayLabel }}</span>
                 <span class="theme-muted text-xs">{{ formatMoney(expense.amount) }}</span>
@@ -1243,7 +1241,7 @@ watch(
                 {{ t('expenses.emptyMonth.cta') }}
               </button>
             </div>
-            <p v-if="!!expenses.length && !mobileExpenses.length" class="theme-muted px-2 text-center text-xs">
+            <p v-if="!!expenses.length && !filteredExpenses.length" class="theme-muted px-2 text-center text-xs">
               {{ t('expenses.empty') }}
             </p>
             </template>

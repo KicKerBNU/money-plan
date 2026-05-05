@@ -1,11 +1,11 @@
 export default {
   home: {
     badge: 'Money Plan',
-    headline: 'Control your money with',
-    headlineHighlight: 'clarity and confidence',
+    headline: 'Talk to your money. ',
+    headlineHighlight: 'It finally has the answers',
     description:
-      'Track daily expenses, organize every category, and understand exactly where your monthly budget goes in one secure dashboard.',
-    trustNote: 'Private by default. Your records are linked to your secure account.',
+      'Track expenses, income, and accounts in one place, then chat with your built-in expense assistant. It answers in plain language from your actual data: totals, trends, and comparisons, so you see where your money really goes.',
+    trustNote: 'Private by default. Your records stay linked to your secure account.',
     cta: {
       login: 'Login and start tracking',
       howItWorks: 'How it works',
@@ -127,7 +127,7 @@ export default {
     cashFlow: 'Cash flow',
     logout: 'Logout',
     settingsMenu: 'Settings and account',
-    chatbot: 'Expense chat',
+    chatbot: 'Chatbot',
   },
   chatbot: {
     title: 'Expense assistant',

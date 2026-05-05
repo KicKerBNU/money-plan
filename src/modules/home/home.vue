@@ -63,7 +63,7 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
           </RouterLink>
           <a
             href="#how-it-works"
-            class="theme-button-secondary rounded-xl px-6 py-3 font-semibold"
+            class="theme-button-secondary hidden rounded-xl px-6 py-3 font-semibold lg:inline-flex"
           >
             {{ t('home.cta.howItWorks') }}
           </a>

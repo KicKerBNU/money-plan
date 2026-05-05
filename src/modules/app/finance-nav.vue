@@ -52,19 +52,27 @@ const navItems: NavItem[] = [
   { key: 'accounts', label: 'appNav.accounts', icon: 'building-columns', to: '/app/accounts' },
 ]
 
+function navByKey(key: NavItem['key']): NavItem {
+  const item = navItems.find((x) => x.key === key)
+  if (!item) throw new Error(`Missing nav item: ${key}`)
+  return item
+}
+
+const addExpenseAction: NavItem = {
+  key: 'add',
+  label: 'appNav.add',
+  icon: 'plus',
+  to: { path: '/app/expenses', query: { new: '1' } },
+  isAction: true,
+}
+
+/** Fewer tabs on small screens; add action is the third of five (center). */
 const mobileNavItems: NavItem[] = [
-  navItems[0],
-  navItems[1],
-  {
-    key: 'add',
-    label: 'appNav.add',
-    icon: 'plus',
-    to: { path: '/app/expenses', query: { new: '1' } },
-    isAction: true,
-  },
-  navItems[3],
-  navItems[4],
-  navItems[2],
+  navByKey('expenses'),
+  navByKey('stats'),
+  addExpenseAction,
+  navByKey('chatbot'),
+  navByKey('accounts'),
 ]
 
 function itemPath(to: RouteLocationRaw): string {
@@ -137,7 +145,7 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
   </div>
 
   <nav
-    class="mobile-bottom-nav theme-card fixed inset-x-4 bottom-4 z-30 grid grid-cols-6 items-center rounded-[1.6rem] px-3 py-2 shadow-2xl lg:hidden"
+    class="mobile-bottom-nav theme-card fixed inset-x-4 bottom-4 z-30 grid grid-cols-5 items-center rounded-[1.6rem] px-3 py-2 shadow-2xl lg:hidden"
   >
     <RouterLink
       v-for="item in mobileNavItems"
