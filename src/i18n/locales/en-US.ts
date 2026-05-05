@@ -127,6 +127,21 @@ export default {
     cashFlow: 'Cash flow',
     logout: 'Logout',
     settingsMenu: 'Settings and account',
+    chatbot: 'Expense chat',
+  },
+  chatbot: {
+    title: 'Expense assistant',
+    subtitle:
+      'Ask about your spending in your own words—we’ll help with totals, comparisons, and spotting patterns in the expenses you’ve already saved.',
+    empty: 'Examples: “How much did I spend on 2026-05-02?” · “Sum for last month” · “Top spending categories this year”.',
+    you: 'You',
+    assistant: 'Assistant',
+    placeholder: 'Ask about your expenses…',
+    send: 'Send',
+    sending: 'Thinking…',
+    clear: 'New chat',
+    inputLabel: 'Your message',
+    loadingLive: 'Assistant is preparing a reply',
   },
   income: {
     title: 'Income',

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { categoryIconForName } from '@/lib/categoryIcons'
 import { formatMonthYear } from '@/lib/dateDisplay'
 import FinanceNav from '@/modules/app/finance-nav.vue'
+import StatsSkeleton from '@/modules/stats/StatsSkeleton.vue'
 import { fetchMonthlyExpensesStats } from './api/stats.api'
 import type { MonthlyCategoryTotal } from './domain/stats.types'
 
@@ -68,6 +69,10 @@ function lineWidth(percent: number) {
 async function loadStats() {
   isLoading.value = true
   errorMessage.value = null
+  await nextTick()
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve())
+  })
 
   try {
     const response = await fetchMonthlyExpensesStats(period.value.year, period.value.month)
@@ -89,8 +94,8 @@ onMounted(() => {
   <div class="app-shell">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen">
-      <div class="mx-auto max-w-7xl">
+    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+      <div class="app-finance-page-inner">
         <header class="mobile-page-header flex items-start justify-between gap-4 pt-9 lg:pt-0">
           <div>
             <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
@@ -104,23 +109,32 @@ onMounted(() => {
             </p>
           </div>
 
-          <div class="stats-total hidden text-right lg:block">
+          <div v-if="isLoading" class="stats-total hidden text-right lg:block" aria-hidden="true">
+            <div class="finance-skeleton-block finance-skeleton-pulse ml-auto h-7 w-[7.5rem] rounded-lg" />
+            <div class="finance-skeleton-block finance-skeleton-pulse mt-2 ml-auto h-3 w-24 rounded-md" />
+          </div>
+          <div v-else class="stats-total hidden text-right lg:block">
             <strong class="block text-xl font-black">{{ formatMoney(totalSpent) }}</strong>
             <span class="theme-muted text-xs">{{ t('stats.totalCaption', { count: categories.length }) }}</span>
           </div>
         </header>
 
-        <div class="stats-total absolute right-10 top-20 text-right lg:hidden">
+        <div v-if="isLoading" class="stats-total absolute right-10 top-20 text-right lg:hidden" aria-hidden="true">
+          <div class="finance-skeleton-block finance-skeleton-pulse ml-auto h-7 w-[6.5rem] rounded-lg" />
+          <div class="finance-skeleton-block finance-skeleton-pulse mt-2 ml-auto h-3 w-20 rounded-md" />
+        </div>
+        <div v-else class="stats-total absolute right-10 top-20 text-right lg:hidden">
           <strong class="block text-xl font-black">{{ formatMoney(totalSpent) }}</strong>
           <span class="theme-muted text-xs">{{ t('stats.mobileTotalCaption', { count: categories.length }) }}</span>
         </div>
 
+        <StatsSkeleton v-if="isLoading" />
+        <template v-else>
         <section class="stats-card mt-5 rounded-2xl p-4 lg:mt-6 lg:p-8">
-          <p v-if="isLoading" class="theme-muted text-sm">{{ t('common.loading') }}</p>
-          <p v-else-if="errorMessage" class="text-sm" style="color: var(--color-danger)">
+          <p v-if="errorMessage" class="text-sm" style="color: var(--color-danger)">
             {{ errorMessage }}
           </p>
-          <div class="stats-pillars">
+          <div v-else class="stats-pillars">
             <article
               v-for="category in categories"
               :key="category.name"
@@ -156,7 +170,7 @@ onMounted(() => {
           <h2 class="theme-muted text-xs font-black uppercase tracking-[0.16em]">{{ t('stats.lineupTitle') }}</h2>
 
           <div class="mt-4 space-y-3 lg:space-y-2.5">
-            <p v-if="!isLoading && !errorMessage && !categories.length" class="theme-muted text-sm">
+            <p v-if="!errorMessage && !categories.length" class="theme-muted text-sm">
               {{ t('expenses.empty') }}
             </p>
             <article
@@ -178,6 +192,7 @@ onMounted(() => {
             </article>
           </div>
         </section>
+        </template>
       </div>
     </main>
   </div>

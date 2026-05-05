@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
+import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
 import {
   createAccount,
   deleteAccount,
@@ -188,8 +189,8 @@ onMounted(() => {
   <div class="app-shell">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen">
-      <div class="mx-auto max-w-3xl pb-28 lg:pb-10">
+    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+      <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
             {{ t('appNav.brand') }} · {{ t('appNav.accounts') }}
@@ -244,7 +245,7 @@ onMounted(() => {
             {{ t('accountsPage.dragHint') }}
           </p>
 
-          <p v-if="isLoading" class="theme-muted mt-4 text-sm">{{ t('common.loading') }}</p>
+          <FinancePageSkeleton v-if="isLoading" variant="accounts" />
           <p v-else-if="errorMessage" class="mt-4 text-sm" style="color: var(--color-danger)">
             {{ errorMessage }}
           </p>

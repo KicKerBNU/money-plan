@@ -127,6 +127,21 @@ export default {
     cashFlow: 'Fluxo do mês',
     logout: 'Sair',
     settingsMenu: 'Configurações e conta',
+    chatbot: 'Chat despesas',
+  },
+  chatbot: {
+    title: 'Assistente de despesas',
+    subtitle:
+      'Pergunte sobre seus gastos do jeito que preferir — ajudamos com totais, comparações e a entender padrões nos lançamentos que você já tem no app.',
+    empty: 'Ex.: “Quanto gastei em 2026-05-02?” · “Total do mês passado” · “Principais categorias este ano”.',
+    you: 'Você',
+    assistant: 'Assistente',
+    placeholder: 'Pergunte sobre suas despesas…',
+    send: 'Enviar',
+    sending: 'Pensando…',
+    clear: 'Novo papo',
+    inputLabel: 'Sua mensagem',
+    loadingLive: 'O assistente está preparando uma resposta',
   },
   income: {
     title: 'Receitas',

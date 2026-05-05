@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getDefaultAccountId } from '@/lib/defaultAccount'
 import { formatMonthYear } from '@/lib/dateDisplay'
 import { openConfirmModal } from '@/utils/confirmModal'
 import FinanceNav from '@/modules/app/finance-nav.vue'
+import IncomeSkeleton from '@/modules/income/IncomeSkeleton.vue'
 import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 import { fetchAccounts } from '@/modules/expenses/api/expenses.api'
 import type { Account } from '@/modules/expenses/domain/expenses.types'
@@ -79,6 +80,10 @@ function toInputDate(date: Date) {
 async function loadIncomeData() {
   isLoading.value = true
   errorMessage.value = null
+  await nextTick()
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => resolve())
+  })
 
   try {
     const [incomesData, accountsData] = await Promise.all([
@@ -175,8 +180,8 @@ onMounted(() => {
   <div class="app-shell">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen">
-      <div class="mx-auto max-w-5xl">
+    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+      <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <p class="theme-muted text-xs font-bold uppercase tracking-wide lg:text-sm lg:normal-case lg:tracking-normal">
             {{ periodMonthLabel }}
@@ -187,6 +192,8 @@ onMounted(() => {
           <p class="theme-muted mt-1 hidden text-sm lg:block">{{ t('income.subtitle') }}</p>
         </header>
 
+        <IncomeSkeleton v-if="isLoading" />
+        <template v-else>
         <section class="mt-4 grid gap-4 lg:mt-6 lg:grid-cols-[1fr_1fr]">
           <article class="income-hero-card rounded-2xl p-5 lg:p-6">
             <p class="theme-muted text-xs font-semibold">{{ t('income.summary.totalIncome') }}</p>
@@ -247,10 +254,10 @@ onMounted(() => {
           </div>
 
           <div class="income-list">
-            <p v-if="isLoading" class="theme-muted p-6 text-center text-sm">{{ t('common.loading') }}</p>
-            <p v-else-if="errorMessage" class="p-6 text-center text-sm" style="color: var(--color-danger)">
+            <p v-if="errorMessage" class="p-6 text-center text-sm" style="color: var(--color-danger)">
               {{ errorMessage }}
             </p>
+            <template v-else>
             <article
               v-for="entry in incomeRows"
               :key="entry.id"
@@ -295,10 +302,12 @@ onMounted(() => {
                 </button>
               </div>
             </article>
+            </template>
           </div>
         </section>
 
         <section class="mobile-entry-list mt-4 space-y-3 lg:hidden">
+          <template v-if="!errorMessage">
           <article v-for="entry in incomeRows" :key="entry.id" class="mobile-entry-card rounded-xl p-4">
             <div class="flex items-center justify-between gap-3">
               <div>
@@ -343,7 +352,9 @@ onMounted(() => {
               </button>
             </div>
           </article>
+          </template>
         </section>
+        </template>
       </div>
     </main>
   </div>

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { categoryIconForName } from '@/lib/categoryIcons'
 import { formatMonthYear } from '@/lib/dateDisplay'
 import FinanceNav from '@/modules/app/finance-nav.vue'
+import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
 import { fetchAccounts, fetchExpensesByDateRange } from '@/modules/expenses/api/expenses.api'
 import type { Account, Expense } from '@/modules/expenses/domain/expenses.types'
 import { fetchIncomesByDateRange } from '@/modules/income/api/income.api'
@@ -234,8 +235,8 @@ watch([preset, anchor], () => void loadOverview(), { deep: true, immediate: true
   <div class="app-shell">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen">
-      <div class="mx-auto max-w-7xl pb-28 lg:pb-10">
+    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+      <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
             {{ t('appNav.brand') }} · {{ t('appNav.overview') }}
@@ -287,7 +288,7 @@ watch([preset, anchor], () => void loadOverview(), { deep: true, immediate: true
           </div>
         </div>
 
-        <p v-if="isLoading" class="theme-muted mt-6 text-sm">{{ t('common.loading') }}</p>
+        <FinancePageSkeleton v-if="isLoading" class="mt-6" variant="overview" />
         <p v-else-if="errorMessage" class="mt-6 text-sm" style="color: var(--color-danger)">
           {{ errorMessage }}
         </p>

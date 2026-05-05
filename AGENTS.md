@@ -48,6 +48,7 @@ src/
 │   ├── income/         # Income UI/API/domain
 │   ├── overview/       # Consolidated dashboard (/app/overview), period presets + chart
 │   ├── stats/          # Monthly stats UI/API/domain
+│   ├── chatbot/        # Expense assistant chat (/app/chatbot), OpenAI via backend
 │   └── theme/          # Light/dark theme store + toggle
 ├── lib/
 │   └── api.ts          # Authenticated API client
@@ -81,6 +82,7 @@ src/
 - Add FontAwesome icons to `src/plugins/fontawesome.ts` before using them.
 - Keep Storybook stories next to the feature component files.
 - Keep authenticated finance screens under `/app/*`.
+- Lay out authenticated finance pages with `main.app-content.app-mobile-screen` → `div.app-finance-page-inner` (full inner width max `80rem`, same as Overview/Accounts). Expense chat uses the same shell; message bubbles stay a readable column inside the shared card.
 - Use `src/lib/api.ts` for backend requests so Firebase ID tokens are attached.
 - Use `src/modules/theme` and semantic theme classes for light/dark styling.
 - Keep user-facing text in both `en-US.ts` and `pt-BR.ts`.

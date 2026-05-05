@@ -2,7 +2,7 @@
 import { computed, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import { useRoute, type RouteLocationRaw } from 'vue-router'
+import { RouterLink, useRoute, type RouteLocationRaw } from 'vue-router'
 import MoneyPlanMark from '@/modules/app/money-plan-mark.vue'
 import AppSettingsMenu from '@/modules/app/app-settings-menu.vue'
 import { formatMonthYear } from '@/lib/dateDisplay'
@@ -46,6 +46,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { key: 'overview', label: 'appNav.overview', icon: 'chart-pie', to: '/app/overview' },
   { key: 'expenses', label: 'appNav.expenses', icon: 'receipt', to: '/app/expenses' },
+  { key: 'chatbot', label: 'appNav.chatbot', icon: 'comments', to: '/app/chatbot' },
   { key: 'income', label: 'appNav.income', icon: 'arrow-trend-up', to: '/app/income' },
   { key: 'stats', label: 'appNav.stats', icon: 'chart-column', to: '/app/stats' },
   { key: 'accounts', label: 'appNav.accounts', icon: 'building-columns', to: '/app/accounts' },
@@ -54,9 +55,16 @@ const navItems: NavItem[] = [
 const mobileNavItems: NavItem[] = [
   navItems[0],
   navItems[1],
-  navItems[2],
-  { key: 'add', label: 'appNav.add', icon: 'plus', to: { path: '/app/expenses', query: { new: '1' } }, isAction: true },
+  {
+    key: 'add',
+    label: 'appNav.add',
+    icon: 'plus',
+    to: { path: '/app/expenses', query: { new: '1' } },
+    isAction: true,
+  },
   navItems[3],
+  navItems[4],
+  navItems[2],
 ]
 
 function itemPath(to: RouteLocationRaw): string {
@@ -129,7 +137,7 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
   </div>
 
   <nav
-    class="mobile-bottom-nav theme-card fixed inset-x-4 bottom-4 z-30 grid grid-cols-5 items-center rounded-[1.6rem] px-3 py-2 shadow-2xl lg:hidden"
+    class="mobile-bottom-nav theme-card fixed inset-x-4 bottom-4 z-30 grid grid-cols-6 items-center rounded-[1.6rem] px-3 py-2 shadow-2xl lg:hidden"
   >
     <RouterLink
       v-for="item in mobileNavItems"

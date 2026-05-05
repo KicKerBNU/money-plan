@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
+import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
 import { fetchIncomesByPeriod } from '@/modules/income/api/income.api'
 import type { IncomeEntry } from '@/modules/income/domain/income.types'
 import {
@@ -892,8 +893,8 @@ watch(
   <div class="app-shell">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen">
-      <div class="mx-auto max-w-7xl">
+    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+      <div class="app-finance-page-inner">
         <header class="mobile-page-header flex flex-wrap items-start justify-between gap-4 pt-9 lg:pt-0">
           <div>
             <p class="theme-muted text-xs font-bold uppercase tracking-wide lg:text-sm lg:normal-case lg:tracking-normal">
@@ -905,6 +906,9 @@ watch(
             <p class="theme-muted mt-1 hidden text-sm lg:block">{{ expensesSubtitle }}</p>
           </div>
         </header>
+
+        <FinancePageSkeleton v-if="isLoading" variant="expenses" />
+        <template v-else>
 
         <section class="mobile-hero-card mt-4 rounded-2xl p-5 lg:hidden">
           <p class="text-xs font-black uppercase tracking-wide opacity-80">{{ t('expenses.mobile.spentInApril') }}</p>
@@ -1035,10 +1039,7 @@ watch(
             </div>
 
             <div class="expense-list flex min-h-0 flex-col xl:flex-1 xl:overflow-y-auto">
-              <p v-if="isLoading" class="theme-muted p-6 text-center text-sm">
-                {{ t('common.loading') }}
-              </p>
-              <p v-else-if="errorMessage" class="p-6 text-center text-sm" style="color: var(--color-danger)">
+              <p v-if="errorMessage" class="p-6 text-center text-sm" style="color: var(--color-danger)">
                 {{ errorMessage }}
               </p>
               <div
@@ -1062,8 +1063,9 @@ watch(
                   {{ t('expenses.emptyMonth.cta') }}
                 </button>
               </div>
+              <template v-if="!errorMessage">
               <p
-                v-if="!isLoading && !errorMessage && expenses.length && expensesReorderEligible"
+                v-if="expenses.length && expensesReorderEligible"
                 class="theme-muted theme-border hidden border-b px-4 py-2 text-xs leading-relaxed lg:block"
               >
                 {{ t('expenses.list.reorderHint') }}
@@ -1148,15 +1150,24 @@ watch(
               </article>
 
               <p
-                v-if="!isLoading && !errorMessage && !!expenses.length && !filteredExpenses.length"
+                v-if="!!expenses.length && !filteredExpenses.length"
                 class="theme-muted p-6 text-center text-sm"
               >
                 {{ t('expenses.empty') }}
               </p>
+              </template>
             </div>
           </div>
 
           <section class="mobile-entry-list space-y-3 lg:hidden">
+            <p
+              v-if="errorMessage"
+              class="mobile-entry-card rounded-xl p-4 text-center text-sm"
+              style="color: var(--color-danger)"
+            >
+              {{ errorMessage }}
+            </p>
+            <template v-else>
             <article v-for="expense in mobileExpenses" :key="expense.id" class="mobile-entry-card rounded-xl p-3">
               <div class="mb-2 flex items-center justify-between">
                 <span class="text-xs font-black">{{ expense.dayLabel }}</span>
@@ -1214,7 +1225,7 @@ watch(
               </div>
             </article>
             <div
-              v-if="!isLoading && !errorMessage && !expenses.length"
+              v-if="!expenses.length"
               class="mobile-entry-card flex flex-col items-center rounded-xl p-5 text-center"
             >
               <div
@@ -1232,9 +1243,10 @@ watch(
                 {{ t('expenses.emptyMonth.cta') }}
               </button>
             </div>
-            <p v-if="!isLoading && !errorMessage && !!expenses.length && !mobileExpenses.length" class="theme-muted px-2 text-center text-xs">
+            <p v-if="!!expenses.length && !mobileExpenses.length" class="theme-muted px-2 text-center text-xs">
               {{ t('expenses.empty') }}
             </p>
+            </template>
           </section>
             </div>
 
@@ -1247,13 +1259,7 @@ watch(
               </div>
               <div class="flex min-h-0 flex-1 flex-col px-4 pb-4">
                 <div
-                  v-if="isLoading"
-                  class="flex min-h-0 flex-1 flex-col justify-center py-8"
-                >
-                  <p class="theme-muted text-center text-sm">{{ t('common.loading') }}</p>
-                </div>
-                <div
-                  v-else-if="!categoryTotals.length"
+                  v-if="!categoryTotals.length"
                   class="flex min-h-0 min-w-0 flex-1 basis-0 flex-col items-center justify-center rounded-xl px-4 py-8 text-center sm:px-5 sm:py-10"
                   style="
                     background: var(--color-surface-soft);
@@ -1312,13 +1318,7 @@ watch(
                 {{ t('expenses.panels.byAccount') }}
               </h2>
               <div class="mt-4 flex min-h-0 flex-1 flex-col">
-                <div
-                  v-if="isLoading"
-                  class="flex flex-1 flex-col justify-center py-6"
-                >
-                  <p class="theme-muted text-center text-sm">{{ t('common.loading') }}</p>
-                </div>
-                <div v-else class="flex flex-1 flex-col justify-start space-y-3 overflow-y-auto">
+                <div class="flex flex-1 flex-col justify-start space-y-3 overflow-y-auto">
                   <div
                     v-for="account in accounts"
                     :key="account.id"
@@ -1536,6 +1536,7 @@ watch(
             </div>
           </div>
         </section>
+        </template>
       </div>
 
       <div
