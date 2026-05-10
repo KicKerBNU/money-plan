@@ -96,37 +96,31 @@ onMounted(() => {
 
     <main class="app-content app-mobile-screen" :aria-busy="isLoading">
       <div class="app-finance-page-inner">
-        <header class="mobile-page-header flex items-start justify-between gap-4 pt-9 lg:pt-0">
-          <div>
-            <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
-              {{ t('appNav.brand') }} · {{ periodMonthLabel }}
-            </p>
-            <h1 class="mt-1 text-2xl font-black leading-tight tracking-tight lg:text-[2rem]">
-              {{ t('stats.title') }}
-            </h1>
-            <p class="theme-muted mt-1 max-w-3xl text-sm lg:text-[0.95rem]">
-              {{ t('stats.subtitle') }}
-            </p>
+        <header class="mobile-page-header pt-9 lg:pt-0">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
+                {{ t('appNav.brand') }} · {{ periodMonthLabel }}
+              </p>
+              <h1 class="mt-1 text-2xl font-black leading-tight tracking-tight lg:text-[2rem]">
+                {{ t('stats.title') }}
+              </h1>
+            </div>
+
+            <div v-if="isLoading" class="shrink-0 text-right" aria-hidden="true">
+              <div class="finance-skeleton-block finance-skeleton-pulse ml-auto h-7 w-[6.5rem] rounded-lg" />
+              <div class="finance-skeleton-block finance-skeleton-pulse mt-2 ml-auto h-3 w-20 rounded-md" />
+            </div>
+            <div v-else class="shrink-0 text-right">
+              <strong class="block text-xl font-black">{{ formatMoney(totalSpent) }}</strong>
+              <span class="theme-muted text-xs">{{ t('stats.totalCaption', { count: categories.length }) }}</span>
+            </div>
           </div>
 
-          <div v-if="isLoading" class="stats-total hidden text-right lg:block" aria-hidden="true">
-            <div class="finance-skeleton-block finance-skeleton-pulse ml-auto h-7 w-[7.5rem] rounded-lg" />
-            <div class="finance-skeleton-block finance-skeleton-pulse mt-2 ml-auto h-3 w-24 rounded-md" />
-          </div>
-          <div v-else class="stats-total hidden text-right lg:block">
-            <strong class="block text-xl font-black">{{ formatMoney(totalSpent) }}</strong>
-            <span class="theme-muted text-xs">{{ t('stats.totalCaption', { count: categories.length }) }}</span>
-          </div>
+          <p class="theme-muted mt-1 max-w-3xl text-sm lg:text-[0.95rem]">
+            {{ t('stats.subtitle') }}
+          </p>
         </header>
-
-        <div v-if="isLoading" class="stats-total absolute right-10 top-20 text-right lg:hidden" aria-hidden="true">
-          <div class="finance-skeleton-block finance-skeleton-pulse ml-auto h-7 w-[6.5rem] rounded-lg" />
-          <div class="finance-skeleton-block finance-skeleton-pulse mt-2 ml-auto h-3 w-20 rounded-md" />
-        </div>
-        <div v-else class="stats-total absolute right-10 top-20 text-right lg:hidden">
-          <strong class="block text-xl font-black">{{ formatMoney(totalSpent) }}</strong>
-          <span class="theme-muted text-xs">{{ t('stats.mobileTotalCaption', { count: categories.length }) }}</span>
-        </div>
 
         <StatsSkeleton v-if="isLoading" />
         <template v-else>
