@@ -572,6 +572,7 @@ body {
     border: 1px solid var(--color-border);
     background: var(--color-surface-soft);
     color: var(--color-text);
+    font-size: 1rem; /* prevents iOS Safari auto-zoom on focus (requires ≥16px) */
   }
 
   .theme-input::placeholder {

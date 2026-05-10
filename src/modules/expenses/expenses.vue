@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
@@ -42,6 +42,15 @@ const tripRangeForm = ref({
   endDate: '',
 })
 const isExpenseModalOpen = ref(false)
+
+// Lock body scroll while the sheet is open so the page behind can't be scrolled.
+watch(isExpenseModalOpen, (open) => {
+  document.body.style.overflow = open ? 'hidden' : ''
+})
+onUnmounted(() => {
+  document.body.style.overflow = ''
+})
+
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
 const expenses = ref<Expense[]>([])
@@ -1692,6 +1701,7 @@ watch(
                   <button
                     type="button"
                     class="theme-button-secondary cursor-pointer rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-50"
+                    style="background: var(--color-surface-soft)"
                     :disabled="isExpenseSubmitting"
                     @click="closeExpenseModal"
                   >
