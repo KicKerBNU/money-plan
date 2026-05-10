@@ -44,7 +44,7 @@ const { t } = useI18n()
         <div class="mt-6 grid grid-cols-2 gap-2">
           <button
             type="button"
-            class="theme-button-secondary cursor-pointer rounded-xl px-4 py-3 text-sm bg-gray-500"
+            class="theme-button-secondary cursor-pointer rounded-xl px-4 py-3 text-sm"
             @click="dismissConfirmModal"
           >
             {{ confirmModalCancelLabel }}
