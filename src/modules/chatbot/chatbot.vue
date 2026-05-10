@@ -133,7 +133,7 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
           <button
             v-if="messages.length > 0"
             type="button"
-            class="theme-muted shrink-0 rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_55%,transparent)]"
+            class="theme-muted shrink-0 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_55%,transparent)]"
             style="border-color: var(--color-border); color: var(--color-primary)"
             @click="clearChat"
           >

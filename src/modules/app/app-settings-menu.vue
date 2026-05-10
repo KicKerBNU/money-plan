@@ -57,6 +57,7 @@ async function handleLogout() {
 
 function toggleTheme() {
   themeStore.toggleTheme()
+  closeMenu()
 }
 
 async function handleInstall() {
@@ -90,7 +91,7 @@ async function handleInstall() {
       >
         <button
           type="button"
-          class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-bold transition-colors hover:bg-[var(--color-surface-soft)]"
+          class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[var(--color-surface-soft)]"
           role="menuitem"
           @click="toggleTheme"
         >
@@ -102,7 +103,7 @@ async function handleInstall() {
           <div class="theme-border mx-2 my-0.5 border-t opacity-70" />
           <button
             type="button"
-            class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-bold transition-colors hover:bg-[var(--color-surface-soft)]"
+            class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[var(--color-surface-soft)]"
             role="menuitem"
             @click="handleInstall"
           >
@@ -114,7 +115,7 @@ async function handleInstall() {
         <div class="theme-border mx-2 my-0.5 border-t opacity-70" />
         <button
           type="button"
-          class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-bold transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
+          class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
           role="menuitem"
           style="color: var(--color-danger)"
           @click="handleLogout"
@@ -144,7 +145,7 @@ async function handleInstall() {
               style="color: var(--color-primary)"
             />
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-bold" style="color: var(--color-text)">
+              <p class="text-sm font-semibold" style="color: var(--color-text)">
                 {{ t('pwa.addToHomeScreen') }}
               </p>
               <p class="mt-0.5 text-xs leading-relaxed" style="color: var(--color-muted)">

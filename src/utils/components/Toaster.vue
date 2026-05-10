@@ -40,7 +40,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
           <p class="min-w-0 flex-1 text-sm font-semibold leading-snug">{{ toast.message }}</p>
           <button
             type="button"
-            class="theme-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg font-bold leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)]"
+            class="theme-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg font-semibold leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)]"
             @click="dismissToast(toast.id)"
           >
             ×

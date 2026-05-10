@@ -33,7 +33,7 @@ const { t } = useI18n()
           <h2 id="confirm-modal-title" class="min-w-0 flex-1 text-lg font-black">{{ confirmModalTitle }}</h2>
           <button
             type="button"
-            class="theme-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)]"
+            class="theme-muted flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl text-lg leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)]"
             :aria-label="t('common.close')"
             @click="dismissConfirmModal"
           >
@@ -41,14 +41,18 @@ const { t } = useI18n()
           </button>
         </div>
         <p id="confirm-modal-desc" class="theme-muted mt-3 text-sm leading-relaxed">{{ confirmModalMessage }}</p>
-        <div class="mt-6 flex flex-wrap justify-end gap-2">
-          <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 text-sm font-bold" @click="dismissConfirmModal">
+        <div class="mt-6 grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            class="theme-button-secondary cursor-pointer rounded-xl px-4 py-3 text-sm bg-gray-500"
+            @click="dismissConfirmModal"
+          >
             {{ confirmModalCancelLabel }}
           </button>
           <button
             type="button"
-            class="rounded-xl px-4 py-3 text-sm font-bold text-white"
-            style="background: var(--color-danger)"
+            class="cursor-pointer rounded-xl px-4 py-3 text-sm"
+            style="background: var(--color-danger); color: var(--color-text)"
             @click="acceptConfirmModal"
           >
             {{ confirmModalConfirmLabel }}

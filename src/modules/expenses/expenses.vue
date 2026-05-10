@@ -904,7 +904,7 @@ watch(
       <div class="app-finance-page-inner">
         <header class="mobile-page-header flex flex-wrap items-start justify-between gap-4 pt-9 lg:pt-0">
           <div>
-            <p class="theme-muted text-xs font-bold uppercase tracking-wide lg:text-sm lg:normal-case lg:tracking-normal">
+            <p class="theme-muted text-xs font-semibold uppercase tracking-wide lg:text-sm lg:normal-case lg:tracking-normal">
               {{ currentMonthLabel }}
             </p>
             <h1 class="mt-0.5 text-xl font-black leading-tight tracking-tight lg:text-[2rem]">
@@ -963,7 +963,7 @@ watch(
                 :placeholder="t('expenses.searchPlaceholder')"
               />
               <button
-                class="theme-button-primary flex min-h-10 items-center justify-center gap-2 rounded-xl px-5 text-sm font-bold"
+                class="theme-button-primary flex min-h-10 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold"
                 type="button"
                 @click="openNewExpenseModal"
               >
@@ -976,7 +976,7 @@ watch(
               <div class="flex gap-2 overflow-x-auto">
                 <button
                   :class="[
-                    'finance-chip flex shrink-0 items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold',
+                    'finance-chip flex shrink-0 items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold',
                     { 'is-active': selectedCategoryId === 'all' },
                   ]"
                   type="button"
@@ -989,7 +989,7 @@ watch(
                   v-for="(chip, index) in categoryFilterChips"
                   :key="chip.categoryId"
                   :class="[
-                    'finance-chip flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-bold',
+                    'finance-chip flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold',
                     { 'is-active': selectedCategoryId === chip.categoryId },
                   ]"
                   type="button"
@@ -1007,14 +1007,14 @@ watch(
             <div class="theme-border flex items-center gap-2 border-b px-4 py-2">
               <span class="theme-muted mr-1 text-xs font-semibold">{{ t('expenses.filters.quickRange') }}</span>
               <button
-                :class="['finance-chip rounded-full px-3 py-1 text-[0.68rem] font-bold', { 'is-active': selectedRangePreset === 'last3' }]"
+                :class="['finance-chip rounded-full px-3 py-1 text-[0.68rem] font-semibold', { 'is-active': selectedRangePreset === 'last3' }]"
                 type="button"
                 @click="applyRangePreset('last3')"
               >
                 {{ t('expenses.filters.last3Days') }}
               </button>
               <button
-                :class="['finance-chip rounded-full px-3 py-1 text-[0.68rem] font-bold', { 'is-active': selectedRangePreset === 'last7' }]"
+                :class="['finance-chip rounded-full px-3 py-1 text-[0.68rem] font-semibold', { 'is-active': selectedRangePreset === 'last7' }]"
                 type="button"
                 @click="applyRangePreset('last7')"
               >
@@ -1022,7 +1022,7 @@ watch(
               </button>
               <button
                 :class="[
-                  'finance-chip rounded-full px-3 py-1 text-[0.68rem] font-bold',
+                  'finance-chip rounded-full px-3 py-1 text-[0.68rem] font-semibold',
                   { 'is-active': selectedRangePreset === 'tripWeek' },
                 ]"
                 type="button"
@@ -1032,7 +1032,7 @@ watch(
               </button>
               <button
                 v-if="selectedDateFrom || selectedDateTo"
-                class="theme-muted ml-auto text-[0.68rem] font-bold"
+                class="theme-muted ml-auto text-[0.68rem] font-semibold"
                 type="button"
                 @click="clearDateFilter"
               >
@@ -1064,7 +1064,7 @@ watch(
                   {{ t('expenses.emptyMonth.description') }}
                 </p>
                 <button
-                  class="theme-button-primary mt-5 rounded-xl px-4 py-2.5 text-sm font-bold"
+                  class="theme-button-primary mt-5 rounded-xl px-4 py-2.5 text-sm font-semibold"
                   @click="openNewExpenseModal"
                 >
                   {{ t('expenses.emptyMonth.cta') }}
@@ -1130,7 +1130,7 @@ watch(
                   >
                     <FontAwesomeIcon icon="pen-to-square" />
                     <span
-                      class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                      class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                       style="background: var(--color-text); color: var(--color-surface-strong)"
                       role="tooltip"
                     >
@@ -1146,7 +1146,7 @@ watch(
                   >
                     <FontAwesomeIcon icon="trash-can" />
                     <span
-                      class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                      class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                       style="background: var(--color-text); color: var(--color-surface-strong)"
                       role="tooltip"
                     >
@@ -1206,7 +1206,7 @@ watch(
                 >
                   <FontAwesomeIcon icon="pen-to-square" />
                   <span
-                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                     style="background: var(--color-text); color: var(--color-surface-strong)"
                     role="tooltip"
                   >
@@ -1222,7 +1222,7 @@ watch(
                 >
                   <FontAwesomeIcon icon="trash-can" />
                   <span
-                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                     style="background: var(--color-text); color: var(--color-surface-strong)"
                     role="tooltip"
                   >
@@ -1244,7 +1244,7 @@ watch(
               <h3 class="text-sm font-black">{{ t('expenses.emptyMonth.title') }}</h3>
               <p class="theme-muted mt-2 text-xs">{{ t('expenses.emptyMonth.description') }}</p>
               <button
-                class="theme-button-primary mt-4 rounded-xl px-4 py-2 text-xs font-bold"
+                class="theme-button-primary mt-4 rounded-xl px-4 py-2 text-xs font-semibold"
                 @click="openNewExpenseModal"
               >
                 {{ t('expenses.emptyMonth.cta') }}
@@ -1384,7 +1384,7 @@ watch(
                   />
                   <button
                     type="submit"
-                    class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-bold"
+                    class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-semibold"
                     :aria-label="t('common.add')"
                   >
                     <FontAwesomeIcon icon="plus" />
@@ -1420,7 +1420,7 @@ watch(
                       >
                         <FontAwesomeIcon icon="pen-to-square" />
                         <span
-                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                           style="background: var(--color-text); color: var(--color-surface-strong)"
                           role="tooltip"
                         >
@@ -1436,7 +1436,7 @@ watch(
                       >
                         <FontAwesomeIcon icon="trash-can" />
                         <span
-                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                           style="background: var(--color-text); color: var(--color-surface-strong)"
                           role="tooltip"
                         >
@@ -1477,7 +1477,7 @@ watch(
                   />
                   <button
                     type="submit"
-                    class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-bold"
+                    class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-semibold"
                     :aria-label="t('common.add')"
                   >
                     <FontAwesomeIcon icon="plus" />
@@ -1513,7 +1513,7 @@ watch(
                       >
                         <FontAwesomeIcon icon="pen-to-square" />
                         <span
-                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                           style="background: var(--color-text); color: var(--color-surface-strong)"
                           role="tooltip"
                         >
@@ -1529,7 +1529,7 @@ watch(
                       >
                         <FontAwesomeIcon icon="trash-can" />
                         <span
-                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                          class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                           style="background: var(--color-text); color: var(--color-surface-strong)"
                           role="tooltip"
                         >
@@ -1590,12 +1590,12 @@ watch(
           </div>
 
           <div class="mt-5 flex justify-end gap-2">
-            <button type="button" class="theme-button-secondary rounded-xl px-4 py-2.5 text-sm font-bold" @click="closeTripRangeModal">
+            <button type="button" class="theme-button-secondary rounded-xl px-4 py-2.5 text-sm font-semibold" @click="closeTripRangeModal">
               {{ t('common.cancel') }}
             </button>
             <button
               type="button"
-              class="theme-button-primary rounded-xl px-4 py-2.5 text-sm font-bold"
+              class="theme-button-primary rounded-xl px-4 py-2.5 text-sm font-semibold"
               :disabled="!tripRangeForm.startDate || !tripRangeForm.endDate"
               @click="applyTripRangeFromModal"
             >
@@ -1667,7 +1667,7 @@ watch(
                       :key="category.id"
                       type="button"
                       :class="[
-                        'finance-chip flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-bold',
+                        'finance-chip flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold',
                         { 'is-active': form.categoryId === category.id },
                       ]"
                       :aria-pressed="form.categoryId === category.id"
@@ -1700,7 +1700,7 @@ watch(
                 <div class="flex gap-2">
                   <button
                     type="submit"
-                    class="theme-button-primary flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-60"
+                    class="theme-button-primary flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold disabled:pointer-events-none disabled:opacity-60"
                     :disabled="isExpenseSubmitting"
                     :aria-busy="isExpenseSubmitting"
                   >
@@ -1751,12 +1751,12 @@ watch(
               />
             </label>
             <div class="flex flex-wrap gap-2 pt-1">
-              <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 font-bold" @click="closeRenameModal">
+              <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 font-semibold" @click="closeRenameModal">
                 {{ t('common.cancel') }}
               </button>
               <button
                 type="submit"
-                class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-bold"
+                class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-semibold"
                 :disabled="!renameNameInput.trim()"
               >
                 {{ t('common.save') }}

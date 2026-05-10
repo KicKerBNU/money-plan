@@ -39,7 +39,7 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
           {{ t('home.badge') }}
         </span>
 
-        <h1 class="animate-fade-up text-5xl font-bold tracking-tight sm:text-6xl">
+        <h1 class="animate-fade-up text-5xl font-semibold tracking-tight sm:text-6xl">
           {{ t('home.headline') }}
           <span class="headline-gradient bg-clip-text text-transparent">
             {{ t('home.headlineHighlight') }}
@@ -74,7 +74,7 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
         <div class="mb-5 flex items-center justify-between">
           <div>
             <p class="theme-muted text-sm">{{ t('home.mockup.month') }}</p>
-            <h2 class="text-2xl font-bold">{{ t('home.mockup.title') }}</h2>
+            <h2 class="text-2xl font-semibold">{{ t('home.mockup.title') }}</h2>
           </div>
           <span class="rounded-full bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
             {{ t('home.mockup.status') }}
@@ -84,11 +84,11 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
         <div class="grid gap-3 sm:grid-cols-2">
           <div class="theme-card-soft rounded-xl p-4">
             <p class="theme-muted text-sm">{{ t('home.mockup.income') }}</p>
-            <p class="mt-2 text-2xl font-bold text-emerald-300">$3,850</p>
+            <p class="mt-2 text-2xl font-semibold text-emerald-300">$3,850</p>
           </div>
           <div class="theme-card-soft rounded-xl p-4">
             <p class="theme-muted text-sm">{{ t('home.mockup.expenses') }}</p>
-            <p class="mt-2 text-2xl font-bold text-rose-300">$2,140</p>
+            <p class="mt-2 text-2xl font-semibold text-rose-300">$2,140</p>
           </div>
         </div>
 
@@ -168,7 +168,7 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
 
     <section class="relative mx-auto max-w-6xl px-6 pb-20">
       <div class="theme-card rounded-3xl p-6 backdrop-blur">
-        <h2 class="text-2xl font-bold">{{ t('home.actions.title') }}</h2>
+        <h2 class="text-2xl font-semibold">{{ t('home.actions.title') }}</h2>
         <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div v-for="action in actions" :key="action" class="theme-card-soft rounded-xl p-4 text-sm">
             {{ t(`home.actions.items.${action}`) }}
@@ -201,7 +201,7 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
     <!-- How It Works -->
     <section id="how-it-works" class="relative mx-auto max-w-6xl px-6 pb-24">
       <div class="mb-8 text-center">
-        <h2 class="text-3xl font-bold">{{ t('home.how.title') }}</h2>
+        <h2 class="text-3xl font-semibold">{{ t('home.how.title') }}</h2>
         <p class="theme-muted mt-2">{{ t('home.how.description') }}</p>
       </div>
 

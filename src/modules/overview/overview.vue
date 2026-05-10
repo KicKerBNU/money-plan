@@ -326,7 +326,7 @@ watch([preset, anchor], () => void loadOverview(), { deep: true, immediate: true
           <section class="finance-card mt-5 rounded-2xl p-4 lg:p-6">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <h2 class="theme-muted text-xs font-black uppercase tracking-[0.16em]">{{ t('overview.chartTitle') }}</h2>
-              <div class="flex flex-wrap gap-4 text-[0.68rem] font-bold">
+              <div class="flex flex-wrap gap-4 text-[0.68rem] font-semibold">
                 <span class="flex items-center gap-2">
                   <span class="inline-block h-2.5 w-2.5 rounded-sm" style="background: var(--color-positive)" />
                   {{ t('overview.chartIncome') }}
@@ -442,7 +442,7 @@ watch([preset, anchor], () => void loadOverview(), { deep: true, immediate: true
                   <FontAwesomeIcon :icon="categoryIconForName(row.name)" />
                 </span>
                 <div class="min-w-0 flex-1">
-                  <div class="flex justify-between gap-2 font-bold">
+                  <div class="flex justify-between gap-2 font-semibold">
                     <span class="truncate">{{ row.name }}</span>
                     <span>{{ formatMoney(row.amount) }}</span>
                   </div>

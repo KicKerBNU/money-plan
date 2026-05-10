@@ -225,7 +225,7 @@ onMounted(() => {
             />
             <button
               type="submit"
-              class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-bold disabled:opacity-60"
+              class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-semibold disabled:opacity-60"
               :disabled="isCreating || !newAccountName.trim()"
               :aria-label="t('common.add')"
             >
@@ -291,7 +291,7 @@ onMounted(() => {
               </span>
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="truncate font-bold">{{ account.name }}</span>
+                  <span class="truncate font-semibold">{{ account.name }}</span>
                   <span
                     v-if="account.isDefault"
                     class="rounded-md px-2 py-0.5 text-[0.65rem] font-black uppercase tracking-wide"
@@ -322,7 +322,7 @@ onMounted(() => {
                 >
                   <FontAwesomeIcon icon="pen-to-square" />
                   <span
-                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                     style="background: var(--color-text); color: var(--color-surface-strong)"
                     role="tooltip"
                   >
@@ -338,7 +338,7 @@ onMounted(() => {
                 >
                   <FontAwesomeIcon icon="trash-can" />
                   <span
-                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                     style="background: var(--color-text); color: var(--color-surface-strong)"
                     role="tooltip"
                   >
@@ -379,12 +379,12 @@ onMounted(() => {
               <input v-model="renameNameInput" type="text" class="theme-input mt-1 w-full rounded-xl p-3" autofocus />
             </label>
             <div class="flex flex-wrap gap-2 pt-1">
-              <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 font-bold" @click="closeRenameModal">
+              <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 font-semibold" @click="closeRenameModal">
                 {{ t('common.cancel') }}
               </button>
               <button
                 type="submit"
-                class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-bold"
+                class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-semibold"
                 :disabled="!renameNameInput.trim()"
               >
                 {{ t('common.save') }}

@@ -7,7 +7,7 @@
   --color-surface-strong: #151820;
   --color-surface-soft: #1a1d25;
   --color-border: rgba(148, 163, 184, 0.13);
-  --color-text: #f4f7fb;
+  --color-text: #ffffff;
   --color-muted: #818b9d;
   --color-subtle: #5f6878;
   --color-primary: #5adcca;
@@ -33,7 +33,7 @@
   --color-surface-strong: #ffffff;
   --color-surface-soft: rgba(239, 241, 236, 0.9);
   --color-border: rgba(24, 39, 36, 0.08);
-  --color-text: #121827;
+  --color-text: #000000;
   --color-muted: #718198;
   --color-subtle: #8a96a8;
   --color-primary: #2f7f73;
@@ -276,7 +276,7 @@ body {
   .mobile-hero-card {
     border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
     background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 72%, #063a32), #2f8174);
-    color: #f8fffd;
+    color: var(--color-text);
     box-shadow: 0 16px 32px rgba(15, 118, 110, 0.16);
   }
 
@@ -436,12 +436,6 @@ body {
     .mobile-nav-item.is-action .mobile-nav-icon {
       height: 2.75rem;
       width: 2.75rem;
-    }
-
-    .theme-button-secondary {
-      height: 2.35rem;
-      width: 2.35rem;
-      border-radius: 0.85rem;
     }
 
     :root[data-theme='light'] .income-hero-card {
@@ -604,6 +598,11 @@ body {
   .theme-button-secondary:hover {
     border-color: var(--color-accent);
     transform: translateY(-1px);
+  }
+
+  :root[data-theme='light'] .theme-button-secondary {
+    background: var(--color-surface-soft);
+    border-color: rgba(24, 39, 36, 0.18);
   }
 
   .theme-button-google {

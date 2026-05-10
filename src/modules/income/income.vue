@@ -183,7 +183,7 @@ onMounted(() => {
     <main class="app-content app-mobile-screen" :aria-busy="isLoading">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
-          <p class="theme-muted text-xs font-bold uppercase tracking-wide lg:text-sm lg:normal-case lg:tracking-normal">
+          <p class="theme-muted text-xs font-semibold uppercase tracking-wide lg:text-sm lg:normal-case lg:tracking-normal">
             {{ periodMonthLabel }}
           </p>
           <h1 class="mt-0.5 text-xl font-black leading-tight tracking-tight lg:text-[2rem]">
@@ -206,7 +206,7 @@ onMounted(() => {
           </article>
 
           <form class="finance-card hidden rounded-2xl p-5 lg:block" @submit.prevent="submitIncome">
-            <h2 class="text-xs font-bold">{{ t('income.quickAdd.title') }}</h2>
+            <h2 class="text-xs font-semibold">{{ t('income.quickAdd.title') }}</h2>
             <div class="mt-3 grid grid-cols-[1fr_auto] gap-2">
               <input
                 v-model="form.amount"
@@ -229,13 +229,13 @@ onMounted(() => {
                 {{ account.name }}
               </option>
             </select>
-            <button class="theme-button-primary mt-3 min-h-9 w-full rounded-lg px-4 text-sm font-bold">
+            <button class="theme-button-primary mt-3 min-h-9 w-full rounded-lg px-4 text-sm font-semibold">
               {{ editingIncomeId ? t('common.save') : t('income.form.submit') }}
             </button>
             <button
               v-if="editingIncomeId"
               type="button"
-              class="theme-button-secondary mt-2 min-h-9 w-full rounded-lg px-4 text-sm font-bold"
+              class="theme-button-secondary mt-2 min-h-9 w-full rounded-lg px-4 text-sm font-semibold"
               @click="resetIncomeForm"
             >
               {{ t('common.cancel') }}
@@ -263,8 +263,8 @@ onMounted(() => {
               :key="entry.id"
               class="income-entry-row grid grid-cols-[4.5rem_1fr_auto_auto] items-center gap-4 px-4 py-3.5 text-sm"
             >
-              <span class="theme-muted text-[0.68rem] font-bold tracking-wide">{{ entry.dateLabel }}</span>
-              <span class="font-bold">{{ entry.title }}</span>
+              <span class="theme-muted text-[0.68rem] font-semibold tracking-wide">{{ entry.dateLabel }}</span>
+              <span class="font-semibold">{{ entry.title }}</span>
               <strong class="font-black" style="color: var(--color-positive)">
                 +{{ formatMoney(entry.amount) }}
               </strong>
@@ -277,7 +277,7 @@ onMounted(() => {
                 >
                   <FontAwesomeIcon icon="pen-to-square" />
                   <span
-                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                     style="background: var(--color-text); color: var(--color-surface-strong)"
                     role="tooltip"
                   >
@@ -293,7 +293,7 @@ onMounted(() => {
                 >
                   <FontAwesomeIcon icon="trash-can" />
                   <span
-                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                    class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                     style="background: var(--color-text); color: var(--color-surface-strong)"
                     role="tooltip"
                   >
@@ -327,7 +327,7 @@ onMounted(() => {
               >
                 <FontAwesomeIcon icon="pen-to-square" />
                 <span
-                  class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                  class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                   style="background: var(--color-text); color: var(--color-surface-strong)"
                   role="tooltip"
                 >
@@ -343,7 +343,7 @@ onMounted(() => {
               >
                 <FontAwesomeIcon icon="trash-can" />
                 <span
-                  class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-bold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
+                  class="pointer-events-none absolute left-1/2 top-full z-[10050] mt-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[0.65rem] font-semibold opacity-0 shadow-md transition-opacity duration-150 group-hover/tooltip:opacity-100 group-focus-visible/tooltip:opacity-100"
                   style="background: var(--color-text); color: var(--color-surface-strong)"
                   role="tooltip"
                 >

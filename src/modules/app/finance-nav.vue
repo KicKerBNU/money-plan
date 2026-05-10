@@ -109,7 +109,7 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
         :key="item.key"
         :aria-disabled="item.disabled"
         :class="[
-          'app-nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.86rem] font-bold',
+          'app-nav-item flex items-center gap-3 rounded-xl px-3 py-2.5 text-[0.86rem] font-semibold',
           { 'is-active': isActive(item), 'is-disabled': item.disabled },
         ]"
         :to="item.to"
@@ -121,7 +121,7 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
     </nav>
 
     <div class="app-net-card rounded-xl p-3.5">
-      <p class="theme-muted text-[0.7rem] font-bold">{{ t('appNav.cashFlow') }}</p>
+      <p class="theme-muted text-[0.7rem] font-semibold">{{ t('appNav.cashFlow') }}</p>
       <strong
         class="mt-0.5 block text-lg font-black"
         :style="{

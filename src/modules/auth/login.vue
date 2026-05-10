@@ -85,7 +85,7 @@ function toggleMode() {
         <span class="theme-badge inline-flex rounded-full px-3 py-1 text-xs font-semibold">
           {{ t('auth.login.badge') }}
         </span>
-        <h1 class="mt-4 text-3xl font-bold">
+        <h1 class="mt-4 text-3xl font-semibold">
           {{ mode === 'login' ? t('auth.login.title') : t('auth.login.createTitle') }}
         </h1>
         <p class="theme-muted mt-3">{{ t('auth.login.description') }}</p>
