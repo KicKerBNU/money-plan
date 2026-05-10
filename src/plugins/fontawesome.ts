@@ -2,6 +2,7 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import {
   faArrowRightFromBracket,
+  faArrowsRotate,
   faArrowTrendUp,
   faBagShopping,
   faBasketShopping,
@@ -51,6 +52,7 @@ import type { App } from 'vue'
 
 library.add(
   faArrowRightFromBracket,
+  faArrowsRotate,
   faArrowTrendUp,
   faBagShopping,
   faBasketShopping,

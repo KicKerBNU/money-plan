@@ -310,4 +310,9 @@ export default {
     hoverHint: 'Hover for details.',
     lineupTitle: 'The line-up',
   },
+  pwa: {
+    updateReady: 'A new version is available.',
+    reload: 'Reload',
+    dismiss: 'Dismiss',
+  },
 }

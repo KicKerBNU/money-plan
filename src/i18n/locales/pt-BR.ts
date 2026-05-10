@@ -311,4 +311,9 @@ export default {
     hoverHint: 'Passe o mouse para detalhes.',
     lineupTitle: 'O ranking',
   },
+  pwa: {
+    updateReady: 'Uma nova versão está disponível.',
+    reload: 'Recarregar',
+    dismiss: 'Dispensar',
+  },
 }
