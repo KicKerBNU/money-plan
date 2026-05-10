@@ -314,5 +314,9 @@ export default {
     updateReady: 'A new version is available.',
     reload: 'Reload',
     dismiss: 'Dismiss',
+    install: 'Install App',
+    addToHomeScreen: 'Add to Home Screen',
+    iosInstructions: 'Tap the Share button in Safari, then select "Add to Home Screen".',
+    gotIt: 'Got it',
   },
 }

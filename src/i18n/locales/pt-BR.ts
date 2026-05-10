@@ -315,5 +315,9 @@ export default {
     updateReady: 'Uma nova versão está disponível.',
     reload: 'Recarregar',
     dismiss: 'Dispensar',
+    install: 'Instalar App',
+    addToHomeScreen: 'Adicionar à Tela Inicial',
+    iosInstructions: 'Toque no botão Compartilhar no Safari e selecione "Adicionar à Tela de Início".',
+    gotIt: 'Entendi',
   },
 }
