@@ -1596,106 +1596,128 @@ watch(
         </div>
       </div>
 
-      <div
-        v-if="isExpenseModalOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-8"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="expense-modal-title"
-        @click.self="!isExpenseSubmitting && closeExpenseModal()"
-      >
-        <div class="finance-card max-h-[min(90vh,44rem)] w-full max-w-md overflow-y-auto rounded-2xl p-5 shadow-xl">
-          <div class="flex items-start justify-between gap-3">
-            <h2 id="expense-modal-title" class="min-w-0 flex-1 text-lg font-black">{{ expenseModalTitle }}</h2>
-            <button
-              type="button"
-              class="theme-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)] disabled:pointer-events-none disabled:opacity-40"
-              :aria-label="t('common.close')"
-              :disabled="isExpenseSubmitting"
-              @click="closeExpenseModal"
-            >
-              <FontAwesomeIcon icon="xmark" />
-            </button>
-          </div>
-          <form class="mt-4 grid gap-3" @submit.prevent="submitExpense">
-            <fieldset class="grid gap-3 border-0 p-0 sm:grid-cols-2" :disabled="isExpenseSubmitting">
-              <label class="text-sm font-semibold">
-                {{ t('expenses.form.date') }}
-                <input v-model="form.date" type="date" class="theme-input mt-1 w-full rounded-xl p-3" required />
-              </label>
-              <label class="text-sm font-semibold">
-                {{ t('expenses.form.amount') }}
-                <input
-                  v-model="form.amount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  class="theme-input mt-1 w-full rounded-xl p-3"
-                  required
-                />
-              </label>
-            </fieldset>
-            <fieldset class="min-w-0 border-0 p-0" :disabled="isExpenseSubmitting">
-              <legend class="text-sm font-semibold">{{ t('expenses.form.category') }}</legend>
-              <div class="theme-border mt-2 flex flex-wrap gap-2 rounded-xl border p-2">
-                <button
-                  v-for="category in sortedCategories"
-                  :key="category.id"
-                  type="button"
-                  :class="[
-                    'finance-chip flex items-center gap-2 rounded-full px-3 py-2 text-xs font-bold',
-                    { 'is-active': form.categoryId === category.id },
-                  ]"
-                  @click="form.categoryId = category.id"
-                  :aria-pressed="form.categoryId === category.id"
-                >
-                  <FontAwesomeIcon :icon="categoryIconForName(category.name)" class="text-[0.65rem] opacity-95" />
-                  <span class="max-w-[9rem] truncate">{{ category.name }}</span>
-                </button>
-              </div>
-            </fieldset>
-            <fieldset class="border-0 p-0" :disabled="isExpenseSubmitting">
-              <label class="text-sm font-semibold">
-                {{ t('expenses.form.account') }}
-                <select v-model="form.accountId" class="theme-input mt-1 w-full rounded-xl p-3" required>
-                  <option v-for="account in accounts" :key="account.id" :value="account.id">
-                    {{ account.name }}
-                  </option>
-                </select>
-              </label>
-              <label class="mt-3 block text-sm font-semibold">
-                {{ t('expenses.form.note') }}
-                <input v-model="form.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
-              </label>
-            </fieldset>
-            <div class="flex flex-wrap gap-2 pt-1">
+      <Transition name="expense-backdrop">
+        <div
+          v-if="isExpenseModalOpen"
+          class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:px-4 sm:py-8"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="expense-modal-title"
+          @click.self="!isExpenseSubmitting && closeExpenseModal()"
+        >
+          <div class="expense-sheet-panel finance-card flex max-h-[90dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-h-[44rem] sm:max-w-md sm:rounded-2xl">
+            <!-- Drag handle (mobile only) -->
+            <div
+              class="mx-auto mt-3 mb-1 h-1 w-10 shrink-0 rounded-full opacity-40 sm:hidden"
+              style="background: var(--color-border)"
+              aria-hidden="true"
+            />
+
+            <!-- Header -->
+            <div class="flex shrink-0 items-center justify-between gap-3 px-5 pt-4 pb-3">
+              <h2 id="expense-modal-title" class="min-w-0 flex-1 text-lg font-black">
+                {{ expenseModalTitle }}
+              </h2>
               <button
                 type="button"
-                class="theme-button-secondary rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-50"
+                class="theme-muted flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl text-lg leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)] disabled:pointer-events-none disabled:opacity-40"
+                :aria-label="t('common.close')"
                 :disabled="isExpenseSubmitting"
                 @click="closeExpenseModal"
               >
-                {{ t('common.cancel') }}
-              </button>
-              <button
-                type="submit"
-                class="theme-button-primary flex min-w-[8rem] flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-60"
-                :disabled="isExpenseSubmitting"
-                :aria-busy="isExpenseSubmitting"
-              >
-                <FontAwesomeIcon v-if="isExpenseSubmitting" icon="spinner" class="h-4 w-4 shrink-0 animate-spin" />
-                {{
-                  isExpenseSubmitting
-                    ? t('common.saving')
-                    : editingExpenseId
-                      ? t('common.save')
-                      : t('expenses.form.submit')
-                }}
+                <FontAwesomeIcon icon="xmark" />
               </button>
             </div>
-          </form>
+
+            <!-- Scrollable form body + sticky footer -->
+            <form class="flex min-h-0 flex-1 flex-col" @submit.prevent="submitExpense">
+              <div class="flex-1 overflow-y-auto px-5 pb-2">
+                <fieldset class="grid gap-3 border-0 p-0 sm:grid-cols-2" :disabled="isExpenseSubmitting">
+                  <label class="text-sm font-semibold">
+                    {{ t('expenses.form.date') }}
+                    <input v-model="form.date" type="date" class="theme-input mt-1 w-full rounded-xl p-3" required />
+                  </label>
+                  <label class="text-sm font-semibold">
+                    {{ t('expenses.form.amount') }}
+                    <input
+                      v-model="form.amount"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="theme-input mt-1 w-full rounded-xl p-3"
+                      required
+                    />
+                  </label>
+                </fieldset>
+
+                <fieldset class="mt-3 min-w-0 border-0 p-0" :disabled="isExpenseSubmitting">
+                  <legend class="text-sm font-semibold">{{ t('expenses.form.category') }}</legend>
+                  <div class="theme-border mt-2 flex gap-2 overflow-x-auto rounded-xl border p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    <button
+                      v-for="category in sortedCategories"
+                      :key="category.id"
+                      type="button"
+                      :class="[
+                        'finance-chip flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-bold',
+                        { 'is-active': form.categoryId === category.id },
+                      ]"
+                      :aria-pressed="form.categoryId === category.id"
+                      @click="form.categoryId = category.id"
+                    >
+                      <FontAwesomeIcon :icon="categoryIconForName(category.name)" class="text-[0.65rem] opacity-95" />
+                      <span class="max-w-[9rem] truncate">{{ category.name }}</span>
+                    </button>
+                  </div>
+                </fieldset>
+
+                <fieldset class="mt-3 border-0 p-0" :disabled="isExpenseSubmitting">
+                  <label class="text-sm font-semibold">
+                    {{ t('expenses.form.account') }}
+                    <select v-model="form.accountId" class="theme-input mt-1 w-full rounded-xl p-3" required>
+                      <option v-for="account in accounts" :key="account.id" :value="account.id">
+                        {{ account.name }}
+                      </option>
+                    </select>
+                  </label>
+                  <label class="mt-3 block text-sm font-semibold">
+                    {{ t('expenses.form.note') }}
+                    <input v-model="form.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
+                  </label>
+                </fieldset>
+              </div>
+
+              <!-- Sticky action footer -->
+              <div class="theme-border shrink-0 border-t px-5 py-4">
+                <div class="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    class="theme-button-secondary cursor-pointer rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-50"
+                    :disabled="isExpenseSubmitting"
+                    @click="closeExpenseModal"
+                  >
+                    {{ t('common.cancel') }}
+                  </button>
+                  <button
+                    type="submit"
+                    class="theme-button-primary flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-60"
+                    :disabled="isExpenseSubmitting"
+                    :aria-busy="isExpenseSubmitting"
+                  >
+                    <FontAwesomeIcon v-if="isExpenseSubmitting" icon="spinner" class="h-4 w-4 shrink-0 animate-spin" />
+                    {{
+                      isExpenseSubmitting
+                        ? t('common.saving')
+                        : editingExpenseId
+                          ? t('common.save')
+                          : t('expenses.form.submit')
+                    }}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      </Transition>
 
       <div
         v-if="isRenameModalOpen && renameTarget"
@@ -1745,3 +1767,32 @@ watch(
     </main>
   </div>
 </template>
+
+<style>
+.expense-backdrop-enter-active,
+.expense-backdrop-leave-active {
+  transition: opacity 220ms ease;
+}
+.expense-backdrop-enter-from,
+.expense-backdrop-leave-to {
+  opacity: 0;
+}
+
+/* Desktop: subtle slide up */
+.expense-backdrop-enter-active .expense-sheet-panel {
+  transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.expense-backdrop-enter-from .expense-sheet-panel {
+  transform: translateY(1.5rem);
+}
+
+/* Mobile: full slide from bottom */
+@media (max-width: 639px) {
+  .expense-backdrop-enter-active .expense-sheet-panel {
+    transition: transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .expense-backdrop-enter-from .expense-sheet-panel {
+    transform: translateY(100%);
+  }
+}
+</style>
