@@ -1697,19 +1697,10 @@ watch(
 
               <!-- Sticky action footer -->
               <div class="theme-border shrink-0 border-t px-5 py-4">
-                <div class="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    class="theme-button-secondary cursor-pointer rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-50"
-                    style="background: var(--color-surface-soft)"
-                    :disabled="isExpenseSubmitting"
-                    @click="closeExpenseModal"
-                  >
-                    {{ t('common.cancel') }}
-                  </button>
+                <div class="flex gap-2">
                   <button
                     type="submit"
-                    class="theme-button-primary flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-60"
+                    class="theme-button-primary flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 font-bold disabled:pointer-events-none disabled:opacity-60"
                     :disabled="isExpenseSubmitting"
                     :aria-busy="isExpenseSubmitting"
                   >
