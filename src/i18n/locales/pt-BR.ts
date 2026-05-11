@@ -1,6 +1,7 @@
 export default {
   home: {
-    badge: 'Money Plan',
+    badge: 'Com IA',
+    badgeFree: '100% Grátis',
     headline: 'Fale com seu dinheiro. ',
     headlineHighlight: 'Ele finalmente tem as respostas',
     description:
@@ -33,6 +34,10 @@ export default {
       },
     },
     features: {
+      chatbot: {
+        title: 'Chat de Despesas com IA',
+        description: 'Faça perguntas sobre seus dados financeiros em linguagem natural. Totais, tendências e comparativos sem precisar ler um único gráfico.',
+      },
       tracking: {
         title: 'Registro diário de despesas',
         description: 'Registre cada despesa em segundos com data, valor, conta, categoria e observação.',
@@ -62,9 +67,9 @@ export default {
           title: 'Adicione receitas e despesas',
           description: 'Registre o dinheiro que entra e cada despesa diária quando ela acontece.',
         },
-        analyze: {
-          title: 'Revise seu mês',
-          description: 'Use totais por categoria e gráficos para decidir melhor antes do mês acabar.',
+        chat: {
+          title: 'Pergunte ao assistente de IA',
+          description: 'Converse com seus dados: totais, tendências e comparativos em linguagem natural — sem gráficos, sem cálculos manuais.',
         },
       },
     },

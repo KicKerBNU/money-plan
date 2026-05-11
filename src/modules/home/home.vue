@@ -5,6 +5,7 @@ import ThemeToggle from '@/modules/theme/theme-toggle.vue'
 const { t } = useI18n()
 
 const features = [
+  { icon: 'comments', key: 'chatbot' },
   { icon: 'database', key: 'tracking' },
   { icon: 'layer-group', key: 'categories' },
   { icon: 'route', key: 'accounts' },
@@ -14,7 +15,7 @@ const features = [
 const steps = [
   { icon: 'bolt', key: 'capture' },
   { icon: 'code', key: 'organize' },
-  { icon: 'globe', key: 'analyze' },
+  { icon: 'comments', key: 'chat' },
 ] as const
 
 const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secure'] as const
@@ -36,7 +37,7 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
     <section class="relative mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 pt-8 sm:pb-24 sm:pt-12 lg:grid-cols-[1fr_0.95fr]">
       <div class="text-center lg:text-left">
         <span class="theme-badge mb-5 inline-flex animate-fade-up rounded-full px-4 py-1.5 text-sm font-medium">
-          {{ t('home.badge') }}
+          {{ t('home.badge') }} · {{ t('home.badgeFree') }}
         </span>
 
         <h1 class="animate-fade-up text-5xl font-semibold tracking-tight sm:text-6xl">
@@ -179,7 +180,7 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
 
     <!-- Feature cards -->
     <section class="relative mx-auto max-w-6xl px-6 pb-20">
-      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <div
           v-for="feature in features"
           :key="feature.key"
@@ -227,7 +228,8 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
 
     <!-- Footer -->
     <footer class="theme-border theme-subtle border-t py-8 text-center text-sm">
-      {{ t('home.footer') }}
+      {{ t('home.footer') }} ·
+      <RouterLink to="/faq" class="hover:underline">FAQ</RouterLink>
     </footer>
   </div>
 </template>

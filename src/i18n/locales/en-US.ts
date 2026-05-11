@@ -1,6 +1,7 @@
 export default {
   home: {
-    badge: 'Money Plan',
+    badge: 'AI-Powered',
+    badgeFree: '100% Free',
     headline: 'Talk to your money. ',
     headlineHighlight: 'It finally has the answers',
     description:
@@ -33,6 +34,10 @@ export default {
       },
     },
     features: {
+      chatbot: {
+        title: 'AI Expense Chat',
+        description: 'Ask your financial data questions in plain language. Get totals, trends, and comparisons without reading a single chart.',
+      },
       tracking: {
         title: 'Daily Expense Tracking',
         description: 'Capture every expense in seconds with date, amount, account, category, and note.',
@@ -62,9 +67,9 @@ export default {
           title: 'Add income and expenses',
           description: 'Record money coming in and every daily expense as it happens.',
         },
-        analyze: {
-          title: 'Review your month',
-          description: 'Use category totals and charts to make better decisions before the month ends.',
+        chat: {
+          title: 'Ask the AI assistant',
+          description: 'Chat with your data: ask totals, trends, and comparisons in plain language — no charts, no manual math.',
         },
       },
     },
