@@ -1614,7 +1614,9 @@ watch(
           aria-labelledby="expense-modal-title"
           @click.self="!isExpenseSubmitting && closeExpenseModal()"
         >
-          <div class="expense-sheet-panel finance-card flex max-h-[90dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-h-[44rem] sm:max-w-md sm:rounded-2xl">
+          <div
+            class="expense-sheet-panel finance-card flex max-h-[90dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-h-[44rem] sm:max-w-md sm:rounded-2xl lg:max-w-2xl"
+          >
             <!-- Drag handle (mobile only) -->
             <div
               class="mx-auto mt-3 mb-1 h-1 w-10 shrink-0 rounded-full opacity-40 sm:hidden"
@@ -1661,13 +1663,16 @@ watch(
 
                 <fieldset class="mt-3 min-w-0 border-0 p-0" :disabled="isExpenseSubmitting">
                   <legend class="text-sm font-semibold">{{ t('expenses.form.category') }}</legend>
-                  <div class="theme-border mt-2 flex gap-2 overflow-x-auto rounded-xl border p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  <!-- Mobile / tablet: horizontal swipe strip -->
+                  <div
+                    class="theme-border mt-2 flex gap-2 overflow-x-auto overscroll-x-contain rounded-xl border p-2 pb-2.5 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] snap-x snap-mandatory lg:hidden [&::-webkit-scrollbar]:hidden"
+                  >
                     <button
                       v-for="category in sortedCategories"
-                      :key="category.id"
+                      :key="'m-' + category.id"
                       type="button"
                       :class="[
-                        'finance-chip flex shrink-0 cursor-pointer items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold',
+                        'finance-chip flex shrink-0 cursor-pointer snap-start items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold touch-pan-x',
                         { 'is-active': form.categoryId === category.id },
                       ]"
                       :aria-pressed="form.categoryId === category.id"
@@ -1675,6 +1680,26 @@ watch(
                     >
                       <FontAwesomeIcon :icon="categoryIconForName(category.name)" class="text-[0.65rem] opacity-95" />
                       <span class="max-w-[9rem] truncate">{{ category.name }}</span>
+                    </button>
+                  </div>
+                  <!-- Desktop (lg+): all categories visible in a grid -->
+                  <div class="theme-border mt-2 hidden gap-2 rounded-xl border p-3 lg:grid lg:grid-cols-3 xl:grid-cols-4">
+                    <button
+                      v-for="category in sortedCategories"
+                      :key="'d-' + category.id"
+                      type="button"
+                      :class="[
+                        'finance-chip flex min-h-[2.5rem] w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-semibold',
+                        { 'is-active': form.categoryId === category.id },
+                      ]"
+                      :aria-pressed="form.categoryId === category.id"
+                      @click="form.categoryId = category.id"
+                    >
+                      <FontAwesomeIcon
+                        :icon="categoryIconForName(category.name)"
+                        class="pointer-events-none shrink-0 text-[0.72rem] opacity-95"
+                      />
+                      <span class="min-w-0 truncate">{{ category.name }}</span>
                     </button>
                   </div>
                 </fieldset>
