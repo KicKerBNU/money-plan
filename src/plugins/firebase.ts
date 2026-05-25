@@ -1,6 +1,11 @@
 import { initializeApp } from 'firebase/app'
 import { getAnalytics, isSupported } from 'firebase/analytics'
-import { connectAuthEmulator, getAuth } from 'firebase/auth'
+import {
+  browserLocalPersistence,
+  connectAuthEmulator,
+  indexedDBLocalPersistence,
+  initializeAuth,
+} from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC8SlRdxkXVwWkwgiNOyrAcBygTlJWxGAw',
@@ -13,7 +18,11 @@ const firebaseConfig = {
 }
 
 export const firebaseApp = initializeApp(firebaseConfig)
-export const firebaseAuth = getAuth(firebaseApp)
+
+/** Prefer IndexedDB, fall back to localStorage so sessions survive PWA restarts. */
+export const firebaseAuth = initializeAuth(firebaseApp, {
+  persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+})
 
 if (import.meta.env.VITE_USE_FIREBASE_AUTH_EMULATOR === 'true') {
   connectAuthEmulator(firebaseAuth, `http://${window.location.hostname}:9099`, {

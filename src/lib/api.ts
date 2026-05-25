@@ -31,10 +31,11 @@ export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T>
     throw new Error(msg)
   }
 
-  let response: Response
-  try {
-    const token = await user.getIdToken()
-    response = await fetch(`${API_BASE_URL}${path}`, {
+  const authUser = user
+
+  async function requestWithToken(forceRefresh: boolean) {
+    const token = await authUser.getIdToken(forceRefresh)
+    return fetch(`${API_BASE_URL}${path}`, {
       ...fetchInit,
       headers: {
         'Content-Type': 'application/json',
@@ -42,6 +43,15 @@ export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T>
         Authorization: `Bearer ${token}`,
       },
     })
+  }
+
+  let response: Response
+  try {
+    response = await requestWithToken(false)
+
+    if (response.status === 401) {
+      response = await requestWithToken(true)
+    }
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(i18n.global.t('common.unexpectedError'))
     if (!toastOpt?.silentError) showToast('error', msg)
