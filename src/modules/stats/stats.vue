@@ -57,9 +57,8 @@ function formatCompactMoney(value: number) {
   return formatMoney(value)
 }
 
-function brickHeight(amount: number, entries: number) {
-  if (entries <= 0) return '3%'
-  return `${Math.max(3, (amount / maxAmount.value / entries) * 100)}%`
+function pillarFillHeight(amount: number) {
+  return `${(amount / maxAmount.value) * 100}%`
 }
 
 function lineWidth(percent: number) {
@@ -140,11 +139,15 @@ onMounted(() => {
               </strong>
               <div class="stats-pillar-track">
                 <div
-                  v-for="brick in category.entries"
-                  :key="brick"
-                  class="stats-brick"
-                  :style="{ height: brickHeight(category.amount, category.entries) }"
-                />
+                  class="stats-pillar-fill"
+                  :style="{ height: pillarFillHeight(category.amount) }"
+                >
+                  <div
+                    v-for="brick in category.entries"
+                    :key="brick"
+                    class="stats-brick"
+                  />
+                </div>
               </div>
               <div class="stats-category-icon">
                 <FontAwesomeIcon :icon="category.icon" />

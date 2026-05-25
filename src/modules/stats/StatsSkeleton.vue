@@ -19,11 +19,13 @@ const barRound = 'finance-skeleton-block finance-skeleton-pulse rounded-md'
         >
           <div :class="[barRound, 'min-h-[0.75rem] w-12']" />
           <div class="stats-pillar-track">
-            <div
-              v-for="b in 5"
-              :key="b"
-              class="finance-skeleton-block finance-skeleton-pulse stats-brick opacity-80"
-            />
+            <div class="stats-pillar-fill" style="height: 55%">
+              <div
+                v-for="b in 5"
+                :key="b"
+                class="finance-skeleton-block finance-skeleton-pulse stats-brick opacity-80"
+              />
+            </div>
           </div>
           <div class="stats-category-icon finance-skeleton-block finance-skeleton-pulse" />
           <div :class="[barRound, 'h-3 w-16']" />
