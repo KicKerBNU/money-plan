@@ -425,6 +425,23 @@ body {
       padding-bottom: 5.25rem;
     }
 
+    .chatbot-screen .app-finance-page-inner {
+      display: flex;
+      min-height: calc(100svh - 6.5rem);
+      flex-direction: column;
+      padding-bottom: 1rem;
+    }
+
+    .chatbot-screen .chatbot-panel {
+      flex: 1 1 auto;
+      min-height: min(22rem, calc(100dvh - 13rem));
+      max-height: none;
+    }
+
+    .chatbot-screen .chatbot-composer {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
     .mobile-page-header {
       padding-top: 0.35rem;
     }
@@ -571,6 +588,16 @@ body {
     background: var(--color-surface-soft);
     color: var(--color-text);
     font-size: 1rem; /* prevents iOS Safari auto-zoom on focus (requires ≥16px) */
+  }
+
+  .chatbot-input {
+    font-size: 1rem; /* prevents iOS Safari auto-zoom on focus (requires ≥16px) */
+  }
+
+  @media (min-width: 1024px) {
+    .chatbot-input {
+      font-size: 0.875rem;
+    }
   }
 
   .theme-input::placeholder {

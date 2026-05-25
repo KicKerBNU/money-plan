@@ -118,7 +118,7 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
   <div class="app-shell">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen" :aria-busy="showThreadHydrateSkeleton">
+    <main class="app-content app-mobile-screen chatbot-screen" :aria-busy="showThreadHydrateSkeleton">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header flex flex-wrap items-start justify-between gap-4 pt-9 lg:pt-0">
           <div>
@@ -142,7 +142,7 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
         </header>
 
         <div
-          class="finance-card mt-6 flex min-h-[min(22rem,calc(100svh-12rem))] max-h-[calc(100svh-12.5rem)] flex-col overflow-hidden rounded-2xl lg:max-h-[calc(100vh-10.5rem)]"
+          class="chatbot-panel finance-card mt-6 flex min-h-[min(22rem,calc(100svh-12rem))] max-h-[calc(100svh-12.5rem)] flex-col overflow-hidden rounded-2xl lg:max-h-[calc(100vh-10.5rem)]"
         >
           <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
               <template v-if="!showMessageList && showThreadHydrateSkeleton">
@@ -209,13 +209,13 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
             </div>
 
             <form
-              class="theme-border flex flex-col gap-3 border-t px-5 py-4 sm:px-6"
+              class="chatbot-composer theme-border flex shrink-0 flex-col gap-3 border-t px-5 py-4 sm:px-6"
               style="background: var(--color-surface-soft)"
               @submit.prevent="send"
             >
               <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
                 <label
-                  class="flex min-h-0 min-w-0 flex-1 cursor-text flex-col gap-2 rounded-xl border-2 px-4 py-3 shadow-sm outline-none ring-offset-2 ring-offset-[var(--color-surface-soft)] transition-[border-color,box-shadow] focus-within:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] focus-within:ring-2 focus-within:ring-[color-mix(in_srgb,var(--color-primary)_32%,transparent)]"
+                  class="chatbot-input-shell flex min-h-0 min-w-0 flex-1 cursor-text flex-col gap-2 rounded-xl border-2 px-4 py-3 shadow-sm outline-none ring-offset-2 ring-offset-[var(--color-surface-soft)] transition-[border-color,box-shadow] focus-within:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] focus-within:ring-2 focus-within:ring-[color-mix(in_srgb,var(--color-primary)_32%,transparent)]"
                   style="
                     border-color: var(--color-border);
                     background: var(--color-surface);
@@ -230,10 +230,13 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
                   <textarea
                     id="chatbot-input"
                     v-model="draft"
-                    rows="3"
+                    rows="2"
                     :disabled="isSending"
                     maxlength="6000"
-                    class="min-h-[5.5rem] w-full flex-1 resize-y border-0 bg-transparent p-0 text-sm text-[var(--color-text)] outline-none ring-0 placeholder:text-[var(--color-muted)] focus:ring-0 disabled:cursor-not-allowed disabled:opacity-55"
+                    enterkeyhint="send"
+                    autocomplete="off"
+                    autocorrect="on"
+                    class="chatbot-input min-h-[3.25rem] w-full flex-1 resize-none border-0 bg-transparent p-0 leading-relaxed text-[var(--color-text)] outline-none ring-0 placeholder:text-[var(--color-muted)] focus:ring-0 disabled:cursor-not-allowed disabled:opacity-55 sm:min-h-[5.5rem] sm:resize-y"
                     :placeholder="t('chatbot.placeholder')"
                     @keydown.enter.exact.prevent="send"
                   />
