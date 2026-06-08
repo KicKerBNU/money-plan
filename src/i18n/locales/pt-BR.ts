@@ -93,6 +93,10 @@ export default {
     light: 'Modo claro',
     dark: 'Modo escuro',
   },
+  preferences: {
+    currency: 'Moeda',
+    currencyAuto: 'Automática · {code}',
+  },
   auth: {
     login: {
       badge: 'Acesso seguro',
@@ -147,6 +151,7 @@ export default {
     clear: 'Novo papo',
     inputLabel: 'Sua mensagem',
     loadingLive: 'O assistente está preparando uma resposta',
+    actionsAria: 'Mais ações',
   },
   income: {
     title: 'Receitas',
@@ -188,17 +193,18 @@ export default {
     },
     filters: {
       all: 'Todos',
-      range: 'Periodo',
+      range: 'Período',
       from: 'De',
-      to: 'Ate',
+      to: 'Até',
       clearDate: 'Limpar',
-      quickRange: 'Rapido',
-      last3Days: 'Ultimos 3 dias',
-      last7Days: 'Ultimos 7 dias',
+      quickRange: 'Rápido',
+      last3Days: 'Últimos 3 dias',
+      last7Days: 'Últimos 7 dias',
       tripWeek: 'Semana da viagem',
-      tripWeekModalTitle: 'Selecionar periodo da viagem',
-      tripWeekModalDescription: 'Escolha as datas de inicio e fim para acompanhar os gastos da sua viagem.',
-      applyRange: 'Aplicar periodo',
+      tripWeekModalTitle: 'Selecionar período da viagem',
+      tripWeekModalDescription:
+        'Escolha as datas de início e fim para acompanhar os gastos da sua viagem.',
+      applyRange: 'Aplicar período',
       selectedDateSpend: 'Gasto em {date}: {amount}',
       selectedDateRangeSpend: 'Gasto em {date}: {amount}',
     },
@@ -213,8 +219,9 @@ export default {
       earnedAmount: 'de {amount} recebidos',
     },
     emptyMonth: {
-      title: 'Ainda sem despesas neste mes',
-      description: 'Comece adicionando sua primeira despesa para liberar os insights por categoria e os saldos das contas.',
+      title: 'Ainda sem despesas neste mês',
+      description:
+        'Comece adicionando sua primeira despesa para liberar os insights por categoria e os saldos das contas.',
       cta: 'Adicionar primeira despesa',
     },
     panels: {

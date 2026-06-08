@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useMoney } from '@/lib/money'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
 import {
@@ -14,6 +15,7 @@ import type { Account } from '@/modules/expenses/domain/expenses.types'
 import { openConfirmModal } from '@/utils/confirmModal'
 
 const { t, locale } = useI18n()
+const { format: formatMoney } = useMoney()
 
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
@@ -44,16 +46,6 @@ watch(
   },
   { deep: true }
 )
-
-function formatMoney(value: number) {
-  const hasCents = !Number.isInteger(value)
-  return new Intl.NumberFormat(locale.value, {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: hasCents ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
 
 async function loadAccounts() {
   isLoading.value = true

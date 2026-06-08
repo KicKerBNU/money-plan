@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { categoryIconForName } from '@/lib/categoryIcons'
 import { formatMonthYear } from '@/lib/dateDisplay'
+import { useMoney } from '@/lib/money'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
 import { fetchAccounts, fetchExpensesByDateRange } from '@/modules/expenses/api/expenses.api'
@@ -21,6 +22,7 @@ import {
 } from '@/modules/overview/lib/overviewPeriod'
 
 const { t, locale } = useI18n()
+const { format: formatMoney } = useMoney()
 
 const preset = ref<OverviewPreset>('month')
 const anchor = ref(new Date())
@@ -196,16 +198,6 @@ const insights = computed(() => {
 
   return items
 })
-
-function formatMoney(value: number) {
-  const hasCents = !Number.isInteger(value)
-  return new Intl.NumberFormat(locale.value, {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: hasCents ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
 
 async function loadOverview() {
   isLoading.value = true

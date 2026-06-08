@@ -3,12 +3,14 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { categoryIconForName } from '@/lib/categoryIcons'
 import { formatMonthYear } from '@/lib/dateDisplay'
+import { useMoney } from '@/lib/money'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import StatsSkeleton from '@/modules/stats/StatsSkeleton.vue'
 import { fetchMonthlyExpensesStats } from './api/stats.api'
 import type { MonthlyCategoryTotal } from './domain/stats.types'
 
 const { t, locale } = useI18n()
+const { format: formatMoney, currency } = useMoney()
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
 const today = new Date()
@@ -41,19 +43,18 @@ const categories = computed(() =>
 )
 const maxAmount = computed(() => Math.max(1, ...categories.value.map((category) => category.amount)))
 
-function formatMoney(value: number) {
-  const hasCents = !Number.isInteger(value)
-
-  return new Intl.NumberFormat(locale.value, {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: hasCents ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
-
 function formatCompactMoney(value: number) {
-  if (value >= 1000) return `$${(value / 1000).toFixed(1)}k`
+  if (value >= 1000) {
+    // Compact form ("$1.2k" / "€1.2 mil") — keep currency symbol from Intl,
+    // but show one decimal and a localized "k" suffix only for English.
+    const compact = new Intl.NumberFormat(locale.value, {
+      style: 'currency',
+      currency: currency.value,
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value)
+    return compact
+  }
   return formatMoney(value)
 }
 

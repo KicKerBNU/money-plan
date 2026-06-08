@@ -93,6 +93,10 @@ export default {
     light: 'Light mode',
     dark: 'Dark mode',
   },
+  preferences: {
+    currency: 'Currency',
+    currencyAuto: 'Auto · {code}',
+  },
   auth: {
     login: {
       badge: 'Secure access',
@@ -147,6 +151,7 @@ export default {
     clear: 'New chat',
     inputLabel: 'Your message',
     loadingLive: 'Assistant is preparing a reply',
+    actionsAria: 'More actions',
   },
   income: {
     title: 'Income',

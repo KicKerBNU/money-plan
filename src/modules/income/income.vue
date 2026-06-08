@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getDefaultAccountId } from '@/lib/defaultAccount'
 import { formatMonthYear } from '@/lib/dateDisplay'
+import { useMoney } from '@/lib/money'
 import { openConfirmModal } from '@/utils/confirmModal'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import IncomeSkeleton from '@/modules/income/IncomeSkeleton.vue'
@@ -13,6 +14,7 @@ import { createIncome, deleteIncome, fetchIncomesByPeriod, updateIncome } from '
 import type { IncomeEntry } from './domain/income.types'
 
 const { t, locale } = useI18n()
+const { format: formatMoney } = useMoney()
 const cashFlowStore = useCashFlowStore()
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
@@ -58,17 +60,6 @@ const incomeRows = computed(() =>
     }
   })
 )
-
-function formatMoney(value: number) {
-  const hasCents = !Number.isInteger(value)
-
-  return new Intl.NumberFormat(locale.value, {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: hasCents ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(value)
-}
 
 function toInputDate(date: Date) {
   const year = date.getFullYear()

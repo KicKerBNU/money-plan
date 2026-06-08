@@ -11,4 +11,9 @@ export const homeRoutes: RouteRecordRaw[] = [
     name: 'faq',
     component: () => import('./faq.vue'),
   },
+  {
+    path: '/privacy',
+    name: 'privacy',
+    component: () => import('./privacy.vue'),
+  },
 ]

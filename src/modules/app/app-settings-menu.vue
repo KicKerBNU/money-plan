@@ -1,20 +1,27 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { useThemeStore } from '@/modules/theme/store/theme.store'
+import { usePreferencesStore } from '@/modules/preferences/store/preferences.store'
+import { detectCurrencyFromLocale, SUPPORTED_CURRENCIES } from '@/lib/money'
 import { usePwaInstall } from '@/utils/usePwaInstall'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const preferences = usePreferencesStore()
 const { canPrompt, isIOS, isInstalled, promptInstall } = usePwaInstall()
 
 const rootRef = ref<HTMLElement | null>(null)
 const open = ref(false)
 const iosInstructionVisible = ref(false)
+const isCurrencyMenuOpen = ref(false)
+
+const autoCurrency = computed(() => detectCurrencyFromLocale(locale.value))
+const activeCurrency = computed(() => preferences.currency ?? autoCurrency.value)
 
 const showInstallOption = () => !isInstalled.value && (canPrompt.value || isIOS.value)
 
@@ -60,6 +67,16 @@ function toggleTheme() {
   closeMenu()
 }
 
+function toggleCurrencyMenu() {
+  isCurrencyMenuOpen.value = !isCurrencyMenuOpen.value
+}
+
+function selectCurrency(code: string | null) {
+  preferences.setCurrency(code)
+  isCurrencyMenuOpen.value = false
+  closeMenu()
+}
+
 async function handleInstall() {
   closeMenu()
   if (isIOS.value) {
@@ -98,6 +115,57 @@ async function handleInstall() {
           <FontAwesomeIcon :icon="themeStore.isDark ? 'sun' : 'moon'" class="w-4 opacity-90" />
           {{ themeStore.isDark ? t('theme.light') : t('theme.dark') }}
         </button>
+
+        <div class="theme-border mx-2 my-0.5 border-t opacity-70" />
+        <button
+          type="button"
+          class="flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[var(--color-surface-soft)]"
+          role="menuitem"
+          :aria-expanded="isCurrencyMenuOpen"
+          @click="toggleCurrencyMenu"
+        >
+          <span class="flex items-center gap-2.5">
+            <FontAwesomeIcon icon="coins" class="w-4 opacity-90" />
+            {{ t('preferences.currency') }}
+          </span>
+          <span class="flex items-center gap-1.5 text-xs font-bold opacity-80">
+            {{ activeCurrency }}
+            <FontAwesomeIcon :icon="isCurrencyMenuOpen ? 'chevron-up' : 'chevron-down'" class="text-[0.65rem]" />
+          </span>
+        </button>
+
+        <div v-if="isCurrencyMenuOpen" class="px-1.5 pb-1.5">
+          <button
+            type="button"
+            class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-[0.8rem] transition-colors hover:bg-[var(--color-surface-soft)]"
+            :class="{ 'font-bold': preferences.currency === null }"
+            @click="selectCurrency(null)"
+          >
+            <span>{{ t('preferences.currencyAuto', { code: autoCurrency }) }}</span>
+            <FontAwesomeIcon
+              v-if="preferences.currency === null"
+              icon="check"
+              class="text-xs"
+              style="color: var(--color-primary)"
+            />
+          </button>
+          <button
+            v-for="code in SUPPORTED_CURRENCIES"
+            :key="code"
+            type="button"
+            class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-[0.8rem] transition-colors hover:bg-[var(--color-surface-soft)]"
+            :class="{ 'font-bold': preferences.currency === code }"
+            @click="selectCurrency(code)"
+          >
+            <span>{{ code }}</span>
+            <FontAwesomeIcon
+              v-if="preferences.currency === code"
+              icon="check"
+              class="text-xs"
+              style="color: var(--color-primary)"
+            />
+          </button>
+        </div>
 
         <template v-if="showInstallOption()">
           <div class="theme-border mx-2 my-0.5 border-t opacity-70" />

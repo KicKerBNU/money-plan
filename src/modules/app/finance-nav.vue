@@ -6,29 +6,19 @@ import { RouterLink, useRoute, type RouteLocationRaw } from 'vue-router'
 import MoneyPlanMark from '@/modules/app/money-plan-mark.vue'
 import AppSettingsMenu from '@/modules/app/app-settings-menu.vue'
 import { formatMonthYear } from '@/lib/dateDisplay'
+import { useMoney } from '@/lib/money'
 import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const cashFlowStore = useCashFlowStore()
 const { cashFlowNet, loading: cashFlowLoading } = storeToRefs(cashFlowStore)
+const { formatSigned: formatCashFlowMoney } = useMoney()
 
 const navMonthLabel = computed(() => {
   const { year, month } = cashFlowStore.calendarYearMonth()
   return formatMonthYear(locale.value, year, month)
 })
-
-function formatCashFlowMoney(value: number) {
-  const absoluteValue = Math.abs(value)
-  const hasCents = !Number.isInteger(absoluteValue)
-  const formatted = new Intl.NumberFormat(locale.value, {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: hasCents ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(absoluteValue)
-  return `${value >= 0 ? '+' : '-'}${formatted}`
-}
 
 onMounted(() => void cashFlowStore.refresh())
 
@@ -66,10 +56,14 @@ const addExpenseAction: NavItem = {
   isAction: true,
 }
 
-/** Fewer tabs on small screens; add action is the third of five (center). */
+/**
+ * Mobile bottom dock: the four most-used screens.
+ * "Add expense" is the daily-driver action, so it sits in the second slot
+ * (next to Expenses) and renders as a primary FAB; Stats is reachable from
+ * Overview/sidebar on larger screens.
+ */
 const mobileNavItems: NavItem[] = [
   navByKey('expenses'),
-  navByKey('stats'),
   addExpenseAction,
   navByKey('chatbot'),
   navByKey('accounts'),
@@ -145,7 +139,7 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
   </div>
 
   <nav
-    class="mobile-bottom-nav theme-card fixed inset-x-4 bottom-4 z-30 grid grid-cols-5 items-center rounded-[1.6rem] px-3 py-2 shadow-2xl lg:hidden"
+    class="mobile-bottom-nav theme-card fixed inset-x-4 bottom-4 z-30 grid grid-cols-4 items-center rounded-[1.6rem] px-3 py-2 shadow-2xl lg:hidden"
   >
     <RouterLink
       v-for="item in mobileNavItems"

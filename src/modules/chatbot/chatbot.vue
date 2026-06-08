@@ -13,6 +13,22 @@ const draft = ref('')
 const isSending = ref(false)
 const errorMessage = ref<string | null>(null)
 const scrollAnchor = ref<HTMLElement | null>(null)
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
+const canSend = computed(() => draft.value.trim().length > 0 && !isSending.value)
+
+/** Auto-grows the composer textarea up to ~6 lines, matching Gemini/ChatGPT input feel. */
+function autosizeTextarea() {
+  const el = textareaRef.value
+  if (!el) return
+  el.style.height = 'auto'
+  const maxHeight = 168 // ~6 lines @ 28px line-height
+  el.style.height = `${Math.min(el.scrollHeight, maxHeight)}px`
+}
+
+watch(draft, () => {
+  void nextTick(() => autosizeTextarea())
+})
 
 const loadingVerb = ref('')
 const loadingDotsCount = ref(1)
@@ -209,48 +225,56 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
             </div>
 
             <form
-              class="chatbot-composer theme-border flex shrink-0 flex-col gap-3 border-t px-5 py-4 sm:px-6"
-              style="background: var(--color-surface-soft)"
+              class="chatbot-composer flex shrink-0 px-4 pt-3 pb-4 sm:px-6"
               @submit.prevent="send"
             >
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <label
-                  class="chatbot-input-shell flex min-h-0 min-w-0 flex-1 cursor-text flex-col gap-2 rounded-xl border-2 px-4 py-3 shadow-sm outline-none ring-offset-2 ring-offset-[var(--color-surface-soft)] transition-[border-color,box-shadow] focus-within:border-[color-mix(in_srgb,var(--color-primary)_55%,var(--color-border))] focus-within:ring-2 focus-within:ring-[color-mix(in_srgb,var(--color-primary)_32%,transparent)]"
-                  style="
-                    border-color: var(--color-border);
-                    background: var(--color-surface);
-                    --tw-ring-offset-color: var(--color-surface-soft);
-                  "
+              <label
+                class="chatbot-pill flex w-full min-w-0 items-end gap-2 rounded-[1.65rem] px-2 py-2 transition-[box-shadow,border-color] focus-within:shadow-lg"
+                :for="'chatbot-input'"
+              >
+                <span class="sr-only">{{ t('chatbot.inputLabel') }}</span>
+
+                <button
+                  type="button"
+                  class="chatbot-pill-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                  :aria-label="t('chatbot.actionsAria')"
+                  tabindex="-1"
+                  disabled
                 >
-                  <span
-                    class="theme-muted pointer-events-none text-[0.65rem] font-black uppercase tracking-wide select-none"
-                  >
-                    {{ t('chatbot.inputLabel') }}
-                  </span>
-                  <textarea
-                    id="chatbot-input"
-                    v-model="draft"
-                    rows="2"
-                    :disabled="isSending"
-                    maxlength="6000"
-                    enterkeyhint="send"
-                    autocomplete="off"
-                    autocorrect="on"
-                    class="chatbot-input min-h-[3.25rem] w-full flex-1 resize-none border-0 bg-transparent p-0 leading-relaxed text-[var(--color-text)] outline-none ring-0 placeholder:text-[var(--color-muted)] focus:ring-0 disabled:cursor-not-allowed disabled:opacity-55 sm:min-h-[5.5rem] sm:resize-y"
-                    :placeholder="t('chatbot.placeholder')"
-                    @keydown.enter.exact.prevent="send"
-                  />
-                </label>
+                  <FontAwesomeIcon icon="plus" />
+                </button>
+
+                <textarea
+                  id="chatbot-input"
+                  v-model="draft"
+                  ref="textareaRef"
+                  rows="1"
+                  :disabled="isSending"
+                  maxlength="6000"
+                  enterkeyhint="send"
+                  autocomplete="off"
+                  autocorrect="on"
+                  class="chatbot-input min-w-0 flex-1 resize-none self-center border-0 bg-transparent p-2 leading-snug text-[var(--color-text)] outline-none ring-0 placeholder:text-[var(--color-muted)] focus:ring-0 disabled:cursor-not-allowed disabled:opacity-55"
+                  :placeholder="t('chatbot.placeholder')"
+                  @keydown.enter.exact.prevent="send"
+                  @input="autosizeTextarea"
+                />
+
                 <button
                   type="submit"
-                  class="flex h-11 shrink-0 items-center justify-center gap-2 self-stretch rounded-xl px-5 text-sm font-black text-white sm:self-auto disabled:opacity-45"
-                  style="background: var(--color-primary)"
-                  :disabled="isSending || !draft.trim()"
+                  class="chatbot-send-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+                  :class="canSend ? 'is-ready' : 'is-idle'"
+                  :aria-label="t('chatbot.send')"
+                  :disabled="isSending || !canSend"
                 >
-                  <FontAwesomeIcon v-if="isSending" icon="spinner" class="animate-spin motion-reduce:animate-none" />
-                  {{ isSending ? t('chatbot.sending') : t('chatbot.send') }}
+                  <FontAwesomeIcon
+                    v-if="isSending"
+                    icon="spinner"
+                    class="animate-spin motion-reduce:animate-none"
+                  />
+                  <FontAwesomeIcon v-else icon="arrow-up" />
                 </button>
-              </div>
+              </label>
             </form>
         </div>
       </div>

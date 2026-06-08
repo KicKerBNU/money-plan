@@ -127,6 +127,8 @@ const faqs = [
     <footer class="theme-border theme-subtle border-t py-8 text-center text-sm">
       Money Plan — Simple finance control for everyday life ·
       <RouterLink to="/" class="hover:underline">Home</RouterLink>
+      ·
+      <RouterLink to="/privacy" class="hover:underline">Privacy</RouterLink>
     </footer>
   </div>
 </template>

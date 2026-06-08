@@ -230,6 +230,8 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
     <footer class="theme-border theme-subtle border-t py-8 text-center text-sm">
       {{ t('home.footer') }} ·
       <RouterLink to="/faq" class="hover:underline">FAQ</RouterLink>
+      ·
+      <RouterLink to="/privacy" class="hover:underline">Privacy</RouterLink>
     </footer>
   </div>
 </template>

@@ -23,11 +23,13 @@ import {
 } from './api/expenses.api'
 import { getDefaultAccountId } from '@/lib/defaultAccount'
 import { categoryIconForName } from '@/lib/categoryIcons'
+import { useMoney } from '@/lib/money'
 import { openConfirmModal } from '@/utils/confirmModal'
 import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 import type { Account, Category, Expense } from './domain/expenses.types'
 
 const { t, locale } = useI18n()
+const { format: formatMoney } = useMoney()
 const route = useRoute()
 const router = useRouter()
 const cashFlowStore = useCashFlowStore()
@@ -409,18 +411,6 @@ function getCategoryColor(index: number) {
 function getExpenseColor(expense: { categoryId: number }) {
   const categoryIndex = categories.value.findIndex((category) => category.id === expense.categoryId)
   return getCategoryColor(Math.max(0, categoryIndex))
-}
-
-function formatMoney(value: number) {
-  const absoluteValue = Math.abs(value)
-  const hasCents = !Number.isInteger(absoluteValue)
-
-  return new Intl.NumberFormat(locale.value, {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: hasCents ? 2 : 0,
-    maximumFractionDigits: 2,
-  }).format(absoluteValue)
 }
 
 function toInputDate(date: Date) {
