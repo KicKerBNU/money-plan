@@ -27,16 +27,7 @@ export const router = createRouter({
 
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
-  authStore.init()
-
-  if (!authStore.ready) {
-    await new Promise<void>((resolve) => {
-      const unsubscribe = firebaseAuth.onAuthStateChanged(() => {
-        unsubscribe()
-        resolve()
-      })
-    })
-  }
+  await authStore.init()
 
   const requiresAuth = Boolean(to.meta.requiresAuth)
   if (requiresAuth && !firebaseAuth.currentUser) {

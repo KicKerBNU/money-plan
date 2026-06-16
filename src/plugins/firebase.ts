@@ -1,11 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getAnalytics, isSupported } from 'firebase/analytics'
-import {
-  browserLocalPersistence,
-  connectAuthEmulator,
-  indexedDBLocalPersistence,
-  initializeAuth,
-} from 'firebase/auth'
+import { connectAuthEmulator, getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyC8SlRdxkXVwWkwgiNOyrAcBygTlJWxGAw',
@@ -19,10 +14,8 @@ const firebaseConfig = {
 
 export const firebaseApp = initializeApp(firebaseConfig)
 
-/** Prefer IndexedDB, fall back to localStorage so sessions survive PWA restarts. */
-export const firebaseAuth = initializeAuth(firebaseApp, {
-  persistence: [indexedDBLocalPersistence, browserLocalPersistence],
-})
+/** Standard web auth — required for Google popup/redirect (custom initializeAuth breaks OAuth). */
+export const firebaseAuth = getAuth(firebaseApp)
 
 if (import.meta.env.VITE_USE_FIREBASE_AUTH_EMULATOR === 'true') {
   connectAuthEmulator(firebaseAuth, `http://${window.location.hostname}:9099`, {

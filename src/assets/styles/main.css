@@ -745,6 +745,30 @@ body {
     transform: translateY(-1px);
   }
 
+  .theme-button-apple {
+    border: 1px solid transparent;
+    background: #000;
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+    transition:
+      background-color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .theme-button-apple:hover {
+    background: #1a1a1a;
+    transform: translateY(-1px);
+  }
+
+  :root[data-theme='dark'] .theme-button-apple {
+    background: #fff;
+    color: #000;
+  }
+
+  :root[data-theme='dark'] .theme-button-apple:hover {
+    background: #f0f0f0;
+  }
+
   .theme-nav-link {
     background: var(--color-surface-soft);
     color: var(--color-text);

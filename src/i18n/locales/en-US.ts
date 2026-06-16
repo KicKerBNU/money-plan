@@ -111,17 +111,55 @@ export default {
       createSubmit: 'Create account',
       or: 'or',
       googleButton: 'Sign in with Google',
+      appleButton: 'Sign in with Apple',
+      appleCreateButton: 'Sign up with Apple',
       noAccount: "Don't have an account?",
       hasAccount: 'Already have an account?',
       createLink: 'Create one',
       loginLink: 'Login',
       errors: {
         invalidCredential: 'Email or password is incorrect.',
+        invalidCredentialApple:
+          'Apple sign-in could not be completed. In Firebase Authentication → Apple, recheck Services ID, Team ID, Key ID, and the .p8 private key (full file, correct line breaks). Also confirm the Apple Services ID return URL is https://money-plan-23efb.firebaseapp.com/__/auth/handler.',
+        accountExistsDifferentCredential:
+          'This email is already registered with another sign-in method (for example Google or email). Sign in that way first, or use a different Apple account.',
         emailInUse: 'This email is already registered.',
         weakPassword: 'Use a password with at least 6 characters.',
         invalidEmail: 'Enter a valid email address.',
+        popupClosed: 'Sign-in was cancelled.',
+        popupBlocked:
+          'Your browser blocked the sign-in window. Allow pop-ups for this site, or try again — we will use a full-page sign-in if needed.',
+        unauthorizedDomain:
+          'Google sign-in is not allowed on this address. Open Money Plan at localhost or your production URL (for example moneyplann.com).',
+        unauthorizedDomainApple:
+          'Sign in with Apple is not allowed on this address. Add this domain under Firebase Authentication → Settings → Authorized domains, and in Apple Developer configure your Services ID with the same domain.',
+        operationNotAllowed:
+          'This sign-in method is disabled for this app. Enable it in Firebase Authentication.',
+        operationNotAllowedGoogle:
+          'Google sign-in is disabled for this app. Enable the Google provider in Firebase Authentication.',
+        operationNotAllowedApple:
+          'Sign in with Apple is not configured for the web app. In Firebase Authentication → Apple, add your Apple Services ID, Team ID, Key ID, and private key (web requires these in addition to the iOS app). In Apple Developer, set the return URL to https://money-plan-23efb.firebaseapp.com/__/auth/handler.',
+        networkFailed: 'Network error while signing in. Check your connection and try again.',
+        internalError: 'Sign-in failed unexpectedly. Try again or use email login.',
+        internalErrorApple:
+          'Sign in with Apple failed unexpectedly. Confirm the Apple provider is fully configured for web in Firebase and Apple Developer.',
+        argumentErrorGoogle:
+          'Google sign-in is misconfigured for this app. Confirm Google is enabled in Firebase Authentication and the Web OAuth client is set up.',
+        argumentErrorApple:
+          'Sign in with Apple is misconfigured for the web app. Confirm the Apple Services ID, Team ID, Key ID, and private key are set in Firebase Authentication → Apple.',
+        localDevOrigin:
+          'Google sign-in needs this dev URL authorized: {origin}. In Google Cloud Console → Credentials → your Firebase Web client → Authorized JavaScript origins, add that exact URL, save, wait a minute, then retry.',
+        withCode: 'Unable to authenticate ({code}). Try again or use email login.',
         generic: 'Unable to authenticate. Please try again.',
       },
+    },
+    deleteAccount: {
+      menu: 'Delete account',
+      confirmTitle: 'Delete your account?',
+      confirmBody:
+        'This permanently deletes your Money Plan account, all expenses, income, accounts, and categories. This cannot be undone.',
+      confirmAction: 'Delete account',
+      success: 'Your account was deleted.',
     },
   },
   appNav: {

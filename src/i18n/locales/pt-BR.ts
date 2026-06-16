@@ -111,17 +111,55 @@ export default {
       createSubmit: 'Criar conta',
       or: 'ou',
       googleButton: 'Fazer login com o Google',
+      appleButton: 'Entrar com a Apple',
+      appleCreateButton: 'Criar conta com a Apple',
       noAccount: 'Ainda não tem uma conta?',
       hasAccount: 'Já tem uma conta?',
       createLink: 'Criar uma',
       loginLink: 'Entrar',
       errors: {
         invalidCredential: 'Email ou senha incorretos.',
+        invalidCredentialApple:
+          'Não foi possível concluir o login com Apple. Em Firebase Authentication → Apple, confira Services ID, Team ID, Key ID e a chave .p8 (arquivo completo, quebras de linha corretas). Confirme também a return URL do Services ID: https://money-plan-23efb.firebaseapp.com/__/auth/handler.',
+        accountExistsDifferentCredential:
+          'Este email já está cadastrado com outro método (por exemplo Google ou email). Entre desse jeito primeiro ou use outra conta Apple.',
         emailInUse: 'Este email já está cadastrado.',
         weakPassword: 'Use uma senha com pelo menos 6 caracteres.',
         invalidEmail: 'Informe um email válido.',
+        popupClosed: 'O login foi cancelado.',
+        popupBlocked:
+          'O navegador bloqueou a janela de login. Permita pop-ups neste site ou tente de novo — usaremos login em página inteira se necessário.',
+        unauthorizedDomain:
+          'Login com Google não é permitido neste endereço. Abra o Money Plan em localhost ou na URL de produção (por exemplo moneyplann.com).',
+        unauthorizedDomainApple:
+          'Login com Apple não é permitido neste endereço. Adicione este domínio em Firebase Authentication → Settings → Authorized domains e, no Apple Developer, configure o Services ID com o mesmo domínio.',
+        operationNotAllowed:
+          'Este método de login está desativado neste app. Ative-o no Firebase Authentication.',
+        operationNotAllowedGoogle:
+          'Login com Google está desativado neste app. Ative o provedor Google no Firebase Authentication.',
+        operationNotAllowedApple:
+          'Login com Apple não está configurado para a web. Em Firebase Authentication → Apple, adicione o Services ID, Team ID, Key ID e chave privada da Apple (a web exige isso além do app iOS). No Apple Developer, defina a return URL como https://money-plan-23efb.firebaseapp.com/__/auth/handler.',
+        networkFailed: 'Erro de rede ao fazer login. Verifique a conexão e tente de novo.',
+        internalError: 'Falha inesperada no login. Tente de novo ou use email.',
+        internalErrorApple:
+          'Falha inesperada no login com Apple. Confirme que o provedor Apple está totalmente configurado para web no Firebase e no Apple Developer.',
+        argumentErrorGoogle:
+          'Login com Google mal configurado neste app. Confirme que o Google está ativo no Firebase Authentication e que o cliente OAuth Web está configurado.',
+        argumentErrorApple:
+          'Login com Apple mal configurado para a web. Confirme Services ID, Team ID, Key ID e chave privada em Firebase Authentication → Apple.',
+        localDevOrigin:
+          'O login com Google precisa desta URL de dev autorizada: {origin}. No Google Cloud Console → Credentials → cliente Web do Firebase → Authorized JavaScript origins, adicione essa URL exata, salve, aguarde um minuto e tente de novo.',
+        withCode: 'Não foi possível autenticar ({code}). Tente de novo ou use email.',
         generic: 'Não foi possível autenticar. Tente novamente.',
       },
+    },
+    deleteAccount: {
+      menu: 'Excluir conta',
+      confirmTitle: 'Excluir sua conta?',
+      confirmBody:
+        'Isso exclui permanentemente sua conta Money Plan, todas as despesas, receitas, contas e categorias. Não dá para desfazer.',
+      confirmAction: 'Excluir conta',
+      success: 'Sua conta foi excluída.',
     },
   },
   appNav: {

@@ -125,9 +125,12 @@ const contactEmail = 'support@moneyplann.com'
           <h2 class="text-xl font-semibold">5. Data retention and deletion</h2>
           <p class="theme-muted mt-3 text-sm leading-relaxed">
             We keep your account and finance records while your account is active so the
-            service can function. If you want your account deleted, contact us at
+            service can function. You can delete your account at any time from the app
+            settings menu (gear icon) under <strong class="text-[var(--color-text)]">Delete account</strong>.
+            That permanently removes your Firebase login and all stored finance data.
+            You can also contact us at
             <a :href="`mailto:${contactEmail}`" class="underline">{{ contactEmail }}</a>
-            from the email tied to your account. We will delete or anonymize your data within
+            from the email tied to your account if you need help. We will delete or anonymize your data within
             a reasonable period, except where we must retain information for legal or
             security reasons.
           </p>

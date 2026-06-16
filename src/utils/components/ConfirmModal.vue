@@ -51,8 +51,8 @@ const { t } = useI18n()
           </button>
           <button
             type="button"
-            class="cursor-pointer rounded-xl px-4 py-3 text-sm"
-            style="background: var(--color-danger); color: var(--color-text)"
+            class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-white"
+            style="background: var(--color-danger)"
             @click="acceptConfirmModal"
           >
             {{ confirmModalConfirmLabel }}

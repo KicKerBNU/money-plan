@@ -7,6 +7,7 @@ import { useThemeStore } from '@/modules/theme/store/theme.store'
 import { usePreferencesStore } from '@/modules/preferences/store/preferences.store'
 import { detectCurrencyFromLocale, SUPPORTED_CURRENCIES } from '@/lib/money'
 import { usePwaInstall } from '@/utils/usePwaInstall'
+import { openConfirmModal } from '@/utils/confirmModal'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -19,6 +20,7 @@ const rootRef = ref<HTMLElement | null>(null)
 const open = ref(false)
 const iosInstructionVisible = ref(false)
 const isCurrencyMenuOpen = ref(false)
+const isDeletingAccount = ref(false)
 
 const autoCurrency = computed(() => detectCurrencyFromLocale(locale.value))
 const activeCurrency = computed(() => preferences.currency ?? autoCurrency.value)
@@ -60,6 +62,27 @@ async function handleLogout() {
   closeMenu()
   await authStore.logout()
   await router.push('/login')
+}
+
+async function handleDeleteAccount() {
+  closeMenu()
+  const ok = await openConfirmModal({
+    title: t('auth.deleteAccount.confirmTitle'),
+    message: t('auth.deleteAccount.confirmBody'),
+    confirmLabel: t('auth.deleteAccount.confirmAction'),
+    cancelLabel: t('common.cancel'),
+  })
+  if (!ok) return
+
+  isDeletingAccount.value = true
+  try {
+    await authStore.deleteAccount()
+    await router.push('/login')
+  } catch {
+    /* Errors shown via global toast from apiFetch */
+  } finally {
+    isDeletingAccount.value = false
+  }
 }
 
 function toggleTheme() {
@@ -181,6 +204,17 @@ async function handleInstall() {
         </template>
 
         <div class="theme-border mx-2 my-0.5 border-t opacity-70" />
+        <button
+          type="button"
+          class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
+          role="menuitem"
+          style="color: var(--color-danger)"
+          :disabled="isDeletingAccount"
+          @click="handleDeleteAccount"
+        >
+          <FontAwesomeIcon icon="user-xmark" class="w-4" />
+          {{ t('auth.deleteAccount.menu') }}
+        </button>
         <button
           type="button"
           class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
