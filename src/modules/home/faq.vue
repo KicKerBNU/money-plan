@@ -2,13 +2,29 @@
 import { ref } from 'vue'
 import ThemeToggle from '@/modules/theme/theme-toggle.vue'
 
+const supportEmail = 'support@moneyplann.com'
 const openIndex = ref<number | null>(null)
 
 function toggle(i: number) {
   openIndex.value = openIndex.value === i ? null : i
 }
 
+const supportTopics = [
+  'Account sign-in, password reset, or Sign in with Apple / Google',
+  'Expenses, income, accounts, or the Expense assistant (Chat)',
+  'Deleting your account or privacy requests',
+  'Bug reports and feedback about the iOS app or website',
+] as const
+
 const faqs = [
+  {
+    q: 'How do I contact Money Plan support?',
+    a: `Email us at ${supportEmail}. We read every message and usually reply within two business days. Include the email tied to your account and, if relevant, whether you use the iOS app or the website.`,
+  },
+  {
+    q: 'How do I delete my Money Plan account?',
+    a: 'Open the app (iOS or web), tap the settings gear icon, and choose Delete account. That permanently removes your login and all stored finance data. You can also email support@moneyplann.com from the email on your account if you need help.',
+  },
   {
     q: 'What is Money Plan?',
     a: 'Money Plan is a free personal finance web app that helps you track expenses, income, and budgets in one place. It includes a built-in AI expense chat assistant that answers questions about your finances in plain language — for example, "How much did I spend on food last month?" or "What is my biggest expense this year?" There is no subscription and no paywalls.',
@@ -71,16 +87,53 @@ const faqs = [
 
       <header class="mb-10">
         <span class="theme-badge mb-4 inline-flex rounded-full px-4 py-1.5 text-sm font-semibold">
-          100% Free · No Subscription
+          Help &amp; Support
         </span>
         <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">
-          Frequently Asked Questions
+          Support &amp; FAQ
         </h1>
         <p class="theme-muted mt-4 max-w-2xl text-lg leading-relaxed">
-          Everything you need to know about Money Plan — the free personal finance app
-          with a built-in AI expense chat assistant.
+          Contact us for account help, technical issues, or privacy requests. Browse
+          common questions about Money Plan below.
         </p>
       </header>
+
+      <section
+        class="theme-card mb-10 rounded-2xl px-6 py-6 sm:px-8"
+        aria-labelledby="support-heading"
+      >
+        <h2 id="support-heading" class="text-xl font-semibold">Contact support</h2>
+        <p class="theme-muted mt-3 text-sm leading-relaxed">
+          Need help with Money Plan? Send us an email — we are happy to assist with
+          sign-in, data in your account, the Expense assistant, or the iOS app.
+        </p>
+
+        <div class="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <a
+            :href="`mailto:${supportEmail}`"
+            class="theme-button-primary inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold"
+          >
+            <FontAwesomeIcon icon="envelope" />
+            {{ supportEmail }}
+          </a>
+          <p class="theme-muted text-sm">
+            Typical response time: within <strong class="text-[var(--color-text)]">2 business days</strong>.
+          </p>
+        </div>
+
+        <h3 class="mt-6 text-sm font-semibold uppercase tracking-wide">We can help with</h3>
+        <ul class="theme-muted mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed">
+          <li v-for="topic in supportTopics" :key="topic">{{ topic }}</li>
+        </ul>
+
+        <p class="theme-muted mt-5 text-sm leading-relaxed">
+          Privacy and data use:
+          <RouterLink to="/privacy" class="font-semibold underline">Privacy Policy</RouterLink>.
+          Money Plan is operated by Money Plan (moneyplann.com).
+        </p>
+      </section>
+
+      <h2 class="mb-4 text-lg font-semibold">Frequently asked questions</h2>
 
       <div class="space-y-3">
         <article
@@ -111,15 +164,17 @@ const faqs = [
       </div>
 
       <div class="mt-12 rounded-2xl p-6 text-center" style="background: var(--color-accent-soft); border: 1px solid var(--color-border)">
-        <h2 class="text-xl font-semibold">Ready to take control of your finances?</h2>
+        <h2 class="text-xl font-semibold">Still need help?</h2>
         <p class="theme-muted mt-2 text-sm">
-          Join Money Plan for free. No subscription, no credit card, no limits.
+          Email
+          <a :href="`mailto:${supportEmail}`" class="font-semibold underline">{{ supportEmail }}</a>
+          and we will get back to you.
         </p>
         <RouterLink
           to="/login"
           class="theme-button-primary mt-5 inline-flex cursor-pointer rounded-xl px-7 py-3 font-semibold"
         >
-          Start for free
+          Open Money Plan
         </RouterLink>
       </div>
     </div>

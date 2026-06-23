@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ThemeToggle from '@/modules/theme/theme-toggle.vue'
 
-const lastUpdated = 'June 16, 2026'
+const lastUpdated = 'June 23, 2026'
 const contactEmail = 'support@moneyplann.com'
 </script>
 
@@ -178,6 +178,12 @@ const contactEmail = 'support@moneyplann.com'
             >API data usage policies</a>.
             We use the OpenAI API to provide the feature, not to build public-facing AI products
             from your chats.
+          </p>
+          <p class="theme-muted mt-3 text-sm leading-relaxed">
+            Before your first use of the Expense assistant, the app asks for your
+            <strong class="text-[var(--color-text)]">explicit permission</strong>
+            in a disclosure that explains what data is sent and that it is shared with OpenAI.
+            If you decline, the assistant will not send any data.
           </p>
         </section>
 

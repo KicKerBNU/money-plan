@@ -190,6 +190,26 @@ export default {
     inputLabel: 'Your message',
     loadingLive: 'Assistant is preparing a reply',
     actionsAria: 'More actions',
+    aiConsent: {
+      title: 'Third-party AI processing',
+      intro:
+        'Before you use the Expense assistant, please review what we send and who receives it. We only send data after you agree below.',
+      whatTitle: 'What we send',
+      whatBody:
+        'Your chat messages, recent messages in this conversation, and expense records from your account that are needed to answer your question (for example totals, categories, or expense lines for a date range you ask about).',
+      whoTitle: 'Who receives it',
+      whoBody:
+        'OpenAI processes this data on our behalf through our backend API to generate replies. OpenAI does not receive your password or unrelated app data.',
+      howTitle: 'How we use it',
+      howBody:
+        'Only to answer your expense questions inside Money Plan. We do not use the assistant for advertising or sell your data.',
+      agree: 'Agree and continue',
+      decline: 'Not now',
+      blockedHint: 'Agree to AI processing above to send messages.',
+      bannerBody:
+        'To use Chat, you must agree to send your messages and relevant expense data to OpenAI via our servers. See details in the prompt or our Privacy Policy.',
+      privacyLink: 'Privacy Policy',
+    },
   },
   income: {
     title: 'Income',

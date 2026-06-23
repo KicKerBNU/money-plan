@@ -190,6 +190,26 @@ export default {
     inputLabel: 'Sua mensagem',
     loadingLive: 'O assistente está preparando uma resposta',
     actionsAria: 'Mais ações',
+    aiConsent: {
+      title: 'Processamento por IA de terceiros',
+      intro:
+        'Antes de usar o Assistente de despesas, veja o que enviamos e quem recebe. Só enviamos dados depois que você concordar abaixo.',
+      whatTitle: 'O que enviamos',
+      whatBody:
+        'Suas mensagens no chat, mensagens recentes desta conversa e registros de despesas da sua conta necessários para responder (por exemplo totais, categorias ou lançamentos em um período que você pedir).',
+      whoTitle: 'Quem recebe',
+      whoBody:
+        'A OpenAI processa esses dados em nosso nome pela nossa API para gerar respostas. A OpenAI não recebe sua senha nem outros dados do app.',
+      howTitle: 'Como usamos',
+      howBody:
+        'Somente para responder perguntas sobre despesas dentro do Money Plan. Não usamos o assistente para anúncios nem vendemos seus dados.',
+      agree: 'Concordar e continuar',
+      decline: 'Agora não',
+      blockedHint: 'Concorde com o processamento por IA acima para enviar mensagens.',
+      bannerBody:
+        'Para usar o Chat, você precisa concordar em enviar suas mensagens e dados de despesas relevantes à OpenAI pelos nossos servidores. Veja os detalhes no aviso ou na Política de Privacidade.',
+      privacyLink: 'Política de Privacidade',
+    },
   },
   income: {
     title: 'Receitas',

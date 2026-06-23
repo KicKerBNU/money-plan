@@ -4,9 +4,15 @@ import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
 import { sendExpenseChat, type ExpenseChatMessage } from '@/modules/chatbot/expense-chat.api'
+import {
+  grantExpenseChatAIConsent,
+  hasExpenseChatAIConsent,
+} from '@/modules/chatbot/expense-chat-consent'
 import { CHATBOT_LOADING_VERBS } from '@/modules/chatbot/chatbotLoadingVerbs'
+import { useAuthStore } from '@/modules/auth/store/auth.store'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 
 const messages = ref<ExpenseChatMessage[]>([])
 const draft = ref('')
@@ -14,8 +20,15 @@ const isSending = ref(false)
 const errorMessage = ref<string | null>(null)
 const scrollAnchor = ref<HTMLElement | null>(null)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
+const showConsentSheet = ref(false)
 
-const canSend = computed(() => draft.value.trim().length > 0 && !isSending.value)
+const firebaseUid = computed(() => authStore.user?.uid ?? null)
+const hasAIConsent = computed(() => {
+  const uid = firebaseUid.value
+  return uid ? hasExpenseChatAIConsent(uid) : false
+})
+
+const canSend = computed(() => draft.value.trim().length > 0 && !isSending.value && hasAIConsent.value)
 
 /** Auto-grows the composer textarea up to ~6 lines, matching Gemini/ChatGPT input feel. */
 function autosizeTextarea() {
@@ -78,7 +91,28 @@ onMounted(() => {
     showThreadHydrateSkeleton.value = false
     hydrateSkeletonTimer = null
   }, 175)
+
+  if (firebaseUid.value && !hasExpenseChatAIConsent(firebaseUid.value)) {
+    showConsentSheet.value = true
+  }
 })
+
+watch(firebaseUid, (uid) => {
+  if (uid && !hasExpenseChatAIConsent(uid)) {
+    showConsentSheet.value = true
+  }
+})
+
+function grantConsent() {
+  const uid = firebaseUid.value
+  if (!uid) return
+  grantExpenseChatAIConsent(uid)
+  showConsentSheet.value = false
+}
+
+function declineConsent() {
+  showConsentSheet.value = false
+}
 
 onBeforeUnmount(() => {
   if (hydrateSkeletonTimer !== null) {
@@ -96,7 +130,7 @@ function scrollToBottom() {
 
 async function send() {
   const text = draft.value.trim()
-  if (!text || isSending.value) return
+  if (!text || isSending.value || !hasAIConsent.value) return
 
   errorMessage.value = null
   const userMessage: ExpenseChatMessage = { role: 'user', content: text }
@@ -165,7 +199,41 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
                 <FinancePageSkeleton variant="chat" />
               </template>
               <template v-else-if="!showMessageList">
-                <p class="theme-muted text-sm">{{ t('chatbot.empty') }}</p>
+                <div v-if="!hasAIConsent" class="space-y-4">
+                  <div class="finance-card rounded-2xl p-4 sm:p-5">
+                    <h2 class="text-sm font-black">{{ t('chatbot.aiConsent.title') }}</h2>
+                    <p class="theme-muted mt-2 text-sm leading-relaxed">
+                      {{ t('chatbot.aiConsent.bannerBody') }}
+                    </p>
+                    <div class="mt-4 space-y-3 text-sm">
+                      <div>
+                        <p class="font-semibold">{{ t('chatbot.aiConsent.whatTitle') }}</p>
+                        <p class="theme-muted mt-1 leading-relaxed">{{ t('chatbot.aiConsent.whatBody') }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold">{{ t('chatbot.aiConsent.whoTitle') }}</p>
+                        <p class="theme-muted mt-1 leading-relaxed">{{ t('chatbot.aiConsent.whoBody') }}</p>
+                      </div>
+                      <div>
+                        <p class="font-semibold">{{ t('chatbot.aiConsent.howTitle') }}</p>
+                        <p class="theme-muted mt-1 leading-relaxed">{{ t('chatbot.aiConsent.howBody') }}</p>
+                      </div>
+                    </div>
+                    <div class="mt-4 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        class="theme-button-primary cursor-pointer rounded-xl px-4 py-2.5 text-sm font-semibold"
+                        @click="grantConsent"
+                      >
+                        {{ t('chatbot.aiConsent.agree') }}
+                      </button>
+                      <RouterLink to="/privacy" class="text-sm font-semibold underline">
+                        {{ t('chatbot.aiConsent.privacyLink') }}
+                      </RouterLink>
+                    </div>
+                  </div>
+                </div>
+                <p v-else class="theme-muted text-sm">{{ t('chatbot.empty') }}</p>
               </template>
 
               <ul v-else class="flex flex-col gap-3">
@@ -225,6 +293,7 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
             </div>
 
             <form
+              v-if="hasAIConsent"
               class="chatbot-composer flex shrink-0 px-4 pt-3 pb-4 sm:px-6"
               @submit.prevent="send"
             >
@@ -276,8 +345,78 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
                 </button>
               </label>
             </form>
+            <p
+              v-else
+              class="theme-muted shrink-0 border-t px-5 py-4 text-center text-sm sm:px-6"
+              style="border-color: var(--color-border)"
+            >
+              {{ t('chatbot.aiConsent.blockedHint') }}
+            </p>
         </div>
       </div>
     </main>
+
+    <Teleport to="body">
+      <div
+        v-if="showConsentSheet"
+        class="fixed inset-0 z-[1100] flex items-end justify-center bg-black/40 px-4 pb-6 sm:items-center sm:pb-8"
+        role="presentation"
+        @click.self="declineConsent"
+      >
+        <div
+          class="finance-card max-h-[min(90svh,40rem)] w-full max-w-lg overflow-y-auto rounded-2xl p-5 shadow-xl sm:p-6"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="ai-consent-title"
+          @click.stop
+        >
+          <div class="flex items-start justify-between gap-3">
+            <h2 id="ai-consent-title" class="text-lg font-black">{{ t('chatbot.aiConsent.title') }}</h2>
+            <button
+              type="button"
+              class="theme-muted flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)]"
+              :aria-label="t('common.close')"
+              @click="declineConsent"
+            >
+              <FontAwesomeIcon icon="xmark" />
+            </button>
+          </div>
+          <p class="theme-muted mt-3 text-sm leading-relaxed">{{ t('chatbot.aiConsent.intro') }}</p>
+          <div class="mt-4 space-y-3 text-sm">
+            <div class="finance-card rounded-xl p-3">
+              <p class="font-semibold">{{ t('chatbot.aiConsent.whatTitle') }}</p>
+              <p class="theme-muted mt-1 leading-relaxed">{{ t('chatbot.aiConsent.whatBody') }}</p>
+            </div>
+            <div class="finance-card rounded-xl p-3">
+              <p class="font-semibold">{{ t('chatbot.aiConsent.whoTitle') }}</p>
+              <p class="theme-muted mt-1 leading-relaxed">{{ t('chatbot.aiConsent.whoBody') }}</p>
+            </div>
+            <div class="finance-card rounded-xl p-3">
+              <p class="font-semibold">{{ t('chatbot.aiConsent.howTitle') }}</p>
+              <p class="theme-muted mt-1 leading-relaxed">{{ t('chatbot.aiConsent.howBody') }}</p>
+            </div>
+          </div>
+          <RouterLink to="/privacy" class="mt-4 inline-block text-sm font-semibold underline">
+            {{ t('chatbot.aiConsent.privacyLink') }}
+          </RouterLink>
+          <div class="mt-6 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              class="theme-button-secondary cursor-pointer rounded-xl px-4 py-3 text-sm"
+              @click="declineConsent"
+            >
+              {{ t('chatbot.aiConsent.decline') }}
+            </button>
+            <button
+              type="button"
+              class="theme-button-primary cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold"
+              @click="grantConsent"
+            >
+              {{ t('chatbot.aiConsent.agree') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
