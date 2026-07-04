@@ -39,6 +39,7 @@ const navItems: NavItem[] = [
   { key: 'recurring', label: 'appNav.recurring', icon: 'arrows-rotate', to: '/app/recurring-expenses' },
   { key: 'chatbot', label: 'appNav.chatbot', icon: 'comments', to: '/app/chatbot' },
   { key: 'income', label: 'appNav.income', icon: 'arrow-trend-up', to: '/app/income' },
+  { key: 'recurringIncome', label: 'appNav.recurringIncome', icon: 'coins', to: '/app/recurring-incomes' },
   { key: 'stats', label: 'appNav.stats', icon: 'chart-column', to: '/app/stats' },
   { key: 'accounts', label: 'appNav.accounts', icon: 'building-columns', to: '/app/accounts' },
 ]

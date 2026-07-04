@@ -167,7 +167,8 @@ export default {
     overview: 'Resumo',
     income: 'Receitas',
     expenses: 'Despesas',
-    recurring: 'Recorrentes',
+    recurring: 'Despesas recorrentes',
+    recurringIncome: 'Receitas recorrentes',
     stats: 'Estatísticas',
     accounts: 'Contas',
     add: 'Adicionar',
@@ -214,22 +215,35 @@ export default {
   },
   income: {
     title: 'Receitas',
-    subtitle: 'Salário, freelas e entradas extras.',
+    subtitle: 'Salário, freelas, aluguel e outras entradas.',
     summary: {
-      totalIncome: 'Receita total · abril',
+      totalForMonth: 'Total em {month}',
       details: '{count} lançamentos · último em {date}',
     },
-    quickAdd: {
-      title: 'Adicionar rápido',
+    period: {
+      prev: 'Mês anterior',
+      next: 'Próximo mês',
     },
-    recent: {
-      title: 'Receitas recentes',
+    actions: {
+      addIncome: 'Adicionar receita',
+      manageRecurring: 'Receitas recorrentes',
+    },
+    list: {
+      title: 'Este mês',
+    },
+    empty: {
+      title: 'Nenhuma receita neste mês',
+      body: 'Adicione salário, freelas, aluguel ou qualquer outra entrada.',
+      action: 'Adicionar primeira receita',
     },
     form: {
+      addTitle: 'Adicionar receita',
+      editTitle: 'Editar receita',
       date: 'Data',
       amount: 'Valor',
+      account: 'Conta',
       note: 'Observação',
-      notePlaceholder: 'Observação (ex: Freela, reembolso)',
+      notePlaceholder: 'Observação (ex: Salário, freela, aluguel)',
       submit: 'Adicionar receita',
     },
     confirmDelete: {
@@ -417,6 +431,31 @@ export default {
     confirmDelete: {
       title: 'Excluir despesa recorrente?',
       body: 'Isso remove o modelo recorrente. As despesas existentes são mantidas.',
+    },
+  },
+  recurringIncomePage: {
+    subtitle: 'Modelos de receitas que se repetem — salário, aluguel e mais. Pause ou edite quando quiser.',
+    listTitle: 'Suas receitas recorrentes',
+  },
+  recurringIncome: {
+    title: 'Receitas recorrentes',
+    nextDue: 'Próximo recebimento: {date}',
+    empty: {
+      title: 'Nenhuma receita recorrente',
+      body: 'Marque uma receita como recorrente ao adicioná-la em Receitas, ou vincule ao editar um lançamento existente.',
+    },
+    form: {
+      isRecurring: 'Receita recorrente',
+      footer: 'Um modelo recorrente será criado para recebimentos futuros.',
+      editLinkedFooter: 'As alterações se aplicam ao modelo recorrente vinculado.',
+      stopRecurrenceHint: 'A recorrência está pausada. Ative para agendar recebimentos futuros novamente.',
+    },
+    edit: {
+      title: 'Editar receita recorrente',
+    },
+    confirmDelete: {
+      title: 'Excluir receita recorrente?',
+      body: 'Isso remove o modelo recorrente. As receitas existentes são mantidas.',
     },
   },
   pwa: {

@@ -1,4 +1,5 @@
 import { apiFetch } from '@/lib/api'
+import type { RecurrenceFrequency } from '@/modules/expenses/domain/expenses.types'
 import type { IncomeEntry } from '../domain/income.types'
 
 interface DataResponse<T> {
@@ -21,7 +22,13 @@ export async function fetchIncomesByDateRange(startDate: string, endDate: string
   return response.data
 }
 
-export async function createIncome(payload: { date: string; amount: number; accountId: number; note?: string }) {
+export async function createIncome(payload: {
+  date: string
+  amount: number
+  accountId: number
+  note?: string
+  recurrenceFrequency?: RecurrenceFrequency
+}) {
   const response = await apiFetch<DataResponse<IncomeEntry>>('/v1/incomes', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -31,7 +38,14 @@ export async function createIncome(payload: { date: string; amount: number; acco
 
 export async function updateIncome(
   incomeId: number,
-  payload: { date: string; amount: number; accountId: number; note?: string }
+  payload: {
+    date: string
+    amount: number
+    accountId: number
+    note?: string
+    recurrenceEnabled?: boolean
+    recurrenceFrequency?: RecurrenceFrequency
+  },
 ) {
   const response = await apiFetch<DataResponse<IncomeEntry>>(`/v1/incomes/${incomeId}`, {
     method: 'PUT',

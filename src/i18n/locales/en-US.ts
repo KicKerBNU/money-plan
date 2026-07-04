@@ -167,7 +167,8 @@ export default {
     overview: 'Overview',
     income: 'Income',
     expenses: 'Expenses',
-    recurring: 'Recurring',
+    recurring: 'Recurring expenses',
+    recurringIncome: 'Recurring income',
     stats: 'Stats',
     accounts: 'Accounts',
     add: 'Add',
@@ -214,22 +215,35 @@ export default {
   },
   income: {
     title: 'Income',
-    subtitle: 'Salary, freelance, and extra money in.',
+    subtitle: 'Salary, freelance, rent, and other money in.',
     summary: {
-      totalIncome: 'Total income · April',
+      totalForMonth: 'Total for {month}',
       details: '{count} entries · last on {date}',
     },
-    quickAdd: {
-      title: 'Quick add',
+    period: {
+      prev: 'Previous month',
+      next: 'Next month',
     },
-    recent: {
-      title: 'Recent income',
+    actions: {
+      addIncome: 'Add income',
+      manageRecurring: 'Recurring income',
+    },
+    list: {
+      title: 'This month',
+    },
+    empty: {
+      title: 'No income this month',
+      body: 'Add salary, freelance payments, rent, or any other money coming in.',
+      action: 'Add your first income',
     },
     form: {
+      addTitle: 'Add income',
+      editTitle: 'Edit income',
       date: 'Date',
       amount: 'Amount',
+      account: 'Account',
       note: 'Note',
-      notePlaceholder: 'Note (e.g. Freelance, refund)',
+      notePlaceholder: 'Note (e.g. Salary, freelance, rent)',
       submit: 'Add income',
     },
     confirmDelete: {
@@ -414,6 +428,31 @@ export default {
     confirmDelete: {
       title: 'Delete recurring expense?',
       body: 'This removes the recurring template. Existing expenses are kept.',
+    },
+  },
+  recurringIncomePage: {
+    subtitle: 'Templates for income that repeats on a schedule — salary, rent, and more. Pause or edit anytime.',
+    listTitle: 'Your recurring income',
+  },
+  recurringIncome: {
+    title: 'Recurring income',
+    nextDue: 'Next expected: {date}',
+    empty: {
+      title: 'No recurring income',
+      body: 'Mark an income entry as recurring when you add it from Income, or link one when editing an existing entry.',
+    },
+    form: {
+      isRecurring: 'Recurring income',
+      footer: 'A recurring template will be created for future deposits.',
+      editLinkedFooter: 'Changes apply to the linked recurring template.',
+      stopRecurrenceHint: 'Recurrence is paused. Turn on to schedule future deposits again.',
+    },
+    edit: {
+      title: 'Edit recurring income',
+    },
+    confirmDelete: {
+      title: 'Delete recurring income?',
+      body: 'This removes the recurring template. Existing income entries are kept.',
     },
   },
   pwa: {

@@ -6,6 +6,7 @@ import { homeRoutes } from '@/modules/home/home.routes'
 import { incomeRoutes } from '@/modules/income/income.routes'
 import { accountsRoutes } from '@/modules/accounts/accounts.routes'
 import { recurringExpensesRoutes } from '@/modules/recurring-expenses/recurring-expenses.routes'
+import { recurringIncomesRoutes } from '@/modules/recurring-incomes/recurring-incomes.routes'
 import { chatbotRoutes } from '@/modules/chatbot/chatbot.routes'
 import { overviewRoutes } from '@/modules/overview/overview.routes'
 import { statsRoutes } from '@/modules/stats/stats.routes'
@@ -20,6 +21,7 @@ export const router = createRouter({
     ...expensesRoutes,
     ...accountsRoutes,
     ...recurringExpensesRoutes,
+    ...recurringIncomesRoutes,
     ...overviewRoutes,
     ...statsRoutes,
     ...chatbotRoutes,
