@@ -21,12 +21,17 @@ import {
   updateCategory,
   updateExpense,
 } from './api/expenses.api'
+import {
+  fetchRecurringExpense,
+  fetchRecurringExpenses,
+} from '@/modules/recurring-expenses/api/recurring-expenses.api'
 import { getDefaultAccountId } from '@/lib/defaultAccount'
 import { categoryIconForName } from '@/lib/categoryIcons'
 import { useMoney } from '@/lib/money'
 import { openConfirmModal } from '@/utils/confirmModal'
 import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
-import type { Account, Category, Expense } from './domain/expenses.types'
+import type { Account, Category, Expense, RecurrenceFrequency, RecurringExpense } from './domain/expenses.types'
+import { RECURRENCE_FREQUENCIES } from './domain/expenses.types'
 
 const { t, locale } = useI18n()
 const { format: formatMoney } = useMoney()
@@ -71,7 +76,12 @@ const form = ref({
   categoryId: null as number | null,
   accountId: null as number | null,
   note: '',
+  isRecurring: false,
+  recurrenceFrequency: 'monthly' as RecurrenceFrequency,
 })
+
+const recurringExpenses = ref<RecurringExpense[]>([])
+const linkedRecurring = ref<RecurringExpense | null>(null)
 
 const newAccountName = ref('')
 const newCategoryName = ref('')
@@ -125,6 +135,25 @@ const expensesSubtitle = computed(() => t('expenses.subtitle', { count: summary.
 const expenseModalTitle = computed(() =>
   editingExpenseId.value ? t('expenses.form.editTitle') : t('expenses.form.title')
 )
+
+const showsRecurrenceSection = computed(() => {
+  if (!editingExpenseId.value) return true
+  const expense = expenses.value.find((e) => e.id === editingExpenseId.value)
+  return Boolean(expense?.recurringExpenseId || linkedRecurring.value)
+})
+
+const recurrenceFormHint = computed(() => {
+  if (editingExpenseId.value) {
+    if (form.value.isRecurring) return t('recurring.form.editLinkedFooter')
+    if (showsRecurrenceSection.value) return t('recurring.form.stopRecurrenceHint')
+    return ''
+  }
+  return form.value.isRecurring ? t('recurring.form.footer') : ''
+})
+
+function frequencyLabel(frequency: RecurrenceFrequency) {
+  return t(`recurring.frequency.${frequency}`)
+}
 
 const renameModalTitle = computed(() => {
   if (!renameTarget.value) return ''
@@ -587,10 +616,28 @@ async function loadExpensesData() {
     }
 
     errorMessage.value = failures.length > 0 ? failures.join(' · ') : null
+
+    try {
+      recurringExpenses.value = await fetchRecurringExpenses()
+    } catch {
+      /* cache for linked expense edit; recurring page loads its own list */
+    }
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
   } finally {
     isLoading.value = false
+  }
+}
+
+function buildRecurrencePayload(editingId: number | null) {
+  if (!editingId) {
+    if (!form.value.isRecurring) return {}
+    return { recurrenceFrequency: form.value.recurrenceFrequency }
+  }
+  if (!showsRecurrenceSection.value) return {}
+  return {
+    recurrenceEnabled: form.value.isRecurring,
+    recurrenceFrequency: form.value.isRecurring ? form.value.recurrenceFrequency : undefined,
   }
 }
 
@@ -615,6 +662,7 @@ async function submitExpense() {
         categoryId,
         accountId: form.value.accountId,
         note: trimmedNote || undefined,
+        ...buildRecurrencePayload(expenseId),
       }
 
       const previous = expenses.value.find((e) => e.id === expenseId)
@@ -665,6 +713,7 @@ async function submitExpense() {
         categoryId,
         accountId: form.value.accountId,
         note: form.value.note.trim() || undefined,
+        ...buildRecurrencePayload(null),
       })
 
       resetExpenseForm()
@@ -702,9 +751,12 @@ async function submitCategory() {
 
 function resetExpenseForm() {
   editingExpenseId.value = null
+  linkedRecurring.value = null
   form.value.date = toInputDate(new Date())
   form.value.amount = ''
   form.value.note = ''
+  form.value.isRecurring = false
+  form.value.recurrenceFrequency = 'monthly'
   if (sortedCategories.value.length > 0) {
     form.value.categoryId = sortedCategories.value[0].id
   }
@@ -717,9 +769,12 @@ function resetExpenseForm() {
 
 function openNewExpenseModal() {
   editingExpenseId.value = null
+  linkedRecurring.value = null
   form.value.date = toInputDate(new Date())
   form.value.amount = ''
   form.value.note = ''
+  form.value.isRecurring = false
+  form.value.recurrenceFrequency = 'monthly'
   if (sortedCategories.value.length > 0) {
     form.value.categoryId = sortedCategories.value[0].id
   }
@@ -743,13 +798,29 @@ function closeExpenseModal() {
   resetExpenseForm()
 }
 
-function startEditExpense(expense: Expense) {
+async function startEditExpense(expense: Expense) {
   editingExpenseId.value = expense.id
+  linkedRecurring.value = null
   form.value.date = expense.date
   form.value.amount = String(expense.amount)
   form.value.categoryId = canonicalCategoryId(expense.categoryId)
   form.value.accountId = expense.accountId
   form.value.note = expense.note ?? ''
+  form.value.isRecurring = false
+  form.value.recurrenceFrequency = 'monthly'
+
+  if (expense.recurringExpenseId) {
+    try {
+      const cached = recurringExpenses.value.find((r) => r.id === expense.recurringExpenseId)
+      const item = cached ?? (await fetchRecurringExpense(expense.recurringExpenseId))
+      linkedRecurring.value = item
+      form.value.isRecurring = item.active
+      form.value.recurrenceFrequency = item.frequency
+    } catch {
+      linkedRecurring.value = null
+    }
+  }
+
   isExpenseModalOpen.value = true
 }
 
@@ -1707,6 +1778,29 @@ watch(
                     {{ t('expenses.form.note') }}
                     <input v-model="form.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
                   </label>
+                </fieldset>
+
+                <fieldset v-if="showsRecurrenceSection" class="theme-border mt-4 border-t pt-4 border-0 p-0" :disabled="isExpenseSubmitting">
+                  <legend class="text-sm font-semibold">{{ t('recurring.form.isRecurring') }}</legend>
+                  <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm font-semibold">
+                    <input
+                      v-model="form.isRecurring"
+                      type="checkbox"
+                      class="h-4 w-4 accent-[var(--color-primary)]"
+                    />
+                    <span>{{ t('recurring.form.isRecurring') }}</span>
+                  </label>
+                  <label v-if="form.isRecurring" class="mt-3 block text-sm font-semibold">
+                    {{ t('recurring.form.frequency') }}
+                    <select v-model="form.recurrenceFrequency" class="theme-input mt-1 w-full rounded-xl p-3">
+                      <option v-for="frequency in RECURRENCE_FREQUENCIES" :key="frequency" :value="frequency">
+                        {{ frequencyLabel(frequency) }}
+                      </option>
+                    </select>
+                  </label>
+                  <p v-if="recurrenceFormHint" class="theme-muted mt-2 text-xs leading-relaxed">
+                    {{ recurrenceFormHint }}
+                  </p>
                 </fieldset>
               </div>
 

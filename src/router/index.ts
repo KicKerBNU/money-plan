@@ -5,6 +5,7 @@ import { expensesRoutes } from '@/modules/expenses/expenses.routes'
 import { homeRoutes } from '@/modules/home/home.routes'
 import { incomeRoutes } from '@/modules/income/income.routes'
 import { accountsRoutes } from '@/modules/accounts/accounts.routes'
+import { recurringExpensesRoutes } from '@/modules/recurring-expenses/recurring-expenses.routes'
 import { chatbotRoutes } from '@/modules/chatbot/chatbot.routes'
 import { overviewRoutes } from '@/modules/overview/overview.routes'
 import { statsRoutes } from '@/modules/stats/stats.routes'
@@ -18,6 +19,7 @@ export const router = createRouter({
     ...incomeRoutes,
     ...expensesRoutes,
     ...accountsRoutes,
+    ...recurringExpensesRoutes,
     ...overviewRoutes,
     ...statsRoutes,
     ...chatbotRoutes,

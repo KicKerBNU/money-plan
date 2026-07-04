@@ -1,5 +1,5 @@
 import { apiFetch } from '@/lib/api'
-import type { Account, Category, Expense } from '../domain/expenses.types'
+import type { Account, Category, Expense, RecurrenceFrequency } from '../domain/expenses.types'
 
 interface DataResponse<T> {
   data: T
@@ -45,6 +45,7 @@ export async function createExpense(payload: {
   categoryId: number
   accountId: number
   note?: string
+  recurrenceFrequency?: RecurrenceFrequency
 }) {
   const response = await apiFetch<DataResponse<Expense>>('/v1/expenses', {
     method: 'POST',
@@ -55,7 +56,15 @@ export async function createExpense(payload: {
 
 export async function updateExpense(
   expenseId: number,
-  payload: { date: string; amount: number; categoryId: number; accountId: number; note?: string }
+  payload: {
+    date: string
+    amount: number
+    categoryId: number
+    accountId: number
+    note?: string
+    recurrenceEnabled?: boolean
+    recurrenceFrequency?: RecurrenceFrequency
+  },
 ) {
   const response = await apiFetch<DataResponse<Expense>>(`/v1/expenses/${expenseId}`, {
     method: 'PUT',

@@ -36,6 +36,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { key: 'overview', label: 'appNav.overview', icon: 'chart-pie', to: '/app/overview' },
   { key: 'expenses', label: 'appNav.expenses', icon: 'receipt', to: '/app/expenses' },
+  { key: 'recurring', label: 'appNav.recurring', icon: 'arrows-rotate', to: '/app/recurring-expenses' },
   { key: 'chatbot', label: 'appNav.chatbot', icon: 'comments', to: '/app/chatbot' },
   { key: 'income', label: 'appNav.income', icon: 'arrow-trend-up', to: '/app/income' },
   { key: 'stats', label: 'appNav.stats', icon: 'chart-column', to: '/app/stats' },

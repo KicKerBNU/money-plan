@@ -23,4 +23,29 @@ export interface Expense {
   note: string | null
   /** Present after user reorders list for a month; drives API sort order with date fallback. */
   manualSort?: number | null
+  recurringExpenseId?: number | null
+}
+
+export type RecurrenceFrequency = 'weekly' | 'monthly' | 'quarterly' | 'semiannual' | 'yearly'
+
+export const RECURRENCE_FREQUENCIES: RecurrenceFrequency[] = [
+  'weekly',
+  'monthly',
+  'quarterly',
+  'semiannual',
+  'yearly',
+]
+
+export interface RecurringExpense {
+  id: number
+  amount: number
+  categoryId: number
+  categoryName: string
+  accountId: number
+  accountName: string
+  note: string | null
+  frequency: RecurrenceFrequency
+  startDate: string
+  nextDate: string
+  active: boolean
 }

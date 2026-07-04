@@ -167,6 +167,7 @@ export default {
     overview: 'Overview',
     income: 'Income',
     expenses: 'Expenses',
+    recurring: 'Recurring',
     stats: 'Stats',
     accounts: 'Accounts',
     add: 'Add',
@@ -377,6 +378,43 @@ export default {
     brickHint: 'Brighter shade = larger expense in that category.',
     hoverHint: 'Hover for details.',
     lineupTitle: 'The line-up',
+  },
+  recurringPage: {
+    subtitle: 'Templates for expenses that repeat on a schedule. Pause or edit anytime.',
+    listTitle: 'Your recurring expenses',
+  },
+  recurring: {
+    title: 'Recurring expenses',
+    nextDue: 'Next due: {date}',
+    status: {
+      paused: 'Paused',
+    },
+    empty: {
+      title: 'No recurring expenses',
+      body: 'Mark an expense as recurring when you add it from Expenses, or link one when editing an existing entry.',
+    },
+    form: {
+      isRecurring: 'Recurring expense',
+      frequency: 'Frequency',
+      startDate: 'Start date',
+      footer: 'A recurring template will be created for future payments.',
+      editLinkedFooter: 'Changes apply to the linked recurring template.',
+      stopRecurrenceHint: 'Recurrence is paused. Turn on to schedule future payments again.',
+    },
+    frequency: {
+      weekly: 'Weekly',
+      monthly: 'Monthly',
+      quarterly: 'Quarterly',
+      semiannual: 'Every 6 months',
+      yearly: 'Yearly',
+    },
+    edit: {
+      title: 'Edit recurring expense',
+    },
+    confirmDelete: {
+      title: 'Delete recurring expense?',
+      body: 'This removes the recurring template. Existing expenses are kept.',
+    },
   },
   pwa: {
     updateReady: 'A new version is available.',

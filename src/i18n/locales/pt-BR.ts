@@ -167,6 +167,7 @@ export default {
     overview: 'Resumo',
     income: 'Receitas',
     expenses: 'Despesas',
+    recurring: 'Recorrentes',
     stats: 'Estatísticas',
     accounts: 'Contas',
     add: 'Adicionar',
@@ -380,6 +381,43 @@ export default {
     brickHint: 'Tom mais claro = maior despesa nessa categoria.',
     hoverHint: 'Passe o mouse para detalhes.',
     lineupTitle: 'O ranking',
+  },
+  recurringPage: {
+    subtitle: 'Modelos de despesas que se repetem em um cronograma. Pause ou edite quando quiser.',
+    listTitle: 'Suas despesas recorrentes',
+  },
+  recurring: {
+    title: 'Despesas recorrentes',
+    nextDue: 'Próximo vencimento: {date}',
+    status: {
+      paused: 'Pausada',
+    },
+    empty: {
+      title: 'Nenhuma despesa recorrente',
+      body: 'Marque uma despesa como recorrente ao adicioná-la em Despesas, ou vincule ao editar um lançamento existente.',
+    },
+    form: {
+      isRecurring: 'Despesa recorrente',
+      frequency: 'Frequência',
+      startDate: 'Data inicial',
+      footer: 'Um modelo recorrente será criado para pagamentos futuros.',
+      editLinkedFooter: 'As alterações se aplicam ao modelo recorrente vinculado.',
+      stopRecurrenceHint: 'A recorrência está pausada. Ative para agendar pagamentos futuros novamente.',
+    },
+    frequency: {
+      weekly: 'Semanal',
+      monthly: 'Mensal',
+      quarterly: 'Trimestral',
+      semiannual: 'A cada 6 meses',
+      yearly: 'Anual',
+    },
+    edit: {
+      title: 'Editar despesa recorrente',
+    },
+    confirmDelete: {
+      title: 'Excluir despesa recorrente?',
+      body: 'Isso remove o modelo recorrente. As despesas existentes são mantidas.',
+    },
   },
   pwa: {
     updateReady: 'Uma nova versão está disponível.',
