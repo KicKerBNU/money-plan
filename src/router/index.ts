@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { firebaseAuth } from '@/plugins/firebase'
+import { firebaseAuth, logScreenView } from '@/plugins/firebase'
 import { authRoutes } from '@/modules/auth/auth.routes'
 import { expensesRoutes } from '@/modules/expenses/expenses.routes'
 import { homeRoutes } from '@/modules/home/home.routes'
@@ -43,4 +43,8 @@ router.beforeEach(async (to) => {
   }
 
   return true
+})
+
+router.afterEach((to) => {
+  logScreenView(to.fullPath)
 })

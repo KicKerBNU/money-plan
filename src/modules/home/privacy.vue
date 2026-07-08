@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ThemeToggle from '@/modules/theme/theme-toggle.vue'
 
-const lastUpdated = 'June 23, 2026'
+const lastUpdated = 'July 7, 2026'
 const contactEmail = 'support@moneyplann.com'
 </script>
 
@@ -92,10 +92,13 @@ const contactEmail = 'support@moneyplann.com'
               questions you send in Chat and the replies generated for you during that session.
             </li>
             <li>
-              <strong class="text-[var(--color-text)]">Technical data:</strong>
+              <strong class="text-[var(--color-text)]">Technical and usage data:</strong>
               basic request data needed to operate the service (for example, app version,
-              timestamps, and error logs). On the website we may use Firebase Analytics;
-              the iOS app does not include analytics tracking.
+              timestamps, and error logs). We use <strong class="text-[var(--color-text)]">Firebase Analytics</strong>
+              on the website, iOS app, and Android app to understand how features are used
+              (for example, which screens you open). This is
+              <strong class="text-[var(--color-text)]">product analytics only</strong> — we do
+              not use it for third-party advertising or cross-app commercial tracking.
             </li>
           </ul>
         </section>
@@ -110,6 +113,10 @@ const contactEmail = 'support@moneyplann.com'
               <strong class="text-[var(--color-text)]">your</strong> expense records when you ask.
             </li>
             <li>Improve reliability, fix bugs, and respond to support requests.</li>
+            <li>
+              Measure anonymous and aggregated product usage (Firebase Analytics) so we know
+              which features are used and can improve the app.
+            </li>
           </ul>
           <p class="theme-muted mt-3 text-sm leading-relaxed">
             We do not sell your personal or financial data. We do not use your data for
@@ -196,7 +203,7 @@ const contactEmail = 'support@moneyplann.com'
           <ul class="theme-muted mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed">
             <li>
               <strong class="text-[var(--color-text)]">Firebase (Google):</strong>
-              authentication and account security.
+              authentication, account security, and product usage analytics (GA4).
             </li>
             <li>
               <strong class="text-[var(--color-text)]">Supabase / PostgreSQL:</strong>

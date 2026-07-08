@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAnalytics, isSupported } from 'firebase/analytics'
+import { getAnalytics, isSupported, logEvent, type Analytics } from 'firebase/analytics'
 import { connectAuthEmulator, getAuth } from 'firebase/auth'
 
 const firebaseConfig = {
@@ -17,6 +17,8 @@ export const firebaseApp = initializeApp(firebaseConfig)
 /** Standard web auth — required for Google popup/redirect (custom initializeAuth breaks OAuth). */
 export const firebaseAuth = getAuth(firebaseApp)
 
+let analyticsInstance: Analytics | null = null
+
 if (import.meta.env.VITE_USE_FIREBASE_AUTH_EMULATOR === 'true') {
   connectAuthEmulator(firebaseAuth, `http://${window.location.hostname}:9099`, {
     disableWarnings: true,
@@ -27,6 +29,12 @@ export async function initializeFirebaseAnalytics() {
   if (typeof window === 'undefined') return
 
   if (await isSupported()) {
-    getAnalytics(firebaseApp)
+    analyticsInstance = getAnalytics(firebaseApp)
   }
+}
+
+/** Logs SPA navigations for GA4 (usage analytics only — no ads). */
+export function logScreenView(path: string) {
+  if (!analyticsInstance) return
+  logEvent(analyticsInstance, 'page_view', { page_path: path })
 }
