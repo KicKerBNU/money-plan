@@ -10,6 +10,21 @@ export default {
     cta: {
       login: 'Entrar e começar',
       howItWorks: 'Como funciona',
+      appStore: 'Baixar na App Store',
+    },
+    ios: {
+      badge: 'Agora no iPhone e iPad',
+      title: 'Money Plan para iOS',
+      description:
+        'Acompanhe despesas, receitas e contas onde estiver — com o mesmo assistente de IA, Entrar com a Apple e seus dados sincronizados na sua conta.',
+      highlights: {
+        native: 'App nativo de iOS para iPhone e iPad',
+        sync: 'Mesma conta na web e no iOS — seus dados ficam sincronizados',
+        apple: 'Entre com a Apple, Google ou email',
+        free: 'Baixe de graça. Sem assinatura.',
+      },
+      cta: 'Baixar na App Store',
+      note: 'Requer iOS 17 ou posterior',
     },
     mockup: {
       month: 'Resumo de abril',

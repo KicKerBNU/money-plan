@@ -10,6 +10,21 @@ export default {
     cta: {
       login: 'Login and start tracking',
       howItWorks: 'How it works',
+      appStore: 'Download on the App Store',
+    },
+    ios: {
+      badge: 'Now on iPhone & iPad',
+      title: 'Money Plan for iOS',
+      description:
+        'Track expenses, income, and accounts on the go — with the same AI expense assistant, Sign in with Apple, and your data synced to your account.',
+      highlights: {
+        native: 'Native iOS app built for iPhone and iPad',
+        sync: 'Same account on web and iOS — your data stays in sync',
+        apple: 'Sign in with Apple, Google, or email',
+        free: 'Free to download. No subscription.',
+      },
+      cta: 'Get it on the App Store',
+      note: 'Requires iOS 17 or later',
     },
     mockup: {
       month: 'April overview',

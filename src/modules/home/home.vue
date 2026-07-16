@@ -19,6 +19,10 @@ const steps = [
 ] as const
 
 const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secure'] as const
+
+const iosHighlights = ['native', 'sync', 'apple', 'free'] as const
+
+const APP_STORE_URL = 'https://apps.apple.com/us/app/money-plann/id6777957861'
 </script>
 
 <template>
@@ -62,6 +66,19 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
           >
             {{ t('home.cta.login') }}
           </RouterLink>
+          <a
+            :href="APP_STORE_URL"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="theme-button-secondary inline-flex items-center gap-2.5 rounded-xl px-6 py-3 font-semibold"
+          >
+            <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+              />
+            </svg>
+            {{ t('home.cta.appStore') }}
+          </a>
           <a
             href="#how-it-works"
             class="theme-button-secondary hidden rounded-xl px-6 py-3 font-semibold lg:inline-flex"
@@ -199,6 +216,86 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
       </div>
     </section>
 
+    <!-- iOS App Store -->
+    <section id="ios-app" class="relative mx-auto max-w-6xl px-6 pb-20">
+      <div class="ios-promo relative overflow-hidden rounded-3xl border border-[var(--color-border)] p-8 sm:p-10 lg:p-12">
+        <div class="ios-promo-glow pointer-events-none absolute -right-16 top-0 h-64 w-64 rounded-full opacity-40 blur-3xl" />
+        <div class="relative grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <span class="theme-badge mb-4 inline-flex rounded-full px-4 py-1.5 text-sm font-medium">
+              {{ t('home.ios.badge') }}
+            </span>
+            <h2 class="text-3xl font-semibold tracking-tight sm:text-4xl">
+              {{ t('home.ios.title') }}
+            </h2>
+            <p class="theme-muted mt-4 max-w-xl text-base leading-relaxed sm:text-lg">
+              {{ t('home.ios.description') }}
+            </p>
+
+            <ul class="mt-8 space-y-3">
+              <li
+                v-for="item in iosHighlights"
+                :key="item"
+                class="flex items-start gap-3 text-sm sm:text-base"
+              >
+                <span class="theme-icon mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                  <FontAwesomeIcon icon="check" class="text-xs" />
+                </span>
+                <span>{{ t(`home.ios.highlights.${item}`) }}</span>
+              </li>
+            </ul>
+
+            <div class="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+              <a
+                :href="APP_STORE_URL"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="theme-button-primary inline-flex items-center gap-3 rounded-xl px-7 py-3.5 font-semibold shadow-lg shadow-amber-500/25"
+              >
+                <svg class="h-6 w-6 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+                  />
+                </svg>
+                {{ t('home.ios.cta') }}
+              </a>
+              <p class="theme-subtle text-sm">{{ t('home.ios.note') }}</p>
+            </div>
+          </div>
+
+          <div class="ios-phone-frame mx-auto w-full max-w-[280px]" aria-hidden="true">
+            <div class="ios-phone-screen">
+              <div class="ios-phone-notch" />
+              <div class="px-5 pt-10 pb-6">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-teal-300/90">
+                  Money Plan
+                </p>
+                <p class="mt-2 text-xl font-semibold text-white">
+                  {{ t('home.headline') }}
+                </p>
+                <div class="mt-5 space-y-2.5">
+                  <div class="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur">
+                    <p class="text-[11px] text-white/60">{{ t('home.mockup.expenses') }}</p>
+                    <p class="text-lg font-semibold text-rose-300">$2,140</p>
+                  </div>
+                  <div class="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur">
+                    <p class="text-[11px] text-white/60">{{ t('home.mockup.income') }}</p>
+                    <p class="text-lg font-semibold text-emerald-300">$3,850</p>
+                  </div>
+                  <div class="rounded-xl bg-amber-400/15 px-3 py-2.5">
+                    <p class="text-[11px] text-amber-200/90">{{ t('home.features.chatbot.title') }}</p>
+                    <p class="mt-1 text-xs leading-snug text-white/80">
+                      “How much on food this month?”
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- How It Works -->
     <section id="how-it-works" class="relative mx-auto max-w-6xl px-6 pb-24">
       <div class="mb-8 text-center">
@@ -229,6 +326,10 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
     <!-- Footer -->
     <footer class="theme-border theme-subtle border-t py-8 text-center text-sm">
       {{ t('home.footer') }} ·
+      <a :href="APP_STORE_URL" target="_blank" rel="noopener noreferrer" class="hover:underline">
+        {{ t('home.ios.cta') }}
+      </a>
+      ·
       <RouterLink to="/faq" class="hover:underline">FAQ</RouterLink>
       ·
       <RouterLink to="/privacy" class="hover:underline">Privacy</RouterLink>
@@ -253,6 +354,43 @@ const actions = ['expenses', 'income', 'accounts', 'categories', 'stats', 'secur
 
 .headline-gradient {
   background-image: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+}
+
+.ios-promo {
+  background: linear-gradient(145deg, var(--color-surface), var(--color-surface-soft));
+  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.35);
+}
+
+.ios-promo-glow {
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.45), transparent 70%);
+}
+
+.ios-phone-frame {
+  border-radius: 2rem;
+  padding: 0.65rem;
+  background: linear-gradient(160deg, #334155, #0f172a);
+  box-shadow:
+    0 25px 50px rgba(2, 6, 23, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.ios-phone-screen {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: linear-gradient(165deg, #1e293b 0%, #0f172a 55%, #134e4a 100%);
+  min-height: 22rem;
+}
+
+.ios-phone-notch {
+  position: absolute;
+  top: 0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6.5rem;
+  height: 1.35rem;
+  border-radius: 9999px;
+  background: #020617;
 }
 
 .mockup-bar-row {

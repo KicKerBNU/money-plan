@@ -43,11 +43,11 @@ const faqs = [
   },
   {
     q: 'How is Money Plan different from YNAB, Mint, or Copilot?',
-    a: 'Money Plan is completely free with no subscription — YNAB costs $14.99/month and Copilot costs $13/month. The core differentiator is the built-in AI chat: instead of reading charts and tables, you simply ask your data a question and get a plain-language answer. Money Plan is also a Progressive Web App, so it installs on your phone like a native app without going through the App Store.',
+    a: 'Money Plan is completely free with no subscription — YNAB costs $14.99/month and Copilot costs $13/month. The core differentiator is the built-in AI chat: instead of reading charts and tables, you simply ask your data a question and get a plain-language answer. On iPhone and iPad you can download the native Money Plan app from the App Store, or use the website on any device.',
   },
   {
     q: 'Does Money Plan work on iPhone and Android?',
-    a: 'Yes. Money Plan is a Progressive Web App (PWA). On iPhone, open moneyplann.com in Safari and tap Share → Add to Home Screen. On Android, open it in Chrome and tap Install. Once installed, it behaves like a native app — full screen, offline-ready, and no App Store required.',
+    a: 'Yes. On iPhone and iPad, download Money Plan from the App Store (search “Money Plann” or visit apps.apple.com). On Android and desktop, use moneyplann.com in your browser — it also works as a Progressive Web App (Chrome → Install, or Safari → Add to Home Screen). Your account syncs across web and iOS.',
   },
   {
     q: 'Can I use Money Plan offline?',
@@ -63,7 +63,11 @@ const faqs = [
   },
   {
     q: 'How do I get started with Money Plan?',
-    a: 'Go to moneyplann.com, click "Login and start tracking", and create a free account with your email or Google. Once inside, add your accounts (cash, bank, or card), then start logging expenses. After a few entries, open the Chat page and ask the AI assistant about your spending. The whole setup takes under two minutes.',
+    a: 'Download Money Plan from the App Store on iPhone, or go to moneyplann.com and click "Login and start tracking". Create a free account with email, Google, or Apple. Add your accounts (cash, bank, or card), then start logging expenses. After a few entries, open the Chat page and ask the AI assistant about your spending. The whole setup takes under two minutes.',
+  },
+  {
+    q: 'Where can I download the iOS app?',
+    a: 'Money Plan is free on the App Store for iPhone and iPad (iOS 17 or later). Open https://apps.apple.com/us/app/money-plann/id6777957861 or search for “Money Plann”. Sign in with the same account you use on the website so your expenses and income stay in sync.',
   },
 ] as const
 </script>
