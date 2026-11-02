@@ -100,6 +100,9 @@ export default {
     cancel: 'Cancelar',
     close: 'Fechar',
     saving: 'Salvando…',
+    validation: {
+      amountPositive: 'Informe um valor maior que zero.',
+    },
   },
   toast: {
     saveSuccess: 'Salvo com sucesso.',

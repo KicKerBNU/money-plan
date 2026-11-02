@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
@@ -29,6 +29,7 @@ import { getDefaultAccountId } from '@/lib/defaultAccount'
 import { categoryIconForName } from '@/lib/categoryIcons'
 import { useMoney } from '@/lib/money'
 import { openConfirmModal } from '@/utils/confirmModal'
+import { useDialogA11y } from '@/utils/useDialogA11y'
 import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 import type { Account, Category, Expense, RecurrenceFrequency, RecurringExpense } from './domain/expenses.types'
 import { RECURRENCE_FREQUENCIES } from './domain/expenses.types'
@@ -50,14 +51,11 @@ const tripRangeForm = ref({
   endDate: '',
 })
 const isExpenseModalOpen = ref(false)
-
-// Lock body scroll while the sheet is open so the page behind can't be scrolled.
-watch(isExpenseModalOpen, (open) => {
-  document.body.style.overflow = open ? 'hidden' : ''
-})
-onUnmounted(() => {
-  document.body.style.overflow = ''
-})
+const tripRangeDialogRef = ref<HTMLElement | null>(null)
+const expenseDialogRef = ref<HTMLElement | null>(null)
+const renameDialogRef = ref<HTMLElement | null>(null)
+const amountInputRef = ref<HTMLInputElement | null>(null)
+const amountError = ref<string | null>(null)
 
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
@@ -96,6 +94,25 @@ type RenameTarget =
 const isRenameModalOpen = ref(false)
 const renameTarget = ref<RenameTarget | null>(null)
 const renameNameInput = ref('')
+
+useDialogA11y({
+  open: isTripRangeModalOpen,
+  dialogRef: tripRangeDialogRef,
+  onDismiss: () => closeTripRangeModal(),
+})
+
+useDialogA11y({
+  open: isExpenseModalOpen,
+  dialogRef: expenseDialogRef,
+  onDismiss: () => closeExpenseModal(),
+  disabled: isExpenseSubmitting,
+})
+
+useDialogA11y({
+  open: () => isRenameModalOpen.value && renameTarget.value != null,
+  dialogRef: renameDialogRef,
+  onDismiss: () => closeRenameModal(),
+})
 
 const currentMonthLabel = computed(() =>
   new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }).format(
@@ -638,10 +655,16 @@ function buildRecurrencePayload(editingId: number | null) {
 
 async function submitExpense() {
   if (isExpenseSubmitting.value) return
-  if (!form.value.amount || !form.value.categoryId || !form.value.accountId) return
+  if (!form.value.categoryId || !form.value.accountId) return
 
   const amount = Number(form.value.amount)
-  if (!Number.isFinite(amount) || amount <= 0) return
+  if (!Number.isFinite(amount) || amount <= 0) {
+    amountError.value = t('common.validation.amountPositive')
+    await nextTick()
+    amountInputRef.value?.focus()
+    return
+  }
+  amountError.value = null
 
   isExpenseSubmitting.value = true
   try {
@@ -702,18 +725,59 @@ async function submitExpense() {
         expenses.value = snapshot
       }
     } else {
-      await createExpense({
+      const trimmedNote = form.value.note.trim()
+      const accountId = form.value.accountId
+      const payload = {
         date: form.value.date,
         amount,
         categoryId,
-        accountId: form.value.accountId,
-        note: form.value.note.trim() || undefined,
+        accountId,
+        note: trimmedNote || undefined,
         ...buildRecurrencePayload(null),
-      })
+      }
+
+      const viewYear = period.value.year
+      const viewMonth = period.value.month
+      const snapshot = [...expenses.value]
+      const tempId = -Date.now()
+      const category = categories.value.find((c) => c.id === categoryId)
+      const account = accounts.value.find((a) => a.id === accountId)
+      const optimistic: Expense = {
+        id: tempId,
+        date: payload.date,
+        amount,
+        categoryId,
+        categoryName: category?.name ?? '',
+        accountId,
+        accountName: account?.name ?? '',
+        note: trimmedNote === '' ? null : trimmedNote,
+      }
+
+      if (expenseBelongsToCalendarMonth(payload.date, viewYear, viewMonth)) {
+        expenses.value = [...expenses.value, optimistic]
+      }
 
       resetExpenseForm()
-      void loadExpensesData()
-      void cashFlowStore.refresh()
+
+      try {
+        const created = await createExpense(payload)
+        if (expenseBelongsToCalendarMonth(created.date, viewYear, viewMonth)) {
+          const i = expenses.value.findIndex((e) => e.id === tempId)
+          if (i >= 0) {
+            const next = [...expenses.value]
+            next[i] = created
+            expenses.value = next
+          } else {
+            expenses.value = [...expenses.value, created]
+          }
+        } else {
+          expenses.value = expenses.value.filter((e) => e.id !== tempId)
+        }
+        void cashFlowStore.refresh()
+      } catch {
+        /* Errors shown via global toast from apiFetch */
+        expenses.value = snapshot
+      }
     }
   } catch {
     /* Errors shown via global toast from apiFetch */
@@ -747,6 +811,7 @@ async function submitCategory() {
 function resetExpenseForm() {
   editingExpenseId.value = null
   linkedRecurring.value = null
+  amountError.value = null
   form.value.date = toInputDate(new Date())
   form.value.amount = ''
   form.value.note = ''
@@ -765,6 +830,7 @@ function resetExpenseForm() {
 function openNewExpenseModal() {
   editingExpenseId.value = null
   linkedRecurring.value = null
+  amountError.value = null
   form.value.date = toInputDate(new Date())
   form.value.amount = ''
   form.value.note = ''
@@ -796,6 +862,7 @@ function closeExpenseModal() {
 async function startEditExpense(expense: Expense) {
   editingExpenseId.value = expense.id
   linkedRecurring.value = null
+  amountError.value = null
   form.value.date = expense.date
   form.value.amount = String(expense.amount)
   form.value.categoryId = canonicalCategoryId(expense.categoryId)
@@ -1607,6 +1674,7 @@ watch(
 
       <div
         v-if="isTripRangeModalOpen"
+        ref="tripRangeDialogRef"
         class="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4"
         role="dialog"
         aria-modal="true"
@@ -1667,6 +1735,7 @@ watch(
       <Transition name="expense-backdrop">
         <div
           v-if="isExpenseModalOpen"
+          ref="expenseDialogRef"
           class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:px-4 sm:py-8"
           role="dialog"
           aria-modal="true"
@@ -1717,14 +1786,27 @@ watch(
                   <label class="text-sm font-semibold">
                     {{ t('expenses.form.amount') }}
                     <input
+                      ref="amountInputRef"
                       v-model="form.amount"
                       data-testid="expense-form-amount"
                       type="number"
-                      min="0"
+                      min="0.01"
                       step="0.01"
                       class="theme-input mt-1 w-full rounded-xl p-3"
                       required
+                      :aria-invalid="amountError ? true : undefined"
+                      :aria-describedby="amountError ? 'expense-amount-error' : undefined"
+                      @input="amountError = null"
                     />
+                    <p
+                      v-if="amountError"
+                      id="expense-amount-error"
+                      class="mt-1 text-xs font-semibold"
+                      style="color: var(--color-danger)"
+                      role="alert"
+                    >
+                      {{ amountError }}
+                    </p>
                   </label>
                 </fieldset>
 
@@ -1843,6 +1925,7 @@ watch(
 
       <div
         v-if="isRenameModalOpen && renameTarget"
+        ref="renameDialogRef"
         class="fixed inset-0 z-[52] flex items-center justify-center bg-black/40 px-4 py-8"
         role="dialog"
         aria-modal="true"

@@ -13,6 +13,7 @@ import {
 } from '@/modules/expenses/api/expenses.api'
 import type { Account } from '@/modules/expenses/domain/expenses.types'
 import { openConfirmModal } from '@/utils/confirmModal'
+import { useDialogA11y } from '@/utils/useDialogA11y'
 
 const { t, locale } = useI18n()
 const { format: formatMoney } = useMoney()
@@ -31,6 +32,13 @@ const dragOverIndex = ref<number | null>(null)
 const renameTarget = ref<{ id: number; initialBalance: number; previousName: string } | null>(null)
 const isRenameModalOpen = ref(false)
 const renameNameInput = ref('')
+const renameDialogRef = ref<HTMLElement | null>(null)
+
+useDialogA11y({
+  open: () => isRenameModalOpen.value && renameTarget.value != null,
+  dialogRef: renameDialogRef,
+  onDismiss: () => closeRenameModal(),
+})
 
 function sortAccountsList(accs: Account[]): Account[] {
   return [...accs].sort((a, b) => {
@@ -345,6 +353,7 @@ onMounted(() => {
 
       <div
         v-if="isRenameModalOpen && renameTarget"
+        ref="renameDialogRef"
         class="fixed inset-0 z-[52] flex items-center justify-center bg-black/40 px-4 py-8"
         role="dialog"
         aria-modal="true"

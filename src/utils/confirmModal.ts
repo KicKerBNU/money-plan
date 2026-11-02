@@ -23,7 +23,6 @@ export function openConfirmModal(options: OpenConfirmModalOptions): Promise<bool
     confirmModalConfirmLabel.value = options.confirmLabel
     confirmModalCancelLabel.value = options.cancelLabel
     confirmModalOpen.value = true
-    document.body.style.overflow = 'hidden'
   })
 }
 
@@ -31,12 +30,10 @@ export function acceptConfirmModal() {
   pendingResolve?.(true)
   pendingResolve = null
   confirmModalOpen.value = false
-  document.body.style.overflow = ''
 }
 
 export function dismissConfirmModal() {
   pendingResolve?.(false)
   pendingResolve = null
   confirmModalOpen.value = false
-  document.body.style.overflow = ''
 }

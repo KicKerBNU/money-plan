@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   acceptConfirmModal,
@@ -9,8 +10,16 @@ import {
   confirmModalTitle,
   dismissConfirmModal,
 } from '@/utils/confirmModal'
+import { useDialogA11y } from '@/utils/useDialogA11y'
 
 const { t } = useI18n()
+const dialogRef = ref<HTMLElement | null>(null)
+
+useDialogA11y({
+  open: confirmModalOpen,
+  dialogRef,
+  onDismiss: dismissConfirmModal,
+})
 </script>
 
 <template>
@@ -22,6 +31,7 @@ const { t } = useI18n()
       @click.self="dismissConfirmModal"
     >
       <div
+        ref="dialogRef"
         data-testid="confirm-modal"
         class="finance-card w-full max-w-md rounded-2xl p-5 shadow-xl"
         role="alertdialog"

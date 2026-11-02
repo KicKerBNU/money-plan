@@ -123,7 +123,7 @@ Successful login e2e uses the **Firebase Auth emulator** (Java required): Playwr
 
 ## Backend
 
-`src/lib/api.ts` uses **`VITE_API_BASE_URL`** with default **`http://localhost:3000`**. For **Netlify production**, set **`VITE_API_BASE_URL`** to the **AWS App Runner** HTTPS origin (Environment variables → Production; value from `money-plan-backend/.apprunner-url` after `./scripts/deploy-apprunner.sh`); redeploy so Vite bakes it into the build. See **`.env.example`** for local overrides / `.env.production.local`. Persistence is PostgreSQL on **Supabase** (`DATABASE_URL` in the backend `.env`); see `money-plan-backend/README.md`. Workspace overview: repo root **`AGENTS.md`**.
+`src/lib/api.ts` uses **`VITE_API_BASE_URL`** with default **`http://localhost:3000`**. For **Netlify production**, set **`VITE_API_BASE_URL`** to the **Railway** HTTPS origin (Environment variables → Production; e.g. `https://money-plan-backend-production.up.railway.app`); redeploy so Vite bakes it into the build. See **`.env.example`** for local overrides / `.env.production.local`. Persistence is PostgreSQL on **Supabase** (`DATABASE_URL` in the backend `.env`); see `money-plan-backend/README.md`. Workspace overview: repo root **`AGENTS.md`**.
 
 ## UI conventions
 

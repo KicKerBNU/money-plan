@@ -6,6 +6,7 @@ import { getDefaultAccountId } from '@/lib/defaultAccount'
 import { formatMonthYear } from '@/lib/dateDisplay'
 import { useMoney } from '@/lib/money'
 import { openConfirmModal } from '@/utils/confirmModal'
+import { useDialogA11y } from '@/utils/useDialogA11y'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import IncomeSkeleton from '@/modules/income/IncomeSkeleton.vue'
 import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
@@ -27,6 +28,9 @@ const isLoading = ref(true)
 const isRefreshing = ref(false)
 const isSubmitting = ref(false)
 const isFormOpen = ref(false)
+const incomeDialogRef = ref<HTMLElement | null>(null)
+const amountInputRef = ref<HTMLInputElement | null>(null)
+const amountError = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
 const accounts = ref<Account[]>([])
 const incomeEntries = ref<IncomeEntry[]>([])
@@ -48,6 +52,13 @@ const form = ref({
 const recurringIncomes = ref<RecurringIncome[]>([])
 const linkedRecurring = ref<RecurringIncome | null>(null)
 const editingIncomeId = ref<number | null>(null)
+
+useDialogA11y({
+  open: isFormOpen,
+  dialogRef: incomeDialogRef,
+  onDismiss: () => closeIncomeForm(),
+  disabled: isSubmitting,
+})
 
 const periodMonthLabel = computed(() =>
   formatMonthYear(locale.value, period.value.year, period.value.month)
@@ -107,6 +118,28 @@ function toInputDate(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+function incomeBelongsToCalendarMonth(dateStr: string, year: number, month: number): boolean {
+  const parts = dateStr.split('-').map(Number)
+  const [y, m] = parts
+  return parts.length >= 2 && Number.isFinite(y) && Number.isFinite(m) && y === year && m === month
+}
+
+function optimisticIncomeFromForm(
+  previous: IncomeEntry,
+  payload: { date: string; amount: number; accountId: number; note: string | null },
+): IncomeEntry {
+  const account = accounts.value.find((a) => a.id === payload.accountId)
+  return {
+    id: previous.id,
+    date: payload.date,
+    amount: payload.amount,
+    accountId: payload.accountId,
+    accountName: account?.name ?? previous.accountName,
+    note: payload.note,
+    recurringIncomeId: previous.recurringIncomeId,
+  }
 }
 
 function shiftPeriod(delta: number) {
@@ -174,6 +207,7 @@ function buildRecurrencePayload(editingId: number | null) {
 function openNewIncomeForm() {
   editingIncomeId.value = null
   linkedRecurring.value = null
+  amountError.value = null
   form.value.date = toInputDate(new Date())
   form.value.amount = ''
   form.value.note = ''
@@ -191,9 +225,11 @@ function closeIncomeForm() {
   isFormOpen.value = false
   editingIncomeId.value = null
   linkedRecurring.value = null
+  amountError.value = null
 }
 
 function resetIncomeFormFields() {
+  amountError.value = null
   form.value.amount = ''
   form.value.note = ''
   form.value.isRecurring = false
@@ -202,37 +238,121 @@ function resetIncomeFormFields() {
 
 async function submitIncome() {
   if (isSubmitting.value) return
-  if (!form.value.amount || !form.value.accountId) return
+  if (!form.value.accountId) return
 
   const amount = Number(form.value.amount)
-  if (!Number.isFinite(amount) || amount <= 0) return
+  if (!Number.isFinite(amount) || amount <= 0) {
+    amountError.value = t('common.validation.amountPositive')
+    await nextTick()
+    amountInputRef.value?.focus()
+    return
+  }
+  amountError.value = null
+
+  const accountId = form.value.accountId
+  const trimmedNote = form.value.note.trim()
+  const viewYear = period.value.year
+  const viewMonth = period.value.month
+  const snapshot = [...incomeEntries.value]
 
   isSubmitting.value = true
   try {
     if (editingIncomeId.value) {
-      await updateIncome(editingIncomeId.value, {
-        date: form.value.date,
-        amount,
-        accountId: form.value.accountId,
-        note: form.value.note.trim() || undefined,
-        ...buildRecurrencePayload(editingIncomeId.value),
-      })
-    } else {
-      await createIncome({
-        date: form.value.date,
-        amount,
-        accountId: form.value.accountId,
-        note: form.value.note.trim() || undefined,
-        ...buildRecurrencePayload(null),
-      })
-    }
+      const incomeId = editingIncomeId.value
+      const previous = incomeEntries.value.find((e) => e.id === incomeId)
+      if (!previous) return
 
-    isFormOpen.value = false
-    editingIncomeId.value = null
-    linkedRecurring.value = null
-    resetIncomeFormFields()
-    await loadIncomeData({ silent: true })
-    void cashFlowStore.refresh()
+      const payload = {
+        date: form.value.date,
+        amount,
+        accountId,
+        note: trimmedNote || undefined,
+        ...buildRecurrencePayload(incomeId),
+      }
+      const optimisticNote = trimmedNote === '' ? null : trimmedNote
+
+      if (incomeBelongsToCalendarMonth(payload.date, viewYear, viewMonth)) {
+        incomeEntries.value = incomeEntries.value.map((e) =>
+          e.id === incomeId
+            ? optimisticIncomeFromForm(previous, { ...payload, note: optimisticNote })
+            : e,
+        )
+      } else {
+        incomeEntries.value = incomeEntries.value.filter((e) => e.id !== incomeId)
+      }
+
+      isFormOpen.value = false
+      editingIncomeId.value = null
+      linkedRecurring.value = null
+      resetIncomeFormFields()
+
+      try {
+        const updated = await updateIncome(incomeId, payload)
+        if (incomeBelongsToCalendarMonth(updated.date, viewYear, viewMonth)) {
+          const i = incomeEntries.value.findIndex((e) => e.id === updated.id)
+          if (i >= 0) {
+            const next = [...incomeEntries.value]
+            next[i] = updated
+            incomeEntries.value = next
+          } else {
+            incomeEntries.value = [...incomeEntries.value, updated]
+          }
+        } else {
+          incomeEntries.value = incomeEntries.value.filter((e) => e.id !== updated.id)
+        }
+        void cashFlowStore.refresh()
+      } catch {
+        /* Errors shown via global toast from apiFetch */
+        incomeEntries.value = snapshot
+      }
+    } else {
+      const payload = {
+        date: form.value.date,
+        amount,
+        accountId,
+        note: trimmedNote || undefined,
+        ...buildRecurrencePayload(null),
+      }
+      const tempId = -Date.now()
+      const account = accounts.value.find((a) => a.id === accountId)
+      const optimistic: IncomeEntry = {
+        id: tempId,
+        date: payload.date,
+        amount,
+        accountId,
+        accountName: account?.name ?? null,
+        note: trimmedNote === '' ? null : trimmedNote,
+      }
+
+      if (incomeBelongsToCalendarMonth(payload.date, viewYear, viewMonth)) {
+        incomeEntries.value = [...incomeEntries.value, optimistic]
+      }
+
+      isFormOpen.value = false
+      editingIncomeId.value = null
+      linkedRecurring.value = null
+      resetIncomeFormFields()
+
+      try {
+        const created = await createIncome(payload)
+        if (incomeBelongsToCalendarMonth(created.date, viewYear, viewMonth)) {
+          const i = incomeEntries.value.findIndex((e) => e.id === tempId)
+          if (i >= 0) {
+            const next = [...incomeEntries.value]
+            next[i] = created
+            incomeEntries.value = next
+          } else {
+            incomeEntries.value = [...incomeEntries.value, created]
+          }
+        } else {
+          incomeEntries.value = incomeEntries.value.filter((e) => e.id !== tempId)
+        }
+        void cashFlowStore.refresh()
+      } catch {
+        /* Errors shown via global toast from apiFetch */
+        incomeEntries.value = snapshot
+      }
+    }
   } catch {
     /* Errors shown via global toast from apiFetch */
   } finally {
@@ -243,6 +363,7 @@ async function submitIncome() {
 async function startEditIncome(entry: IncomeEntry) {
   editingIncomeId.value = entry.id
   linkedRecurring.value = null
+  amountError.value = null
   form.value.date = entry.date
   form.value.amount = String(entry.amount)
   form.value.accountId = entry.accountId ?? getDefaultAccountId(accounts.value) ?? null
@@ -274,15 +395,19 @@ async function removeIncome(incomeId: number) {
   })
   if (!ok) return
 
+  const snapshot = [...incomeEntries.value]
+  incomeEntries.value = incomeEntries.value.filter((e) => e.id !== incomeId)
+
+  if (editingIncomeId.value === incomeId) {
+    closeIncomeForm()
+  }
+
   try {
     await deleteIncome(incomeId)
-    if (editingIncomeId.value === incomeId) {
-      closeIncomeForm()
-    }
-    await loadIncomeData({ silent: true })
     void cashFlowStore.refresh()
   } catch {
     /* Errors shown via global toast from apiFetch */
+    incomeEntries.value = snapshot
   }
 }
 
@@ -498,6 +623,7 @@ onMounted(() => {
       <Transition name="expense-backdrop">
         <div
           v-if="isFormOpen"
+          ref="incomeDialogRef"
           class="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center sm:px-4 sm:py-8"
           role="dialog"
           aria-modal="true"
@@ -535,15 +661,28 @@ onMounted(() => {
                   <label class="block text-sm font-semibold">
                     {{ t('income.form.amount') }}
                     <input
+                      ref="amountInputRef"
                       v-model="form.amount"
                       data-testid="income-form-amount"
                       type="number"
-                      min="0"
+                      min="0.01"
                       step="0.01"
                       class="theme-input mt-1 w-full rounded-xl p-3"
                       required
                       autofocus
+                      :aria-invalid="amountError ? true : undefined"
+                      :aria-describedby="amountError ? 'income-amount-error' : undefined"
+                      @input="amountError = null"
                     />
+                    <p
+                      v-if="amountError"
+                      id="income-amount-error"
+                      class="mt-1 text-xs font-semibold"
+                      style="color: var(--color-danger)"
+                      role="alert"
+                    >
+                      {{ amountError }}
+                    </p>
                   </label>
                   <label class="block text-sm font-semibold">
                     {{ t('income.form.date') }}

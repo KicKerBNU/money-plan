@@ -10,6 +10,7 @@ import {
 } from '@/modules/chatbot/expense-chat-consent'
 import { CHATBOT_LOADING_VERBS } from '@/modules/chatbot/chatbotLoadingVerbs'
 import { useAuthStore } from '@/modules/auth/store/auth.store'
+import { useDialogA11y } from '@/utils/useDialogA11y'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -21,6 +22,13 @@ const errorMessage = ref<string | null>(null)
 const scrollAnchor = ref<HTMLElement | null>(null)
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const showConsentSheet = ref(false)
+const consentDialogRef = ref<HTMLElement | null>(null)
+
+useDialogA11y({
+  open: showConsentSheet,
+  dialogRef: consentDialogRef,
+  onDismiss: () => declineConsent(),
+})
 
 const firebaseUid = computed(() => authStore.user?.uid ?? null)
 const hasAIConsent = computed(() => {
@@ -354,6 +362,7 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
         @click.self="declineConsent"
       >
         <div
+          ref="consentDialogRef"
           class="finance-card max-h-[min(90svh,40rem)] w-full max-w-lg overflow-y-auto rounded-2xl p-5 shadow-xl sm:p-6"
           role="alertdialog"
           aria-modal="true"

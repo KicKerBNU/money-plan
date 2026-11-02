@@ -21,6 +21,7 @@ import {
 } from '@/modules/expenses/domain/expenses.types'
 import { useMoney } from '@/lib/money'
 import { openConfirmModal } from '@/utils/confirmModal'
+import { useDialogA11y } from '@/utils/useDialogA11y'
 
 const { t, locale } = useI18n()
 const { format: formatMoney } = useMoney()
@@ -34,6 +35,7 @@ const categories = ref<Category[]>([])
 const isEditModalOpen = ref(false)
 const isEditSubmitting = ref(false)
 const editTargetId = ref<number | null>(null)
+const editDialogRef = ref<HTMLElement | null>(null)
 const editForm = ref({
   amount: '',
   categoryId: null as number | null,
@@ -42,6 +44,13 @@ const editForm = ref({
   frequency: 'monthly' as RecurrenceFrequency,
   startDate: '',
   active: true,
+})
+
+useDialogA11y({
+  open: isEditModalOpen,
+  dialogRef: editDialogRef,
+  onDismiss: () => closeEditModal(),
+  disabled: isEditSubmitting,
 })
 
 function formatShortDate(iso: string) {
@@ -280,6 +289,7 @@ onMounted(() => {
 
       <div
         v-if="isEditModalOpen"
+        ref="editDialogRef"
         class="fixed inset-0 z-[52] flex items-end justify-center bg-black/40 sm:items-center sm:px-4 sm:py-8"
         role="dialog"
         aria-modal="true"
