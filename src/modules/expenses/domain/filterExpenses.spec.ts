@@ -13,6 +13,7 @@ function row(partial: Partial<ExpenseListRow> & Pick<ExpenseListRow, 'id'>): Exp
     note: null,
     title: 'Groceries',
     dateLabel: 'Oct 10',
+    dayLabel: 'Fri, Oct 10',
     ...partial,
   }
 }

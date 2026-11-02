@@ -4,6 +4,7 @@ import type { Expense } from './expenses.types'
 export interface ExpenseListRow extends Expense {
   title: string
   dateLabel: string
+  dayLabel: string
 }
 
 export interface ExpenseListFilters {

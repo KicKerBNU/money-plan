@@ -8,12 +8,23 @@ import {
   unlockBodyScroll,
 } from './useDialogA11y'
 
-function mockElement(overrides: Partial<HTMLElement> & { tagName?: string } = {}): HTMLElement {
-  const el = {
+type MockFocusable = {
+  tagName: string
+  tabIndex: number
+  disabled: boolean
+  hasAttribute: (name: string) => boolean
+  getAttribute: (name: string) => string | null
+  getClientRects: () => DOMRectList
+}
+
+function mockElement(
+  overrides: Partial<MockFocusable> & { tagName?: string } = {},
+): HTMLElement {
+  const el: MockFocusable = {
     tagName: overrides.tagName ?? 'BUTTON',
     tabIndex: 0,
     disabled: false,
-    hasAttribute: (name: string) => name === 'disabled' && Boolean((el as { disabled?: boolean }).disabled),
+    hasAttribute: (name: string) => name === 'disabled' && Boolean(el.disabled),
     getAttribute: () => null,
     getClientRects: () => [{ width: 1, height: 1 }] as unknown as DOMRectList,
     ...overrides,

@@ -77,10 +77,6 @@ describe('useCashFlowStore', () => {
   })
 
   it('force refresh bypasses the cache', async () => {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth() + 1
-
     fetchExpensesByPeriod
       .mockResolvedValueOnce({
         rows: [{ amount: 10 }],
