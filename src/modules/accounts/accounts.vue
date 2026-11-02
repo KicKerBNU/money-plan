@@ -24,6 +24,7 @@ const accounts = ref<Account[]>([])
 const orderedAccounts = ref<Account[]>([])
 const newAccountName = ref('')
 const isCreating = ref(false)
+const isRenaming = ref(false)
 const isPersistingOrder = ref(false)
 
 const dragFromIndex = ref<number | null>(null)
@@ -100,19 +101,22 @@ function closeRenameModal() {
 
 async function submitRenameModal() {
   const target = renameTarget.value
-  if (!target) return
+  if (!target || isRenaming.value) return
   const trimmed = renameNameInput.value.trim()
   if (!trimmed) return
   if (trimmed === target.previousName) {
     closeRenameModal()
     return
   }
+  isRenaming.value = true
   try {
     await updateAccount(target.id, { name: trimmed, initialBalance: target.initialBalance })
     closeRenameModal()
     await loadAccounts()
   } catch {
     /* toast from apiFetch */
+  } finally {
+    isRenaming.value = false
   }
 }
 
@@ -124,11 +128,14 @@ async function removeAccount(accountId: number) {
     cancelLabel: t('common.cancel'),
   })
   if (!ok) return
+
+  const snapshot = accounts.value
+  accounts.value = accounts.value.filter((account) => account.id !== accountId)
+
   try {
     await deleteAccount(accountId)
-    await loadAccounts()
   } catch {
-    /* toast from apiFetch */
+    accounts.value = snapshot
   }
 }
 
@@ -189,7 +196,7 @@ onMounted(() => {
   <div class="app-shell" data-testid="accounts-page">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+    <main id="main-content" tabindex="-1" class="app-content app-mobile-screen" :aria-busy="isLoading">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
@@ -222,12 +229,14 @@ onMounted(() => {
               class="theme-input min-h-10 min-w-0 flex-1 rounded-xl border-0 bg-transparent px-3 py-2 text-sm shadow-none ring-0 focus:ring-0"
               :placeholder="t('expenses.addAccount.placeholder')"
               :disabled="isCreating"
+              data-testid="accounts-create-input"
             />
             <button
               type="submit"
               class="theme-button-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base font-semibold disabled:opacity-60"
               :disabled="isCreating || !newAccountName.trim()"
               :aria-label="t('common.add')"
+              data-testid="accounts-create-submit"
             >
               <FontAwesomeIcon :icon="isCreating ? 'spinner' : 'plus'" :class="{ 'animate-spin': isCreating }" />
             </button>
@@ -377,18 +386,31 @@ onMounted(() => {
           <form class="mt-4 grid gap-3" @submit.prevent="submitRenameModal">
             <label class="text-sm font-semibold">
               {{ t('expenses.renameModal.accountNameLabel') }}
-              <input v-model="renameNameInput" type="text" class="theme-input mt-1 w-full rounded-xl p-3" autofocus />
+              <input
+                v-model="renameNameInput"
+                type="text"
+                class="theme-input mt-1 w-full rounded-xl p-3"
+                autofocus
+                :disabled="isRenaming"
+                data-testid="accounts-rename-input"
+              />
             </label>
             <div class="flex flex-wrap gap-2 pt-1">
-              <button type="button" class="theme-button-secondary rounded-xl px-4 py-3 font-semibold" @click="closeRenameModal">
+              <button
+                type="button"
+                class="theme-button-secondary rounded-xl px-4 py-3 font-semibold"
+                :disabled="isRenaming"
+                @click="closeRenameModal"
+              >
                 {{ t('common.cancel') }}
               </button>
               <button
                 type="submit"
-                class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-semibold"
-                :disabled="!renameNameInput.trim()"
+                class="theme-button-primary min-w-[8rem] flex-1 rounded-xl px-4 py-3 font-semibold disabled:opacity-60"
+                data-testid="accounts-rename-submit"
+                :disabled="isRenaming || !renameNameInput.trim()"
               >
-                {{ t('common.save') }}
+                {{ isRenaming ? t('common.saving') : t('common.save') }}
               </button>
             </div>
           </form>

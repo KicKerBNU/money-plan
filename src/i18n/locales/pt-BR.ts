@@ -100,6 +100,7 @@ export default {
     cancel: 'Cancelar',
     close: 'Fechar',
     saving: 'Salvando…',
+    skipToMain: 'Ir para o conteúdo principal',
     validation: {
       amountPositive: 'Informe um valor maior que zero.',
     },
@@ -114,6 +115,11 @@ export default {
   preferences: {
     currency: 'Moeda',
     currencyAuto: 'Automática · {code}',
+    language: 'Idioma',
+    languages: {
+      'en-US': 'English',
+      'pt-BR': 'Português (Brasil)',
+    },
   },
   auth: {
     login: {
@@ -190,6 +196,8 @@ export default {
     stats: 'Estatísticas',
     accounts: 'Contas',
     add: 'Adicionar',
+    more: 'Mais',
+    moreTitle: 'Mais',
     me: 'Eu',
     cashFlow: 'Fluxo do mês',
     logout: 'Sair',
@@ -247,6 +255,8 @@ export default {
     },
     list: {
       title: 'Este mês',
+      truncated:
+        'Mostrando as primeiras 500 receitas deste mês. Use um período menor para ver a lista completa — os totais na Visão geral continuam corretos.',
     },
     empty: {
       title: 'Nenhuma receita neste mês',
@@ -280,6 +290,9 @@ export default {
       reorderHint:
         'Arraste o ícone em cada linha para reordenar as despesas do mês (limpe busca, filtros de categoria e intervalo de datas primeiro). A ordem é salva automaticamente.',
       dragHandleAria: 'Arrastar para reordenar despesa',
+      truncated:
+        'Mostrando as primeiras 500 despesas deste mês. Use filtros ou um intervalo menor para ver tudo — os totais na Visão geral continuam corretos.',
+      showMore: 'Mostrar mais ({remaining} restantes)',
     },
     filters: {
       all: 'Todos',

@@ -1,18 +1,28 @@
 import { apiFetch } from '@/lib/api'
+import { normalizeListMeta, type ListedRows } from '@/lib/list-meta'
 import type { Account, Category, Expense, RecurrenceFrequency } from '../domain/expenses.types'
 
 interface DataResponse<T> {
   data: T
 }
 
-export async function fetchExpenses() {
-  const response = await apiFetch<DataResponse<Expense[]>>('/v1/expenses')
-  return response.data
+interface ListDataResponse<T> {
+  data: T
+  meta?: {
+    limit: number
+    returned: number
+    truncated: boolean
+  }
 }
 
-export async function fetchExpensesByPeriod(year: number, month: number) {
-  const response = await apiFetch<DataResponse<Expense[]>>(`/v1/expenses?year=${year}&month=${month}`)
-  return response.data
+export async function fetchExpenses(): Promise<ListedRows<Expense>> {
+  const response = await apiFetch<ListDataResponse<Expense[]>>('/v1/expenses')
+  return { rows: response.data, meta: normalizeListMeta(response.data, response.meta) }
+}
+
+export async function fetchExpensesByPeriod(year: number, month: number): Promise<ListedRows<Expense>> {
+  const response = await apiFetch<ListDataResponse<Expense[]>>(`/v1/expenses?year=${year}&month=${month}`)
+  return { rows: response.data, meta: normalizeListMeta(response.data, response.meta) }
 }
 
 export async function reorderExpensesForMonth(year: number, month: number, orderedIds: number[]) {
@@ -23,10 +33,13 @@ export async function reorderExpensesForMonth(year: number, month: number, order
   return response.data
 }
 
-export async function fetchExpensesByDateRange(startDate: string, endDate: string) {
+export async function fetchExpensesByDateRange(
+  startDate: string,
+  endDate: string,
+): Promise<ListedRows<Expense>> {
   const q = new URLSearchParams({ startDate, endDate })
-  const response = await apiFetch<DataResponse<Expense[]>>(`/v1/expenses?${q.toString()}`)
-  return response.data
+  const response = await apiFetch<ListDataResponse<Expense[]>>(`/v1/expenses?${q.toString()}`)
+  return { rows: response.data, meta: normalizeListMeta(response.data, response.meta) }
 }
 
 export async function fetchAccounts() {

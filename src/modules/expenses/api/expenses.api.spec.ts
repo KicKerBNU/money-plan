@@ -13,17 +13,21 @@ describe('expenses.api', () => {
   })
 
   it('fetchExpensesByPeriod unwraps data and builds the query string', async () => {
-    apiFetch.mockResolvedValue({ data: [{ id: 1, amount: 12 }] })
+    apiFetch.mockResolvedValue({
+      data: [{ id: 1, amount: 12 }],
+      meta: { limit: 500, returned: 1, truncated: false },
+    })
     const { fetchExpensesByPeriod } = await import('./expenses.api')
 
-    const rows = await fetchExpensesByPeriod(2026, 10)
+    const listed = await fetchExpensesByPeriod(2026, 10)
 
-    expect(rows).toEqual([{ id: 1, amount: 12 }])
+    expect(listed.rows).toEqual([{ id: 1, amount: 12 }])
+    expect(listed.meta.truncated).toBe(false)
     expect(apiFetch).toHaveBeenCalledWith('/v1/expenses?year=2026&month=10')
   })
 
   it('fetchExpensesByDateRange sends startDate and endDate', async () => {
-    apiFetch.mockResolvedValue({ data: [] })
+    apiFetch.mockResolvedValue({ data: [], meta: { limit: 500, returned: 0, truncated: false } })
     const { fetchExpensesByDateRange } = await import('./expenses.api')
 
     await fetchExpensesByDateRange('2026-10-01', '2026-10-31')

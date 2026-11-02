@@ -7,10 +7,8 @@ import { formatMonthYear } from '@/lib/dateDisplay'
 import { useMoney } from '@/lib/money'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
-import { fetchAccounts, fetchExpensesByDateRange } from '@/modules/expenses/api/expenses.api'
-import type { Account, Expense } from '@/modules/expenses/domain/expenses.types'
-import { fetchIncomesByDateRange } from '@/modules/income/api/income.api'
-import type { IncomeEntry } from '@/modules/income/domain/income.types'
+import { fetchAccounts } from '@/modules/expenses/api/expenses.api'
+import type { Account } from '@/modules/expenses/domain/expenses.types'
 import type { OverviewPreset } from '@/modules/overview/lib/overviewPeriod'
 import {
   formatBucketLabel,
@@ -18,8 +16,9 @@ import {
   listBucketKeys,
   parseLocalISODate,
   shiftAnchor,
-  txBucketKey,
 } from '@/modules/overview/lib/overviewPeriod'
+import { fetchOverviewSummary } from '@/modules/stats/api/stats.api'
+import type { OverviewSummary } from '@/modules/stats/domain/stats.types'
 
 const { t, locale } = useI18n()
 const { format: formatMoney } = useMoney()
@@ -29,8 +28,7 @@ const anchor = ref(new Date())
 
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
-const expenses = ref<Expense[]>([])
-const incomes = ref<IncomeEntry[]>([])
+const summary = ref<OverviewSummary | null>(null)
 const accounts = ref<Account[]>([])
 
 const periodRange = computed(() => getPeriodRange(preset.value, anchor.value))
@@ -59,8 +57,8 @@ function nextPeriod() {
   anchor.value = shiftAnchor(preset.value, anchor.value, 1)
 }
 
-const totalIncome = computed(() => incomes.value.reduce((s, i) => s + i.amount, 0))
-const totalExpenses = computed(() => expenses.value.reduce((s, e) => s + e.amount, 0))
+const totalIncome = computed(() => summary.value?.totalIncome ?? 0)
+const totalExpenses = computed(() => summary.value?.totalExpenses ?? 0)
 const net = computed(() => totalIncome.value - totalExpenses.value)
 
 const savingsRate = computed(() => {
@@ -71,18 +69,12 @@ const savingsRate = computed(() => {
 const accountsBalance = computed(() => accounts.value.reduce((s, a) => s + a.currentBalance, 0))
 
 const categoryTotals = computed(() => {
-  const map = new Map<string, number>()
-  for (const x of expenses.value) {
-    map.set(x.categoryName, (map.get(x.categoryName) ?? 0) + x.amount)
-  }
-  const rows = [...map.entries()]
-    .map(([name, amount]) => ({
-      name,
-      amount,
-      share: totalExpenses.value > 0 ? amount / totalExpenses.value : 0,
-    }))
-    .sort((a, b) => b.amount - a.amount)
-  return rows
+  const total = totalExpenses.value
+  return (summary.value?.categories ?? []).map((row) => ({
+    name: row.categoryName,
+    amount: row.totalAmount,
+    share: total > 0 ? row.totalAmount / total : 0,
+  }))
 })
 
 const topCategory = computed(() => categoryTotals.value[0] ?? null)
@@ -97,28 +89,18 @@ const chartBuckets = computed(() => {
   const { start, end } = periodRange.value
   const keys = listBucketKeys(preset.value, start, end)
   const p = preset.value
-  const inc = new Map<string, number>()
-  const exp = new Map<string, number>()
-  for (const k of keys) {
-    inc.set(k, 0)
-    exp.set(k, 0)
-  }
-  for (const i of incomes.value) {
-    const k = txBucketKey(i.date, p)
-    if (k && inc.has(k)) inc.set(k, (inc.get(k) ?? 0) + i.amount)
-  }
-  for (const e of expenses.value) {
-    const k = txBucketKey(e.date, p)
-    if (k && exp.has(k)) exp.set(k, (exp.get(k) ?? 0) + e.amount)
-  }
+  const byKey = new Map((summary.value?.series ?? []).map((point) => [point.key, point]))
   const n = keys.length
-  return keys.map((key, index) => ({
-    key,
-    label: formatBucketLabel(key, p, locale.value),
-    showLabel: p !== 'month' || shouldShowMonthChartLabel(index, n),
-    income: inc.get(key) ?? 0,
-    expenses: exp.get(key) ?? 0,
-  }))
+  return keys.map((key, index) => {
+    const point = byKey.get(key)
+    return {
+      key,
+      label: formatBucketLabel(key, p, locale.value),
+      showLabel: p !== 'month' || shouldShowMonthChartLabel(index, n),
+      income: point?.income ?? 0,
+      expenses: point?.expenses ?? 0,
+    }
+  })
 })
 
 const chartMax = computed(() => {
@@ -199,24 +181,48 @@ const insights = computed(() => {
   return items
 })
 
+/** Only render KPIs that match the period currently on screen (avoids stale totals after a failed switch). */
+const loadedPeriodKey = ref<string | null>(null)
+
+function periodKeyFor(start: string, end: string, bucket: string) {
+  return `${start}|${end}|${bucket}`
+}
+
+const activePeriodKey = computed(() => {
+  const { start, end } = periodRange.value
+  const bucket = preset.value === 'year' ? 'month' : 'day'
+  return periodKeyFor(start, end, bucket)
+})
+
+const hasFreshSummary = computed(
+  () => summary.value != null && loadedPeriodKey.value === activePeriodKey.value,
+)
+
 async function loadOverview() {
   isLoading.value = true
   errorMessage.value = null
   const { start, end } = periodRange.value
+  const bucket = preset.value === 'year' ? 'month' : 'day'
+  const requestKey = periodKeyFor(start, end, bucket)
 
   try {
-    const [expData, incData, accData] = await Promise.all([
-      fetchExpensesByDateRange(start, end),
-      fetchIncomesByDateRange(start, end),
+    const [summaryData, accData] = await Promise.all([
+      fetchOverviewSummary(start, end, bucket),
       fetchAccounts(),
     ])
-    expenses.value = expData
-    incomes.value = incData
+    if (requestKey !== activePeriodKey.value) return
+    summary.value = summaryData
     accounts.value = accData
+    loadedPeriodKey.value = requestKey
   } catch (error) {
+    if (requestKey !== activePeriodKey.value) return
+    summary.value = null
+    loadedPeriodKey.value = null
     errorMessage.value = error instanceof Error ? error.message : t('common.unexpectedError')
   } finally {
-    isLoading.value = false
+    if (requestKey === activePeriodKey.value) {
+      isLoading.value = false
+    }
   }
 }
 
@@ -227,7 +233,7 @@ watch([preset, anchor], () => void loadOverview(), { deep: true, immediate: true
   <div class="app-shell" data-testid="overview-page">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+    <main id="main-content" tabindex="-1" class="app-content app-mobile-screen" :aria-busy="isLoading">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
@@ -280,12 +286,12 @@ watch([preset, anchor], () => void loadOverview(), { deep: true, immediate: true
           </div>
         </div>
 
-        <FinancePageSkeleton v-if="isLoading" class="mt-6" variant="overview" />
+        <FinancePageSkeleton v-if="isLoading || (!errorMessage && !hasFreshSummary)" class="mt-6" variant="overview" />
         <p v-else-if="errorMessage" class="mt-6 text-sm" style="color: var(--color-danger)">
           {{ errorMessage }}
         </p>
 
-        <template v-else>
+        <template v-else-if="hasFreshSummary">
           <section class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div class="finance-card rounded-2xl p-4">
               <p class="theme-muted text-[0.65rem] font-black uppercase tracking-wide">{{ t('overview.kpiIncome') }}</p>

@@ -181,7 +181,7 @@ onMounted(() => {
   <div class="app-shell" data-testid="recurring-expenses-page">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+    <main id="main-content" tabindex="-1" class="app-content app-mobile-screen" :aria-busy="isLoading">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <p class="theme-muted text-xs font-black uppercase tracking-[0.16em]">
@@ -331,7 +331,12 @@ onMounted(() => {
               </label>
               <label class="block text-sm font-semibold">
                 {{ t('expenses.form.category') }}
-                <select v-model="editForm.categoryId" class="theme-input mt-1 w-full rounded-xl p-3" required>
+                <select
+                  v-model="editForm.categoryId"
+                  data-testid="recurring-expense-form-category"
+                  class="theme-input mt-1 w-full rounded-xl p-3"
+                  required
+                >
                   <option v-for="category in sortedCategories" :key="category.id" :value="category.id">
                     {{ category.name }}
                   </option>
@@ -339,7 +344,12 @@ onMounted(() => {
               </label>
               <label class="block text-sm font-semibold">
                 {{ t('expenses.form.account') }}
-                <select v-model="editForm.accountId" class="theme-input mt-1 w-full rounded-xl p-3" required>
+                <select
+                  v-model="editForm.accountId"
+                  data-testid="recurring-expense-form-account"
+                  class="theme-input mt-1 w-full rounded-xl p-3"
+                  required
+                >
                   <option v-for="account in accounts" :key="account.id" :value="account.id">
                     {{ account.name }}
                   </option>
@@ -347,7 +357,11 @@ onMounted(() => {
               </label>
               <label class="block text-sm font-semibold">
                 {{ t('recurring.form.frequency') }}
-                <select v-model="editForm.frequency" class="theme-input mt-1 w-full rounded-xl p-3">
+                <select
+                  v-model="editForm.frequency"
+                  data-testid="recurring-expense-form-frequency"
+                  class="theme-input mt-1 w-full rounded-xl p-3"
+                >
                   <option v-for="frequency in RECURRENCE_FREQUENCIES" :key="frequency" :value="frequency">
                     {{ frequencyLabel(frequency) }}
                   </option>
@@ -355,7 +369,13 @@ onMounted(() => {
               </label>
               <label class="block text-sm font-semibold">
                 {{ t('recurring.form.startDate') }}
-                <input v-model="editForm.startDate" type="date" class="theme-input mt-1 w-full rounded-xl p-3" required />
+                <input
+                  v-model="editForm.startDate"
+                  data-testid="recurring-expense-form-start-date"
+                  type="date"
+                  class="theme-input mt-1 w-full rounded-xl p-3"
+                  required
+                />
               </label>
               <label class="flex items-center justify-between gap-3 text-sm font-semibold">
                 <span>{{ t('recurring.form.isRecurring') }}</span>

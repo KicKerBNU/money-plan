@@ -154,8 +154,21 @@ async function json(route: Route, status: number, body: unknown) {
   })
 }
 
-// Must match src/lib/api.ts default. Scope mocks to this origin only so Firebase Auth emulator traffic is not intercepted.
-const API_ORIGIN = (process.env.VITE_API_BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+// Match Vite env (incl. `.env.local`) and common local API ports. Scope mocks to API
+// origins only so Firebase Auth emulator traffic is not intercepted.
+const API_ORIGINS = [
+  ...new Set(
+    [
+      process.env.VITE_API_BASE_URL,
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+    ]
+      .filter((value): value is string => Boolean(value))
+      .map((value) => value.replace(/\/$/, '')),
+  ),
+]
 
 /**
  * Mocks Money Plan finance API so authenticated e2e can exercise UI without a
@@ -190,12 +203,27 @@ export async function installFinanceApiMock(
     { id: 2, name: 'Transport', isDefault: true },
   ]
 
-  await page.route(`${API_ORIGIN}/v1/**`, async (route) => {
+  const handleFinanceApi = async (route: Route) => {
     const request = route.request()
     const method = request.method().toUpperCase()
     const url = new URL(request.url())
     const path = url.pathname.replace(/\/$/, '')
 
+    if (method === 'GET' && path.includes('/v1/stats/overview-summary')) {
+      return json(route, 200, {
+        data: {
+          startDate: url.searchParams.get('startDate') ?? '2026-01-01',
+          endDate: url.searchParams.get('endDate') ?? '2026-01-31',
+          bucket: url.searchParams.get('bucket') ?? 'day',
+          totalIncome: 0,
+          totalExpenses: 0,
+          incomeCount: 0,
+          expenseCount: 0,
+          categories: [],
+          series: [],
+        },
+      })
+    }
     if (method === 'GET' && path.endsWith('/v1/accounts')) {
       return json(route, 200, { data: accounts })
     }
@@ -396,7 +424,11 @@ export async function installFinanceApiMock(
     }
 
     return json(route, 200, { data: [] })
-  })
+  }
+
+  for (const origin of API_ORIGINS) {
+    await page.route(`${origin}/v1/**`, handleFinanceApi)
+  }
 
   return state
 }

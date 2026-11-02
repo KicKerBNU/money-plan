@@ -100,6 +100,7 @@ export default {
     cancel: 'Cancel',
     close: 'Close',
     saving: 'Saving…',
+    skipToMain: 'Skip to main content',
     validation: {
       amountPositive: 'Enter an amount greater than zero.',
     },
@@ -114,6 +115,11 @@ export default {
   preferences: {
     currency: 'Currency',
     currencyAuto: 'Auto · {code}',
+    language: 'Language',
+    languages: {
+      'en-US': 'English',
+      'pt-BR': 'Português (Brasil)',
+    },
   },
   auth: {
     login: {
@@ -190,6 +196,8 @@ export default {
     stats: 'Stats',
     accounts: 'Accounts',
     add: 'Add',
+    more: 'More',
+    moreTitle: 'More',
     me: 'Me',
     cashFlow: 'Cash flow',
     logout: 'Logout',
@@ -247,6 +255,8 @@ export default {
     },
     list: {
       title: 'This month',
+      truncated:
+        'Showing the first 500 income entries for this month. Narrow the period for a complete list — Overview totals stay accurate.',
     },
     empty: {
       title: 'No income this month',
@@ -280,6 +290,9 @@ export default {
       reorderHint:
         'Drag the grip on each row to reorder this month’s expenses (clear search, category filters, and date range first). Order is saved automatically.',
       dragHandleAria: 'Drag to reorder expense',
+      truncated:
+        'Showing the first 500 entries for this month. Narrow the date range or filters for a complete view — summary totals on Overview stay accurate.',
+      showMore: 'Show more ({remaining} left)',
     },
     filters: {
       all: 'All',

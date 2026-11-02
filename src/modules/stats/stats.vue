@@ -25,16 +25,21 @@ const periodMonthLabel = computed(() =>
   formatMonthYear(locale.value, period.value.year, period.value.month)
 )
 
+/** Cap brick DOM nodes so a category with hundreds of expenses stays light. */
+const MAX_VISIBLE_BRICKS = 48
+
 const colorPalette = ['#a855f7', '#45c6b5', '#ef4444', '#ec4899', '#f59e0b', '#38bdf8', '#8b5cf6', '#94a3b8']
 const categories = computed(() =>
   statsCategories.value.map((category, index) => {
     const percent = totalSpent.value > 0 ? (category.totalAmount / totalSpent.value) * 100 : 0
+    const entries = category.entryCount
 
     return {
       rank: index + 1,
       name: category.categoryName,
       amount: category.totalAmount,
-      entries: category.entryCount,
+      entries,
+      visibleBricks: Math.min(Math.max(entries, 0), MAX_VISIBLE_BRICKS),
       percent,
       color: colorPalette[index % colorPalette.length],
       icon: categoryIconForName(category.categoryName),
@@ -94,7 +99,7 @@ onMounted(() => {
   <div class="app-shell" data-testid="stats-page">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+    <main id="main-content" tabindex="-1" class="app-content app-mobile-screen" :aria-busy="isLoading">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <div class="flex items-start justify-between gap-4">
@@ -142,11 +147,14 @@ onMounted(() => {
                 <div
                   class="stats-pillar-fill"
                   :style="{ height: pillarFillHeight(category.amount) }"
+                  role="img"
+                  :aria-label="`${category.entries} ${t('stats.entryLabel')}`"
                 >
                   <div
-                    v-for="brick in category.entries"
+                    v-for="brick in category.visibleBricks"
                     :key="brick"
                     class="stats-brick"
+                    aria-hidden="true"
                   />
                 </div>
               </div>

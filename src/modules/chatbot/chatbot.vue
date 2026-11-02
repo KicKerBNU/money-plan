@@ -176,7 +176,7 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
   <div class="app-shell" data-testid="chatbot-page">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen chatbot-screen" :aria-busy="showThreadHydrateSkeleton">
+    <main id="main-content" tabindex="-1" class="app-content app-mobile-screen chatbot-screen" :aria-busy="showThreadHydrateSkeleton">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header flex flex-wrap items-start justify-between gap-4 pt-9 lg:pt-0">
           <div>

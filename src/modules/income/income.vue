@@ -13,7 +13,7 @@ import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 import { fetchAccounts } from '@/modules/expenses/api/expenses.api'
 import type { Account } from '@/modules/expenses/domain/expenses.types'
 import { RECURRENCE_FREQUENCIES, type RecurrenceFrequency } from '@/modules/expenses/domain/expenses.types'
-import { createIncome, deleteIncome, fetchIncomesByPeriod, updateIncome } from './api/income.api'
+import { createIncome, deleteIncome, updateIncome } from './api/income.api'
 import {
   fetchRecurringIncome,
   fetchRecurringIncomes,
@@ -32,6 +32,7 @@ const incomeDialogRef = ref<HTMLElement | null>(null)
 const amountInputRef = ref<HTMLInputElement | null>(null)
 const amountError = ref<string | null>(null)
 const errorMessage = ref<string | null>(null)
+const listTruncated = ref(false)
 const accounts = ref<Account[]>([])
 const incomeEntries = ref<IncomeEntry[]>([])
 const today = new Date()
@@ -167,12 +168,14 @@ async function loadIncomeData(options?: { silent?: boolean }) {
 
   try {
     const [incomesData, accountsData] = await Promise.all([
-      fetchIncomesByPeriod(period.value.year, period.value.month),
+      cashFlowStore.getIncomesForPeriod(period.value.year, period.value.month),
       fetchAccounts(),
     ])
 
     incomeEntries.value = incomesData
     accounts.value = accountsData
+    listTruncated.value = cashFlowStore.isIncomesTruncated(period.value.year, period.value.month)
+    cashFlowStore.seedPeriod(period.value.year, period.value.month, { incomes: incomesData })
 
     if (!form.value.accountId && accountsData.length > 0) {
       const id = getDefaultAccountId(accountsData)
@@ -300,7 +303,8 @@ async function submitIncome() {
         } else {
           incomeEntries.value = incomeEntries.value.filter((e) => e.id !== updated.id)
         }
-        void cashFlowStore.refresh()
+        cashFlowStore.seedPeriod(viewYear, viewMonth, { incomes: incomeEntries.value })
+        void cashFlowStore.refresh({ force: true })
       } catch {
         /* Errors shown via global toast from apiFetch */
         incomeEntries.value = snapshot
@@ -347,7 +351,8 @@ async function submitIncome() {
         } else {
           incomeEntries.value = incomeEntries.value.filter((e) => e.id !== tempId)
         }
-        void cashFlowStore.refresh()
+        cashFlowStore.seedPeriod(viewYear, viewMonth, { incomes: incomeEntries.value })
+        void cashFlowStore.refresh({ force: true })
       } catch {
         /* Errors shown via global toast from apiFetch */
         incomeEntries.value = snapshot
@@ -404,7 +409,8 @@ async function removeIncome(incomeId: number) {
 
   try {
     await deleteIncome(incomeId)
-    void cashFlowStore.refresh()
+    cashFlowStore.seedPeriod(period.value.year, period.value.month, { incomes: incomeEntries.value })
+    void cashFlowStore.refresh({ force: true })
   } catch {
     /* Errors shown via global toast from apiFetch */
     incomeEntries.value = snapshot
@@ -420,7 +426,7 @@ onMounted(() => {
   <div class="app-shell" data-testid="income-page">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+    <main id="main-content" tabindex="-1" class="app-content app-mobile-screen" :aria-busy="isLoading">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header pt-9 lg:pt-0">
           <p class="theme-muted text-xs font-black uppercase tracking-[0.16em] lg:normal-case lg:tracking-normal">
@@ -460,6 +466,15 @@ onMounted(() => {
               <FontAwesomeIcon icon="chevron-down" class="-rotate-90" />
             </button>
           </div>
+
+          <p
+            v-if="listTruncated"
+            class="mt-3 rounded-xl px-4 py-2 text-xs font-semibold"
+            style="color: var(--color-warning, #b45309); background: color-mix(in srgb, var(--color-warning, #b45309) 10%, transparent)"
+            role="status"
+          >
+            {{ t('income.list.truncated') }}
+          </p>
 
           <!-- Summary hero -->
           <section
@@ -698,7 +713,12 @@ onMounted(() => {
 
                 <label class="block text-sm font-semibold">
                   {{ t('income.form.account') }}
-                  <select v-model="form.accountId" class="theme-input mt-1 w-full rounded-xl p-3" required>
+                  <select
+                    v-model="form.accountId"
+                    data-testid="income-form-account"
+                    class="theme-input mt-1 w-full rounded-xl p-3"
+                    required
+                  >
                     <option v-for="account in accounts" :key="account.id" :value="account.id">
                       {{ account.name }}
                     </option>

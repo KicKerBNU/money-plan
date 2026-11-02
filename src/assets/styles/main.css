@@ -9,7 +9,8 @@
   --color-border: rgba(148, 163, 184, 0.13);
   --color-text: #ffffff;
   --color-muted: #818b9d;
-  --color-subtle: #5f6878;
+  /* Quieter than muted but still ≥4.5:1 on page/surface/surface-soft */
+  --color-subtle: #7e889a;
   --color-primary: #5adcca;
   --color-primary-hover: #6ee7d8;
   --color-primary-text: #08201d;
@@ -34,8 +35,9 @@
   --color-surface-soft: rgba(239, 241, 236, 0.9);
   --color-border: rgba(24, 39, 36, 0.08);
   --color-text: #000000;
-  --color-muted: #718198;
-  --color-subtle: #8a96a8;
+  /* ≥4.5:1 vs page (#f8fafc), white cards, and surface-soft */
+  --color-muted: #586372;
+  --color-subtle: #5d6879;
   --color-primary: #2f7f73;
   --color-primary-hover: #256f65;
   --color-primary-text: #ffffff;
@@ -83,6 +85,29 @@ body {
     border: 1px solid var(--color-border);
     background: var(--color-surface);
     color: var(--color-text);
+  }
+
+  .skip-to-main {
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    z-index: 100;
+    padding: 0.65rem 1rem;
+    border-radius: 0.75rem;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-decoration: none;
+    transform: translateY(-160%);
+    transition: transform 0.15s ease;
+  }
+
+  .skip-to-main:focus,
+  .skip-to-main:focus-visible {
+    transform: translateY(0);
+    outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, white);
+    outline-offset: 2px;
   }
 
   .app-shell {
@@ -597,11 +622,63 @@ body {
     border-color: var(--color-border);
   }
 
+  /*
+   * Shared field metrics — text start + trailing picker icons use the same inset
+   * on every form (recurring, expenses, income, accounts, login, …).
+   * !important on icon-side padding beats Tailwind `p-3` / `px-*` utilities so
+   * selects and date fields stay aligned with each other.
+   */
   .theme-input {
+    --theme-input-pad-x: 0.75rem;
+    --theme-input-pad-y: 0.75rem;
+    --theme-input-icon-inset: 0.75rem;
+    --theme-input-icon-slot: 1.75rem;
+
     border: 1px solid var(--color-border);
-    background: var(--color-surface-soft);
+    background-color: var(--color-surface-soft);
     color: var(--color-text);
     font-size: 1rem; /* prevents iOS Safari auto-zoom on focus (requires ≥16px) */
+  }
+
+  /* Custom chevron so native select arrows don't use a different inset than date icons. */
+  select.theme-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-inline-start: var(--theme-input-pad-x) !important;
+    padding-inline-end: calc(var(--theme-input-icon-inset) + var(--theme-input-icon-slot)) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23586372' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--theme-input-icon-inset) center;
+    background-size: 0.75rem;
+  }
+
+  :root:not([data-theme='light']) select.theme-input {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.5 4.5L6 8L9.5 4.5' stroke='%23818b9d' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  /* Date / time: same text start + icon slot as selects. */
+  input[type='date'].theme-input,
+  input[type='datetime-local'].theme-input,
+  input[type='month'].theme-input,
+  input[type='time'].theme-input {
+    position: relative;
+    padding-inline-start: var(--theme-input-pad-x) !important;
+    padding-inline-end: calc(var(--theme-input-icon-inset) + var(--theme-input-icon-slot)) !important;
+  }
+
+  input[type='date'].theme-input::-webkit-calendar-picker-indicator,
+  input[type='datetime-local'].theme-input::-webkit-calendar-picker-indicator,
+  input[type='month'].theme-input::-webkit-calendar-picker-indicator,
+  input[type='time'].theme-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    inset-inline-end: var(--theme-input-icon-inset);
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0.65;
   }
 
   /* --- Chatbot composer (Gemini/ChatGPT-style pill) ------------------- */

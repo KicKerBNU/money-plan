@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
-import { fetchIncomesByPeriod } from '@/modules/income/api/income.api'
 import type { IncomeEntry } from '@/modules/income/domain/income.types'
 import {
   createAccount,
@@ -15,7 +14,6 @@ import {
   deleteExpense,
   fetchAccounts,
   fetchCategories,
-  fetchExpensesByPeriod,
   reorderExpensesForMonth,
   updateAccount,
   updateCategory,
@@ -59,6 +57,7 @@ const amountError = ref<string | null>(null)
 
 const isLoading = ref(true)
 const errorMessage = ref<string | null>(null)
+const listTruncated = ref(false)
 const expenses = ref<Expense[]>([])
 const incomes = ref<IncomeEntry[]>([])
 const categories = ref<Category[]>([])
@@ -187,28 +186,6 @@ const renameModalNameLabel = computed(() => {
     : t('expenses.renameModal.categoryNameLabel')
 })
 
-const filteredExpenses = computed(() =>
-  filterExpenseRows(expensesList.value, {
-    searchQuery: searchQuery.value,
-    categoryId: selectedCategoryId.value,
-    dateFrom: selectedDateFrom.value,
-    dateTo: selectedDateTo.value,
-  }),
-)
-
-/** Full month list with default filters — safe to persist manual order for `period`. */
-const expensesReorderEligible = computed(() =>
-  isExpenseReorderEligible(
-    {
-      searchQuery: searchQuery.value,
-      categoryId: selectedCategoryId.value,
-      dateFrom: selectedDateFrom.value,
-      dateTo: selectedDateTo.value,
-    },
-    filteredExpenses.value.length,
-  ),
-)
-
 const dragExpenseFromIndex = ref<number | null>(null)
 const dragExpenseOverIndex = ref<number | null>(null)
 const isPersistingExpenseOrder = ref(false)
@@ -260,7 +237,7 @@ async function onExpenseDrop(targetIndex: number) {
   isPersistingExpenseOrder.value = true
   try {
     expenses.value = await reorderExpensesForMonth(period.value.year, period.value.month, orderedIds)
-    void cashFlowStore.refresh()
+    cashFlowStore.seedPeriod(period.value.year, period.value.month, { expenses: expenses.value })
   } catch {
     expenses.value = snapshot
     await loadExpensesData()
@@ -337,8 +314,56 @@ const expensesList = computed(() =>
         day: 'numeric',
       }).format(date),
     }
-  })
+  }),
 )
+
+const filteredExpenses = computed(() =>
+  filterExpenseRows(expensesList.value, {
+    searchQuery: searchQuery.value,
+    categoryId: selectedCategoryId.value,
+    dateFrom: selectedDateFrom.value,
+    dateTo: selectedDateTo.value,
+  }),
+)
+
+/** Cap non-reorder DOM so heavy months stay light; reorder needs the full filtered list. */
+const EXPENSE_LIST_PAGE_SIZE = 100
+const expenseListVisibleCount = ref(EXPENSE_LIST_PAGE_SIZE)
+
+watch(filteredExpenses, () => {
+  expenseListVisibleCount.value = EXPENSE_LIST_PAGE_SIZE
+})
+
+/** Full month list with default filters — safe to persist manual order for `period`. */
+const expensesReorderEligible = computed(() =>
+  isExpenseReorderEligible(
+    {
+      searchQuery: searchQuery.value,
+      categoryId: selectedCategoryId.value,
+      dateFrom: selectedDateFrom.value,
+      dateTo: selectedDateTo.value,
+    },
+    filteredExpenses.value.length,
+  ),
+)
+
+const visibleExpenses = computed(() => {
+  if (expensesReorderEligible.value) return filteredExpenses.value
+  return filteredExpenses.value.slice(0, expenseListVisibleCount.value)
+})
+
+const expenseListHasMore = computed(
+  () =>
+    !expensesReorderEligible.value &&
+    filteredExpenses.value.length > expenseListVisibleCount.value,
+)
+
+function showMoreExpenses() {
+  expenseListVisibleCount.value = Math.min(
+    filteredExpenses.value.length,
+    expenseListVisibleCount.value + EXPENSE_LIST_PAGE_SIZE,
+  )
+}
 
 const categoryColors = ['#8b5cf6', '#14b8a6', '#ef4444', '#ec4899', '#f59e0b', '#38bdf8']
 
@@ -566,8 +591,8 @@ async function loadExpensesData() {
 
   try {
     const settled = await Promise.allSettled([
-      fetchExpensesByPeriod(period.value.year, period.value.month),
-      fetchIncomesByPeriod(period.value.year, period.value.month),
+      cashFlowStore.getExpensesForPeriod(period.value.year, period.value.month),
+      cashFlowStore.getIncomesForPeriod(period.value.year, period.value.month),
       fetchCategories(),
       fetchAccounts(),
     ])
@@ -628,6 +653,16 @@ async function loadExpensesData() {
     }
 
     errorMessage.value = failures.length > 0 ? failures.join(' · ') : null
+    listTruncated.value =
+      cashFlowStore.isExpensesTruncated(period.value.year, period.value.month) ||
+      cashFlowStore.isIncomesTruncated(period.value.year, period.value.month)
+
+    if (expensesResult.status === 'fulfilled' || incomesResult.status === 'fulfilled') {
+      cashFlowStore.seedPeriod(period.value.year, period.value.month, {
+        expenses: expensesResult.status === 'fulfilled' ? expensesResult.value : undefined,
+        incomes: incomesResult.status === 'fulfilled' ? incomesResult.value : undefined,
+      })
+    }
 
     try {
       recurringExpenses.value = await fetchRecurringExpenses()
@@ -719,7 +754,8 @@ async function submitExpense() {
         } else {
           expenses.value = expenses.value.filter((e) => e.id !== updated.id)
         }
-        void cashFlowStore.refresh()
+        cashFlowStore.seedPeriod(viewYear, viewMonth, { expenses: expenses.value })
+        void cashFlowStore.refresh({ force: true })
       } catch {
         /* Errors shown via global toast from apiFetch */
         expenses.value = snapshot
@@ -773,7 +809,8 @@ async function submitExpense() {
         } else {
           expenses.value = expenses.value.filter((e) => e.id !== tempId)
         }
-        void cashFlowStore.refresh()
+        cashFlowStore.seedPeriod(viewYear, viewMonth, { expenses: expenses.value })
+        void cashFlowStore.refresh({ force: true })
       } catch {
         /* Errors shown via global toast from apiFetch */
         expenses.value = snapshot
@@ -904,7 +941,8 @@ async function removeExpense(expenseId: number) {
 
   try {
     await deleteExpense(expenseId)
-    void cashFlowStore.refresh()
+    cashFlowStore.seedPeriod(period.value.year, period.value.month, { expenses: expenses.value })
+    void cashFlowStore.refresh({ force: true })
   } catch {
     /* Errors shown via global toast from apiFetch */
     expenses.value = snapshot
@@ -1023,7 +1061,7 @@ watch(
   <div class="app-shell" data-testid="expenses-page">
     <FinanceNav />
 
-    <main class="app-content app-mobile-screen" :aria-busy="isLoading">
+    <main id="main-content" tabindex="-1" class="app-content app-mobile-screen" :aria-busy="isLoading">
       <div class="app-finance-page-inner">
         <header class="mobile-page-header flex flex-wrap items-start justify-between gap-4 pt-9 lg:pt-0">
           <div>
@@ -1169,6 +1207,14 @@ watch(
             </div>
 
             <div class="expense-list flex min-h-0 flex-col xl:flex-1 xl:overflow-y-auto">
+              <p
+                v-if="listTruncated && !errorMessage"
+                class="theme-border border-b px-4 py-2 text-xs font-semibold"
+                style="color: var(--color-warning, #b45309); background: color-mix(in srgb, var(--color-warning, #b45309) 10%, transparent)"
+                role="status"
+              >
+                {{ t('expenses.list.truncated') }}
+              </p>
               <p v-if="errorMessage" class="p-6 text-center text-sm" style="color: var(--color-danger)">
                 {{ errorMessage }}
               </p>
@@ -1201,7 +1247,7 @@ watch(
                 {{ t('expenses.list.reorderHint') }}
               </p>
               <article
-                v-for="(expense, index) in filteredExpenses"
+                v-for="(expense, index) in visibleExpenses"
                 :key="expense.id"
                 :data-testid="`expense-row-${expense.id}`"
                 class="expense-row grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 px-4 py-3.5 transition-[opacity,box-shadow] lg:grid-cols-[auto_auto_1fr_auto_auto]"
@@ -1212,7 +1258,7 @@ watch(
                     dragExpenseFromIndex !== null &&
                     dragExpenseFromIndex !== index,
                 }"
-                style="outline-color: var(--color-primary)"
+                style="outline-color: var(--color-primary); content-visibility: auto; contain-intrinsic-size: auto 64px"
                 @dragover="onExpenseDragOver(index, $event)"
                 @drop.prevent="onExpenseDrop(index)"
               >
@@ -1288,6 +1334,20 @@ watch(
               >
                 {{ t('expenses.empty') }}
               </p>
+              <div v-if="expenseListHasMore" class="theme-border border-t p-3 text-center">
+                <button
+                  type="button"
+                  class="theme-button-secondary rounded-xl px-4 py-2 text-xs font-black uppercase tracking-wide"
+                  data-testid="expenses-show-more"
+                  @click="showMoreExpenses"
+                >
+                  {{
+                    t('expenses.list.showMore', {
+                      remaining: filteredExpenses.length - visibleExpenses.length,
+                    })
+                  }}
+                </button>
+              </div>
               </template>
             </div>
           </div>
@@ -1301,7 +1361,12 @@ watch(
               {{ errorMessage }}
             </p>
             <template v-else>
-            <article v-for="expense in filteredExpenses" :key="expense.id" class="mobile-entry-card rounded-xl p-3">
+            <article
+              v-for="expense in visibleExpenses"
+              :key="expense.id"
+              class="mobile-entry-card rounded-xl p-3"
+              style="content-visibility: auto; contain-intrinsic-size: auto 88px"
+            >
               <div class="mb-2 flex items-center justify-between">
                 <span class="text-xs font-black">{{ expense.dayLabel }}</span>
                 <span class="theme-muted text-xs">{{ formatMoney(expense.amount) }}</span>
@@ -1379,6 +1444,19 @@ watch(
             <p v-if="!!expenses.length && !filteredExpenses.length" class="theme-muted px-2 text-center text-xs">
               {{ t('expenses.empty') }}
             </p>
+            <button
+              v-if="expenseListHasMore"
+              type="button"
+              class="theme-button-secondary w-full rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wide"
+              data-testid="expenses-show-more-mobile"
+              @click="showMoreExpenses"
+            >
+              {{
+                t('expenses.list.showMore', {
+                  remaining: filteredExpenses.length - visibleExpenses.length,
+                })
+              }}
+            </button>
             </template>
           </section>
             </div>
@@ -1856,7 +1934,12 @@ watch(
                 <fieldset class="mt-3 border-0 p-0" :disabled="isExpenseSubmitting">
                   <label class="text-sm font-semibold">
                     {{ t('expenses.form.account') }}
-                    <select v-model="form.accountId" class="theme-input mt-1 w-full rounded-xl p-3" required>
+                    <select
+                      v-model="form.accountId"
+                      data-testid="expense-form-account"
+                      class="theme-input mt-1 w-full rounded-xl p-3"
+                      required
+                    >
                       <option v-for="account in accounts" :key="account.id" :value="account.id">
                         {{ account.name }}
                       </option>

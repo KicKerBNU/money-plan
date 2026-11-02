@@ -3,7 +3,19 @@ import { defineConfig, devices } from '@playwright/test'
 const PORT = Number(process.env.E2E_PORT ?? 1074)
 const baseURL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${PORT}`
 const authOrigin = process.env.E2E_AUTH_EMULATOR_ORIGIN ?? 'http://127.0.0.1:9099'
-const reuse = !process.env.CI
+
+/**
+ * Local `yarn test:ci` / pre-commit set CI=true for workers/retries, but Auth
+ * emulator or Vite may already be running — reuse those. Only force a fresh
+ * webServer on remote CI (Netlify / GitHub Actions) unless overridden.
+ */
+const remoteCi = Boolean(process.env.NETLIFY || process.env.GITHUB_ACTIONS)
+const reuse =
+  process.env.E2E_REUSE_SERVER === 'true'
+    ? true
+    : process.env.E2E_REUSE_SERVER === 'false'
+      ? false
+      : !remoteCi
 
 /**
  * Smoke / auth e2e against Vite + Firebase Auth emulator.
@@ -14,7 +26,7 @@ export default defineConfig({
   testDir: './e2e',
   globalSetup: './e2e/global-setup.ts',
   fullyParallel: true,
-  forbidOnly: Boolean(process.env.CI),
+  forbidOnly: remoteCi,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],

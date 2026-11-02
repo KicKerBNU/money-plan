@@ -6,6 +6,7 @@ import { useAuthStore } from '@/modules/auth/store/auth.store'
 import { useThemeStore } from '@/modules/theme/store/theme.store'
 import { usePreferencesStore } from '@/modules/preferences/store/preferences.store'
 import { detectCurrencyFromLocale, SUPPORTED_CURRENCIES } from '@/lib/money'
+import { setAppLocale, SUPPORTED_LOCALES, type SupportedLocale } from '@/i18n'
 import { usePwaInstall } from '@/utils/usePwaInstall'
 import { openConfirmModal } from '@/utils/confirmModal'
 
@@ -20,15 +21,19 @@ const rootRef = ref<HTMLElement | null>(null)
 const open = ref(false)
 const iosInstructionVisible = ref(false)
 const isCurrencyMenuOpen = ref(false)
+const isLanguageMenuOpen = ref(false)
 const isDeletingAccount = ref(false)
 
 const autoCurrency = computed(() => detectCurrencyFromLocale(locale.value))
 const activeCurrency = computed(() => preferences.currency ?? autoCurrency.value)
+const activeLocaleLabel = computed(() => languageLabel(locale.value as SupportedLocale))
 
 const showInstallOption = () => !isInstalled.value && (canPrompt.value || isIOS.value)
 
 function closeMenu() {
   open.value = false
+  isCurrencyMenuOpen.value = false
+  isLanguageMenuOpen.value = false
 }
 
 function toggleMenu(e: MouseEvent) {
@@ -91,6 +96,7 @@ function toggleTheme() {
 }
 
 function toggleCurrencyMenu() {
+  isLanguageMenuOpen.value = false
   isCurrencyMenuOpen.value = !isCurrencyMenuOpen.value
 }
 
@@ -98,6 +104,21 @@ function selectCurrency(code: string | null) {
   preferences.setCurrency(code)
   isCurrencyMenuOpen.value = false
   closeMenu()
+}
+
+function toggleLanguageMenu() {
+  isCurrencyMenuOpen.value = false
+  isLanguageMenuOpen.value = !isLanguageMenuOpen.value
+}
+
+function selectLanguage(next: SupportedLocale) {
+  setAppLocale(next)
+  isLanguageMenuOpen.value = false
+  closeMenu()
+}
+
+function languageLabel(code: SupportedLocale) {
+  return t(`preferences.languages.${code}`)
 }
 
 async function handleInstall() {
@@ -141,6 +162,45 @@ async function handleInstall() {
           <FontAwesomeIcon :icon="themeStore.isDark ? 'sun' : 'moon'" class="w-4 opacity-90" />
           {{ themeStore.isDark ? t('theme.light') : t('theme.dark') }}
         </button>
+
+        <div class="theme-border mx-2 my-0.5 border-t opacity-70" />
+        <button
+          type="button"
+          data-testid="settings-language"
+          class="flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[var(--color-surface-soft)]"
+          role="menuitem"
+          :aria-expanded="isLanguageMenuOpen"
+          @click="toggleLanguageMenu"
+        >
+          <span class="flex items-center gap-2.5">
+            <FontAwesomeIcon icon="globe" class="w-4 opacity-90" />
+            {{ t('preferences.language') }}
+          </span>
+          <span class="flex items-center gap-1.5 text-xs font-bold opacity-80">
+            {{ activeLocaleLabel }}
+            <FontAwesomeIcon :icon="isLanguageMenuOpen ? 'chevron-up' : 'chevron-down'" class="text-[0.65rem]" />
+          </span>
+        </button>
+
+        <div v-if="isLanguageMenuOpen" data-testid="settings-language-options" class="px-1.5 pb-1.5">
+          <button
+            v-for="code in SUPPORTED_LOCALES"
+            :key="code"
+            type="button"
+            :data-testid="`settings-language-${code}`"
+            class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-[0.8rem] transition-colors hover:bg-[var(--color-surface-soft)]"
+            :class="{ 'font-bold': locale === code }"
+            @click="selectLanguage(code)"
+          >
+            <span>{{ languageLabel(code) }}</span>
+            <FontAwesomeIcon
+              v-if="locale === code"
+              icon="check"
+              class="text-xs"
+              style="color: var(--color-primary)"
+            />
+          </button>
+        </div>
 
         <div class="theme-border mx-2 my-0.5 border-t opacity-70" />
         <button

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, type RouteLocationRaw } from 'vue-router'
@@ -8,12 +8,24 @@ import AppSettingsMenu from '@/modules/app/app-settings-menu.vue'
 import { formatMonthYear } from '@/lib/dateDisplay'
 import { useMoney } from '@/lib/money'
 import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
+import { useDialogA11y } from '@/utils/useDialogA11y'
 
 const { t, locale } = useI18n()
 const route = useRoute()
 const cashFlowStore = useCashFlowStore()
 const { cashFlowNet, loading: cashFlowLoading } = storeToRefs(cashFlowStore)
 const { formatSigned: formatCashFlowMoney } = useMoney()
+
+const isMoreOpen = ref(false)
+const moreDialogRef = ref<HTMLElement | null>(null)
+
+useDialogA11y({
+  open: isMoreOpen,
+  dialogRef: moreDialogRef,
+  onDismiss: () => {
+    isMoreOpen.value = false
+  },
+})
 
 const navMonthLabel = computed(() => {
   const { year, month } = cashFlowStore.calendarYearMonth()
@@ -22,7 +34,12 @@ const navMonthLabel = computed(() => {
 
 onMounted(() => void cashFlowStore.refresh())
 
-watch(locale, () => void cashFlowStore.refresh())
+watch(
+  () => route.fullPath,
+  () => {
+    isMoreOpen.value = false
+  },
+)
 
 interface NavItem {
   key: string
@@ -59,10 +76,9 @@ const addExpenseAction: NavItem = {
 }
 
 /**
- * Mobile bottom dock: the four most-used screens.
- * "Add expense" is the daily-driver action, so it sits in the second slot
- * (next to Expenses) and renders as a primary FAB; Stats is reachable from
- * Overview/sidebar on larger screens.
+ * Mobile bottom dock: primary destinations + Add FAB + More sheet trigger.
+ * Destinations only in the desktop sidebar (Overview, Income, Recurring ×2, Stats)
+ * live in the More sheet so the dock stays usable on small screens.
  */
 const mobileNavItems: NavItem[] = [
   navByKey('expenses'),
@@ -70,6 +86,16 @@ const mobileNavItems: NavItem[] = [
   navByKey('chatbot'),
   navByKey('accounts'),
 ]
+
+const moreNavItems: NavItem[] = [
+  navByKey('overview'),
+  navByKey('income'),
+  navByKey('recurring'),
+  navByKey('recurringIncome'),
+  navByKey('stats'),
+]
+
+const isMoreRouteActive = computed(() => moreNavItems.some((item) => isActive(item)))
 
 function itemPath(to: RouteLocationRaw): string {
   return typeof to === 'string' ? to : to.path ?? '/'
@@ -83,9 +109,20 @@ function isActive(item: NavItem) {
 function handleNavClick(event: MouseEvent, item: NavItem) {
   if (item.disabled) event.preventDefault()
 }
+
+function openMore() {
+  isMoreOpen.value = true
+}
+
+function closeMore() {
+  isMoreOpen.value = false
+}
 </script>
 
 <template>
+  <a href="#main-content" class="skip-to-main" data-testid="skip-to-main">
+    {{ t('common.skipToMain') }}
+  </a>
   <aside
     data-testid="finance-nav"
     class="app-sidebar theme-border fixed inset-y-0 left-0 z-30 hidden w-60 border-r px-6 py-7 lg:flex lg:flex-col"
@@ -142,7 +179,8 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
   </div>
 
   <nav
-    class="mobile-bottom-nav theme-card fixed inset-x-4 bottom-4 z-30 grid grid-cols-4 items-center rounded-[1.6rem] px-3 py-2 shadow-2xl lg:hidden"
+    data-testid="finance-mobile-nav"
+    class="mobile-bottom-nav theme-card fixed inset-x-4 bottom-4 z-30 grid grid-cols-5 items-center rounded-[1.6rem] px-3 py-2 shadow-2xl lg:hidden"
   >
     <RouterLink
       v-for="item in mobileNavItems"
@@ -161,5 +199,75 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
       </span>
       <span v-if="!item.isAction">{{ t(item.label) }}</span>
     </RouterLink>
+
+    <button
+      type="button"
+      data-testid="finance-nav-more"
+      :aria-expanded="isMoreOpen"
+      aria-haspopup="dialog"
+      :aria-label="t('appNav.more')"
+      :class="[
+        'mobile-nav-item flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[0.68rem] font-semibold',
+        { 'is-active': isMoreRouteActive || isMoreOpen },
+      ]"
+      @click="openMore"
+    >
+      <span class="mobile-nav-icon flex items-center justify-center">
+        <FontAwesomeIcon icon="ellipsis" />
+      </span>
+      <span>{{ t('appNav.more') }}</span>
+    </button>
   </nav>
+
+  <Teleport to="body">
+    <div
+      v-if="isMoreOpen"
+      ref="moreDialogRef"
+      class="fixed inset-0 z-[52] flex items-end justify-center bg-black/40 lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="t('appNav.moreTitle')"
+      data-testid="finance-nav-more-sheet"
+      @click.self="closeMore"
+    >
+      <div
+        class="finance-card flex w-full max-w-lg flex-col rounded-t-2xl shadow-xl"
+        style="padding-bottom: max(1rem, env(safe-area-inset-bottom))"
+      >
+        <div
+          class="flex shrink-0 items-center justify-between gap-3 border-b px-5 py-4"
+          style="border-color: var(--color-border)"
+        >
+          <h2 class="text-lg font-black">{{ t('appNav.moreTitle') }}</h2>
+          <button
+            type="button"
+            class="theme-muted flex h-9 w-9 items-center justify-center rounded-xl"
+            :aria-label="t('common.close')"
+            data-testid="finance-nav-more-close"
+            @click="closeMore"
+          >
+            <FontAwesomeIcon icon="xmark" />
+          </button>
+        </div>
+
+        <nav class="flex flex-col gap-1 px-3 py-3" :aria-label="t('appNav.moreTitle')">
+          <RouterLink
+            v-for="item in moreNavItems"
+            :key="item.key"
+            :data-testid="`finance-nav-more-${item.key}`"
+            :aria-disabled="item.disabled"
+            :class="[
+              'app-nav-item flex items-center gap-3 rounded-xl px-3 py-3 text-[0.9rem] font-semibold',
+              { 'is-active': isActive(item), 'is-disabled': item.disabled },
+            ]"
+            :to="item.to"
+            @click="handleNavClick($event, item)"
+          >
+            <FontAwesomeIcon :icon="item.icon" class="w-4" />
+            {{ t(item.label) }}
+          </RouterLink>
+        </nav>
+      </div>
+    </div>
+  </Teleport>
 </template>
