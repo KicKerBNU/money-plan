@@ -93,7 +93,7 @@ function toggleMode() {
 </script>
 
 <template>
-  <div class="theme-page min-h-screen px-6 py-8">
+  <div class="theme-page min-h-screen px-6 py-8" data-testid="login-page">
     <div class="mx-auto flex max-w-lg justify-end">
       <ThemeToggle />
     </div>
@@ -103,17 +103,18 @@ function toggleMode() {
         <span class="theme-badge inline-flex rounded-full px-3 py-1 text-xs font-semibold">
           {{ t('auth.login.badge') }}
         </span>
-        <h1 class="mt-4 text-3xl font-semibold">
+        <h1 class="mt-4 text-3xl font-semibold" data-testid="login-title">
           {{ mode === 'login' ? t('auth.login.title') : t('auth.login.createTitle') }}
         </h1>
         <p class="theme-muted mt-3">{{ t('auth.login.description') }}</p>
       </div>
 
-      <form class="mt-8 space-y-4" @submit.prevent="handleEmailSubmit">
+      <form class="mt-8 space-y-4" data-testid="login-form" @submit.prevent="handleEmailSubmit">
         <label class="block text-sm font-medium">
           {{ t('auth.login.emailLabel') }}
           <input
             v-model="email"
+            data-testid="login-email"
             autocomplete="email"
             class="theme-input mt-2 w-full rounded-xl px-4 py-3"
             required
@@ -126,6 +127,7 @@ function toggleMode() {
           {{ t('auth.login.passwordLabel') }}
           <input
             v-model="password"
+            data-testid="login-password"
             autocomplete="current-password"
             class="theme-input mt-2 w-full rounded-xl px-4 py-3"
             minlength="6"
@@ -135,11 +137,16 @@ function toggleMode() {
           />
         </label>
 
-        <p v-if="errorMessage" class="rounded-xl bg-rose-500/10 px-4 py-3 text-sm text-rose-400">
+        <p
+          v-if="errorMessage"
+          data-testid="login-error"
+          class="rounded-xl bg-rose-500/10 px-4 py-3 text-sm text-rose-400"
+        >
           {{ errorMessage }}
         </p>
 
         <button
+          data-testid="login-submit"
           class="theme-button-primary w-full rounded-xl px-6 py-3 font-semibold disabled:opacity-60"
           :disabled="isLoading"
           type="submit"
@@ -171,6 +178,7 @@ function toggleMode() {
 
         <button
           type="button"
+          data-testid="login-google"
           class="theme-button-google flex w-full items-center justify-center gap-3 rounded-xl px-6 py-3 font-medium disabled:opacity-60"
           :disabled="isLoading"
           @click="handleGoogleLogin"

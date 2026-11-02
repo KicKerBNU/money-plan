@@ -224,7 +224,7 @@ watch([preset, anchor], () => void loadOverview(), { deep: true, immediate: true
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" data-testid="overview-page">
     <FinanceNav />
 
     <main class="app-content app-mobile-screen" :aria-busy="isLoading">

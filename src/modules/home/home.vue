@@ -26,7 +26,7 @@ const APP_STORE_URL = 'https://apps.apple.com/us/app/money-plann/id6777957861'
 </script>
 
 <template>
-  <div class="theme-page relative min-h-screen overflow-hidden">
+  <div class="theme-page relative min-h-screen overflow-hidden" data-testid="home-page">
     <div
       class="pointer-events-none absolute inset-x-0 top-0 h-[36rem] animate-pulse-slow bg-[radial-gradient(circle_at_top,rgba(20,184,166,0.25),transparent_60%)]"
     />
@@ -62,6 +62,7 @@ const APP_STORE_URL = 'https://apps.apple.com/us/app/money-plann/id6777957861'
         <div class="mt-10 flex animate-fade-up flex-wrap justify-center gap-4 lg:justify-start">
           <RouterLink
             to="/login"
+            data-testid="home-cta-login"
             class="theme-button-primary rounded-xl px-7 py-3 font-semibold shadow-lg shadow-amber-500/25"
           >
             {{ t('home.cta.login') }}

@@ -292,7 +292,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" data-testid="income-page">
     <FinanceNav />
 
     <main class="app-content app-mobile-screen" :aria-busy="isLoading">
@@ -419,6 +419,7 @@ onMounted(() => {
               <li
                 v-for="entry in incomeRows"
                 :key="entry.id"
+                :data-testid="`income-row-${entry.id}`"
                 class="income-entry-row group/row"
                 :class="{ 'is-editing': editingIncomeId === entry.id && isFormOpen }"
               >
@@ -455,6 +456,7 @@ onMounted(() => {
                 <div class="flex shrink-0 items-center gap-0.5">
                   <button
                     type="button"
+                    data-testid="income-edit"
                     class="theme-muted group/tooltip relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
                     :aria-label="t('common.edit')"
                     @click="startEditIncome(entry)"
@@ -470,6 +472,7 @@ onMounted(() => {
                   </button>
                   <button
                     type="button"
+                    data-testid="income-delete"
                     class="group/tooltip relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
                     style="color: var(--color-danger)"
                     :aria-label="t('common.delete')"
@@ -502,6 +505,7 @@ onMounted(() => {
           @click.self="!isSubmitting && closeIncomeForm()"
         >
           <div
+            data-testid="income-modal"
             class="finance-card flex max-h-[90dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-h-[44rem] sm:max-w-lg sm:rounded-2xl"
           >
             <div
@@ -511,7 +515,9 @@ onMounted(() => {
             />
 
             <div class="flex shrink-0 items-center justify-between gap-3 border-b px-5 py-4" style="border-color: var(--color-border)">
-              <h2 id="income-form-title" class="text-lg font-black">{{ formModalTitle }}</h2>
+              <h2 id="income-form-title" data-testid="income-modal-title" class="text-lg font-black">
+                {{ formModalTitle }}
+              </h2>
               <button
                 type="button"
                 class="theme-muted flex h-9 w-9 items-center justify-center rounded-xl disabled:opacity-40"
@@ -530,6 +536,7 @@ onMounted(() => {
                     {{ t('income.form.amount') }}
                     <input
                       v-model="form.amount"
+                      data-testid="income-form-amount"
                       type="number"
                       min="0"
                       step="0.01"
@@ -540,7 +547,13 @@ onMounted(() => {
                   </label>
                   <label class="block text-sm font-semibold">
                     {{ t('income.form.date') }}
-                    <input v-model="form.date" type="date" class="theme-input mt-1 w-full rounded-xl p-3" required />
+                    <input
+                      v-model="form.date"
+                      data-testid="income-form-date"
+                      type="date"
+                      class="theme-input mt-1 w-full rounded-xl p-3"
+                      required
+                    />
                   </label>
                 </fieldset>
 
@@ -557,6 +570,7 @@ onMounted(() => {
                   {{ t('income.form.note') }}
                   <input
                     v-model="form.note"
+                    data-testid="income-form-note"
                     type="text"
                     class="theme-input mt-1 w-full rounded-xl p-3"
                     :placeholder="t('income.form.notePlaceholder')"
@@ -594,6 +608,7 @@ onMounted(() => {
               <div class="shrink-0 border-t px-5 py-4" style="border-color: var(--color-border)">
                 <button
                   type="submit"
+                  data-testid="income-form-submit"
                   class="theme-button-primary flex w-full min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold disabled:cursor-not-allowed disabled:opacity-60"
                   :disabled="isSubmitting"
                   :aria-busy="isSubmitting"

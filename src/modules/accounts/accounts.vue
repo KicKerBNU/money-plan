@@ -178,7 +178,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" data-testid="accounts-page">
     <FinanceNav />
 
     <main class="app-content app-mobile-screen" :aria-busy="isLoading">

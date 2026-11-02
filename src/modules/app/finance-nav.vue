@@ -87,6 +87,7 @@ function handleNavClick(event: MouseEvent, item: NavItem) {
 
 <template>
   <aside
+    data-testid="finance-nav"
     class="app-sidebar theme-border fixed inset-y-0 left-0 z-30 hidden w-60 border-r px-6 py-7 lg:flex lg:flex-col"
   >
     <RouterLink class="mb-9 flex items-center gap-3" to="/app/expenses">

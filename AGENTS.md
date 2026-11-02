@@ -102,17 +102,28 @@ Use **optimistic updates** for user-driven mutations whenever the predicted UI s
 ## Commands
 
 ```bash
-npm run dev
-npm run build
-npm run preview
-npm run storybook
-npm run build-storybook
-npx netlify deploy --prod --dir=dist
+yarn dev
+yarn build
+yarn preview
+yarn storybook
+yarn build-storybook
+yarn test              # unit tests (Vitest, node) — prefer this for regression
+yarn test:watch
+yarn test:coverage
+yarn test:storybook    # Storybook browser Vitest project (Playwright)
+yarn test:e2e          # Playwright smoke e2e (starts Vite unless E2E_BASE_URL is set)
+yarn test:ci           # unit + e2e build gates (same as the start of yarn build)
+# Pre-commit (install once): ./scripts/install-git-hooks.sh
+# Blocks git commit unless yarn test:ci passes (bypass: SKIP_TEST_HOOK=1)
 ```
+
+Unit specs live next to source as `*.spec.ts` under `src/` (e.g. `src/lib/money.spec.ts`).
+E2E specs live under `e2e/` (`playwright.config.ts`). `yarn build` / Netlify runs unit then e2e before `vue-tsc` + Vite.
+Successful login e2e uses the **Firebase Auth emulator** (Java required): Playwright starts auth on `:9099`, seeds `e2e@money-plan.test` in `e2e/global-setup.ts`, and runs Vite with `VITE_USE_FIREBASE_AUTH_EMULATOR=true`. Override email/password only via `E2E_EMAIL` / `E2E_PASSWORD` env (never commit real credentials).
 
 ## Backend
 
-`src/lib/api.ts` uses **`VITE_API_BASE_URL`** with default **`http://localhost:3000`**. For **Netlify production**, set **`VITE_API_BASE_URL`** to **`https://money-plan-backend-production.up.railway.app`** (Environment variables → Production); redeploy so Vite bakes it into the build. See **`.env.example`** for local overrides / `.env.production.local`. Persistence is PostgreSQL on **Supabase** (`DATABASE_URL` in the backend `.env`); see `money-plan-backend/README.md`. Workspace overview: repo root **`AGENTS.md`**.
+`src/lib/api.ts` uses **`VITE_API_BASE_URL`** with default **`http://localhost:3000`**. For **Netlify production**, set **`VITE_API_BASE_URL`** to the **AWS App Runner** HTTPS origin (Environment variables → Production; value from `money-plan-backend/.apprunner-url` after `./scripts/deploy-apprunner.sh`); redeploy so Vite bakes it into the build. See **`.env.example`** for local overrides / `.env.production.local`. Persistence is PostgreSQL on **Supabase** (`DATABASE_URL` in the backend `.env`); see `money-plan-backend/README.md`. Workspace overview: repo root **`AGENTS.md`**.
 
 ## UI conventions
 

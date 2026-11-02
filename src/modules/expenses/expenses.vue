@@ -32,6 +32,7 @@ import { openConfirmModal } from '@/utils/confirmModal'
 import { useCashFlowStore } from '@/modules/app/store/cash-flow.store'
 import type { Account, Category, Expense, RecurrenceFrequency, RecurringExpense } from './domain/expenses.types'
 import { RECURRENCE_FREQUENCIES } from './domain/expenses.types'
+import { filterExpenseRows, isExpenseReorderEligible } from './domain/filterExpenses'
 
 const { t, locale } = useI18n()
 const { format: formatMoney } = useMoney()
@@ -169,33 +170,27 @@ const renameModalNameLabel = computed(() => {
     : t('expenses.renameModal.categoryNameLabel')
 })
 
-const filteredExpenses = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase()
-
-  return expensesList.value.filter((expense) => {
-    const matchesCategory = selectedCategoryId.value === 'all' || expense.categoryId === selectedCategoryId.value
-    const matchesDateFrom = !selectedDateFrom.value || expense.date >= selectedDateFrom.value
-    const matchesDateTo = !selectedDateTo.value || expense.date <= selectedDateTo.value
-    const matchesSearch =
-      !query ||
-      [expense.title, expense.categoryName, expense.accountName, expense.dateLabel].some((value) =>
-        value.toLowerCase().includes(query)
-      )
-
-    return matchesCategory && matchesDateFrom && matchesDateTo && matchesSearch
-  })
-})
+const filteredExpenses = computed(() =>
+  filterExpenseRows(expensesList.value, {
+    searchQuery: searchQuery.value,
+    categoryId: selectedCategoryId.value,
+    dateFrom: selectedDateFrom.value,
+    dateTo: selectedDateTo.value,
+  }),
+)
 
 /** Full month list with default filters — safe to persist manual order for `period`. */
-const expensesReorderEligible = computed(() => {
-  return (
-    !searchQuery.value.trim() &&
-    selectedCategoryId.value === 'all' &&
-    !selectedDateFrom.value &&
-    !selectedDateTo.value &&
-    filteredExpenses.value.length > 1
-  )
-})
+const expensesReorderEligible = computed(() =>
+  isExpenseReorderEligible(
+    {
+      searchQuery: searchQuery.value,
+      categoryId: selectedCategoryId.value,
+      dateFrom: selectedDateFrom.value,
+      dateTo: selectedDateTo.value,
+    },
+    filteredExpenses.value.length,
+  ),
+)
 
 const dragExpenseFromIndex = ref<number | null>(null)
 const dragExpenseOverIndex = ref<number | null>(null)
@@ -958,7 +953,7 @@ watch(
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" data-testid="expenses-page">
     <FinanceNav />
 
     <main class="app-content app-mobile-screen" :aria-busy="isLoading">
@@ -1141,6 +1136,7 @@ watch(
               <article
                 v-for="(expense, index) in filteredExpenses"
                 :key="expense.id"
+                :data-testid="`expense-row-${expense.id}`"
                 class="expense-row grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 px-4 py-3.5 transition-[opacity,box-shadow] lg:grid-cols-[auto_auto_1fr_auto_auto]"
                 :class="{
                   'opacity-55': dragExpenseFromIndex === index,
@@ -1185,6 +1181,7 @@ watch(
                 <div class="flex items-center gap-0.5">
                   <button
                     type="button"
+                    data-testid="expense-edit"
                     class="theme-muted group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
                     :aria-label="t('common.edit')"
                     @click="startEditExpense(expense)"
@@ -1200,6 +1197,7 @@ watch(
                   </button>
                   <button
                     type="button"
+                    data-testid="expense-delete"
                     class="group/tooltip relative flex h-8 w-8 items-center justify-center rounded-lg text-[0.8rem] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
                     style="color: var(--color-danger)"
                     :aria-label="t('common.delete')"
@@ -1676,6 +1674,7 @@ watch(
           @click.self="!isExpenseSubmitting && closeExpenseModal()"
         >
           <div
+            data-testid="expense-modal"
             class="expense-sheet-panel finance-card flex max-h-[90dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-h-[44rem] sm:max-w-md sm:rounded-2xl lg:max-w-2xl"
           >
             <!-- Drag handle (mobile only) -->
@@ -1687,7 +1686,7 @@ watch(
 
             <!-- Header -->
             <div class="flex shrink-0 items-center justify-between gap-3 px-5 pt-4 pb-3">
-              <h2 id="expense-modal-title" class="min-w-0 flex-1 text-lg font-black">
+              <h2 id="expense-modal-title" data-testid="expense-modal-title" class="min-w-0 flex-1 text-lg font-black">
                 {{ expenseModalTitle }}
               </h2>
               <button
@@ -1707,12 +1706,19 @@ watch(
                 <fieldset class="grid gap-3 border-0 p-0 sm:grid-cols-2" :disabled="isExpenseSubmitting">
                   <label class="text-sm font-semibold">
                     {{ t('expenses.form.date') }}
-                    <input v-model="form.date" type="date" class="theme-input mt-1 w-full rounded-xl p-3" required />
+                    <input
+                      v-model="form.date"
+                      data-testid="expense-form-date"
+                      type="date"
+                      class="theme-input mt-1 w-full rounded-xl p-3"
+                      required
+                    />
                   </label>
                   <label class="text-sm font-semibold">
                     {{ t('expenses.form.amount') }}
                     <input
                       v-model="form.amount"
+                      data-testid="expense-form-amount"
                       type="number"
                       min="0"
                       step="0.01"
@@ -1776,7 +1782,12 @@ watch(
                   </label>
                   <label class="mt-3 block text-sm font-semibold">
                     {{ t('expenses.form.note') }}
-                    <input v-model="form.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
+                    <input
+                      v-model="form.note"
+                      data-testid="expense-form-note"
+                      type="text"
+                      class="theme-input mt-1 w-full rounded-xl p-3"
+                    />
                   </label>
                 </fieldset>
 
@@ -1809,6 +1820,7 @@ watch(
                 <div class="flex gap-2">
                   <button
                     type="submit"
+                    data-testid="expense-form-submit"
                     class="theme-button-primary flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold disabled:pointer-events-none disabled:opacity-60"
                     :disabled="isExpenseSubmitting"
                     :aria-busy="isExpenseSubmitting"

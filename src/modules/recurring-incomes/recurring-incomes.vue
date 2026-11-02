@@ -115,6 +115,7 @@ async function submitEditModal() {
         ? await setRecurringIncomeActive(id, editForm.value.active)
         : saved
     items.value = items.value.map((row) => (row.id === synced.id ? synced : row))
+    isEditSubmitting.value = false
     closeEditModal()
   } catch {
     /* toast from apiFetch */
@@ -148,7 +149,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" data-testid="recurring-incomes-page">
     <FinanceNav />
 
     <main class="app-content app-mobile-screen" :aria-busy="isLoading">
@@ -182,6 +183,7 @@ onMounted(() => {
             <li
               v-for="item in items"
               :key="item.id"
+              :data-testid="`recurring-income-row-${item.id}`"
               class="rounded-xl border px-4 py-4 transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]"
               style="border-color: var(--color-border)"
             >
@@ -222,6 +224,7 @@ onMounted(() => {
                 <div class="flex shrink-0 items-center gap-1">
                   <button
                     type="button"
+                    data-testid="recurring-income-edit"
                     class="theme-muted flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[color-mix(in_srgb,var(--color-border)_80%,transparent)]"
                     :aria-label="t('common.edit')"
                     @click="openEditModal(item)"
@@ -230,6 +233,7 @@ onMounted(() => {
                   </button>
                   <button
                     type="button"
+                    data-testid="recurring-income-delete"
                     class="theme-muted flex h-8 w-8 items-center justify-center rounded-lg hover:bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)]"
                     :aria-label="t('common.delete')"
                     @click="removeItem(item)"
@@ -262,10 +266,17 @@ onMounted(() => {
         @click.self="!isEditSubmitting && closeEditModal()"
       >
         <div
+          data-testid="recurring-income-modal"
           class="finance-card flex max-h-[90dvh] w-full flex-col rounded-t-2xl shadow-xl sm:max-h-[44rem] sm:max-w-lg sm:rounded-2xl"
         >
           <div class="flex shrink-0 items-center justify-between gap-3 border-b px-5 py-4" style="border-color: var(--color-border)">
-            <h2 id="recurring-income-edit-title" class="text-lg font-black">{{ t('recurringIncome.edit.title') }}</h2>
+            <h2
+              id="recurring-income-edit-title"
+              data-testid="recurring-income-modal-title"
+              class="text-lg font-black"
+            >
+              {{ t('recurringIncome.edit.title') }}
+            </h2>
             <button
               type="button"
               class="theme-muted flex h-9 w-9 items-center justify-center rounded-xl"
@@ -283,6 +294,7 @@ onMounted(() => {
                 {{ t('income.form.amount') }}
                 <input
                   v-model="editForm.amount"
+                  data-testid="recurring-income-form-amount"
                   type="number"
                   min="0"
                   step="0.01"
@@ -316,12 +328,18 @@ onMounted(() => {
               </label>
               <label class="block text-sm font-semibold">
                 {{ t('income.form.notePlaceholder') }}
-                <input v-model="editForm.note" type="text" class="theme-input mt-1 w-full rounded-xl p-3" />
+                <input
+                  v-model="editForm.note"
+                  data-testid="recurring-income-form-note"
+                  type="text"
+                  class="theme-input mt-1 w-full rounded-xl p-3"
+                />
               </label>
             </div>
             <div class="shrink-0 border-t px-5 py-4" style="border-color: var(--color-border)">
               <button
                 type="submit"
+                data-testid="recurring-income-form-submit"
                 class="theme-button-primary w-full rounded-xl px-4 py-3 font-semibold disabled:opacity-60"
                 :disabled="isEditSubmitting"
               >

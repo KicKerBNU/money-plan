@@ -111,9 +111,10 @@ async function handleInstall() {
 </script>
 
 <template>
-  <div ref="rootRef" class="relative">
+  <div ref="rootRef" class="relative" data-testid="settings-menu">
     <button
       type="button"
+      data-testid="settings-menu-trigger"
       class="theme-button-secondary flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-sm font-medium"
       :aria-expanded="open"
       aria-haspopup="menu"
@@ -126,11 +127,13 @@ async function handleInstall() {
     <Transition name="app-settings-fade">
       <div
         v-show="open"
+        data-testid="settings-menu-panel"
         class="theme-card theme-border absolute right-0 z-50 mt-2 min-w-[12rem] overflow-hidden rounded-xl border py-1 shadow-xl"
         role="menu"
       >
         <button
           type="button"
+          data-testid="settings-theme-toggle"
           class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[var(--color-surface-soft)]"
           role="menuitem"
           @click="toggleTheme"
@@ -142,6 +145,7 @@ async function handleInstall() {
         <div class="theme-border mx-2 my-0.5 border-t opacity-70" />
         <button
           type="button"
+          data-testid="settings-currency"
           class="flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[var(--color-surface-soft)]"
           role="menuitem"
           :aria-expanded="isCurrencyMenuOpen"
@@ -157,9 +161,10 @@ async function handleInstall() {
           </span>
         </button>
 
-        <div v-if="isCurrencyMenuOpen" class="px-1.5 pb-1.5">
+        <div v-if="isCurrencyMenuOpen" data-testid="settings-currency-options" class="px-1.5 pb-1.5">
           <button
             type="button"
+            data-testid="settings-currency-auto"
             class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-[0.8rem] transition-colors hover:bg-[var(--color-surface-soft)]"
             :class="{ 'font-bold': preferences.currency === null }"
             @click="selectCurrency(null)"
@@ -176,6 +181,7 @@ async function handleInstall() {
             v-for="code in SUPPORTED_CURRENCIES"
             :key="code"
             type="button"
+            :data-testid="`settings-currency-${code}`"
             class="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-[0.8rem] transition-colors hover:bg-[var(--color-surface-soft)]"
             :class="{ 'font-bold': preferences.currency === code }"
             @click="selectCurrency(code)"
@@ -206,6 +212,7 @@ async function handleInstall() {
         <div class="theme-border mx-2 my-0.5 border-t opacity-70" />
         <button
           type="button"
+          data-testid="settings-delete-account"
           class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
           role="menuitem"
           style="color: var(--color-danger)"
@@ -217,6 +224,7 @@ async function handleInstall() {
         </button>
         <button
           type="button"
+          data-testid="settings-logout"
           class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2.5 text-left text-[0.86rem] font-semibold transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)]"
           role="menuitem"
           style="color: var(--color-danger)"

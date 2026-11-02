@@ -206,7 +206,6 @@ export default {
     clear: 'New chat',
     inputLabel: 'Your message',
     loadingLive: 'Assistant is preparing a reply',
-    actionsAria: 'More actions',
     aiConsent: {
       title: 'Third-party AI processing',
       intro:

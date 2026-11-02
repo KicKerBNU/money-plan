@@ -1,6 +1,11 @@
-# Production builds need the Railway API origin (Vite inlines at build time):
-# Netlify → Environment variables → Production → VITE_API_BASE_URL=https://money-plan-backend-production.up.railway.app
+# Production builds need the App Runner API origin (Vite inlines at build time):
+# Netlify → Environment variables → Production → VITE_API_BASE_URL=<https://….awsapprunner.com>
+# After deploy-apprunner.sh, use the URL in money-plan-backend/.apprunner-url
 # (no trailing slash). See money-plan-frontend/.env.example and README.md.
+#
+# `npm run build` runs unit tests then the full Playwright e2e suite
+# (scripts/run-*-tests-ci.mjs). Any unit or e2e failure exits non-zero and
+# Netlify will not deploy. Log banner: "BUILD FAILED: … deploy blocked."
 
 [build]
   command = "npm run build"

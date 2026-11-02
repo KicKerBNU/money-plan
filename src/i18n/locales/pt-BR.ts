@@ -206,7 +206,6 @@ export default {
     clear: 'Novo papo',
     inputLabel: 'Sua mensagem',
     loadingLive: 'O assistente está preparando uma resposta',
-    actionsAria: 'Mais ações',
     aiConsent: {
       title: 'Processamento por IA de terceiros',
       intro:

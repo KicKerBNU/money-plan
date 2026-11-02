@@ -22,6 +22,7 @@ const { t } = useI18n()
       @click.self="dismissConfirmModal"
     >
       <div
+        data-testid="confirm-modal"
         class="finance-card w-full max-w-md rounded-2xl p-5 shadow-xl"
         role="alertdialog"
         aria-modal="true"
@@ -33,6 +34,7 @@ const { t } = useI18n()
           <h2 id="confirm-modal-title" class="min-w-0 flex-1 text-lg font-black">{{ confirmModalTitle }}</h2>
           <button
             type="button"
+            data-testid="confirm-modal-close"
             class="theme-muted flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-xl text-lg leading-none hover:bg-[color-mix(in_srgb,var(--color-border)_70%,transparent)]"
             :aria-label="t('common.close')"
             @click="dismissConfirmModal"
@@ -44,6 +46,7 @@ const { t } = useI18n()
         <div class="mt-6 grid grid-cols-2 gap-2">
           <button
             type="button"
+            data-testid="confirm-modal-cancel"
             class="theme-button-secondary cursor-pointer rounded-xl px-4 py-3 text-sm"
             @click="dismissConfirmModal"
           >
@@ -51,6 +54,7 @@ const { t } = useI18n()
           </button>
           <button
             type="button"
+            data-testid="confirm-modal-confirm"
             class="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold text-white"
             style="background: var(--color-danger)"
             @click="acceptConfirmModal"

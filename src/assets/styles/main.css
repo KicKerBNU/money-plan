@@ -642,23 +642,6 @@ body {
     opacity: 1;
   }
 
-  .chatbot-pill-btn {
-    color: var(--color-muted);
-    background: transparent;
-    transition:
-      background-color 180ms ease,
-      color 180ms ease;
-  }
-
-  .chatbot-pill-btn:not(:disabled):hover {
-    background: color-mix(in srgb, var(--color-muted) 12%, transparent);
-    color: var(--color-text);
-  }
-
-  .chatbot-pill-btn:disabled {
-    opacity: 0.55;
-  }
-
   .chatbot-send-btn {
     transition:
       background-color 180ms ease,

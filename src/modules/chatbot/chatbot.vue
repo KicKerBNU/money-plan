@@ -165,7 +165,7 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" data-testid="chatbot-page">
     <FinanceNav />
 
     <main class="app-content app-mobile-screen chatbot-screen" :aria-busy="showThreadHydrateSkeleton">
@@ -303,16 +303,6 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
               >
                 <span class="sr-only">{{ t('chatbot.inputLabel') }}</span>
 
-                <button
-                  type="button"
-                  class="chatbot-pill-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
-                  :aria-label="t('chatbot.actionsAria')"
-                  tabindex="-1"
-                  disabled
-                >
-                  <FontAwesomeIcon icon="plus" />
-                </button>
-
                 <textarea
                   id="chatbot-input"
                   v-model="draft"
@@ -323,7 +313,7 @@ const showMessageList = computed(() => messages.value.length > 0 || isSending.va
                   enterkeyhint="send"
                   autocomplete="off"
                   autocorrect="on"
-                  class="chatbot-input min-w-0 flex-1 resize-none self-center border-0 bg-transparent p-2 leading-snug text-[var(--color-text)] outline-none ring-0 placeholder:text-[var(--color-muted)] focus:ring-0 disabled:cursor-not-allowed disabled:opacity-55"
+                  class="chatbot-input min-w-0 flex-1 resize-none self-center border-0 bg-transparent px-3 py-2 leading-snug text-[var(--color-text)] outline-none ring-0 placeholder:text-[var(--color-muted)] focus:ring-0 disabled:cursor-not-allowed disabled:opacity-55"
                   :placeholder="t('chatbot.placeholder')"
                   @keydown.enter.exact.prevent="send"
                   @input="autosizeTextarea"
