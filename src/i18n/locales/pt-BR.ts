@@ -12,9 +12,14 @@ export default {
       howItWorks: 'Como funciona',
       appStore: 'Baixar na App Store',
     },
+    about: {
+      title: 'Sobre o Money Plann. Fale com seu dinheiro.',
+      body: 'Money Plann é um app gratuito de orçamento e controle de despesas com IA que deixa você falar com o seu dinheiro. Registre despesas, receitas e contas e pergunte sobre os seus totais em linguagem simples. Grátis no iPhone e no iPad, sem assinatura.',
+      appStore: 'Money Plann na App Store',
+    },
     ios: {
       badge: 'Agora no iPhone e iPad',
-      title: 'Money Plan para iOS',
+      title: 'Money Plann. Fale com seu dinheiro.',
       description:
         'Acompanhe despesas, receitas e contas onde estiver — com o mesmo assistente de IA, Entrar com a Apple e seus dados sincronizados na sua conta.',
       highlights: {
@@ -88,7 +93,7 @@ export default {
         },
       },
     },
-    footer: 'Money Plan — Controle financeiro simples para o dia a dia',
+    footer: 'Money Plann — Fale com seu dinheiro.',
   },
   common: {
     loading: 'Carregando...',

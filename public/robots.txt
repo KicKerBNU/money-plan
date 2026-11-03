@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.moneyplann.com/sitemap.xml
+Sitemap: https://moneyplann.com/sitemap.xml

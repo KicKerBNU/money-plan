@@ -43,7 +43,7 @@ const contactEmail = 'support@moneyplann.com'
             and accounts, and ask questions about your spending through a built-in
             <strong class="text-[var(--color-text)]">Expense assistant</strong>.
             The service is operated by Money Plan and is available at
-            <a href="https://www.moneyplann.com" class="underline">moneyplann.com</a>.
+            <a href="https://moneyplann.com" class="underline">moneyplann.com</a>.
           </p>
         </section>
 

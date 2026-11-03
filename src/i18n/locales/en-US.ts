@@ -12,9 +12,14 @@ export default {
       howItWorks: 'How it works',
       appStore: 'Download on the App Store',
     },
+    about: {
+      title: 'About Money Plann. Talk to your money.',
+      body: 'Money Plann is a free AI budget and expense tracker that lets you talk to your money. Log expenses, income, and accounts, then ask about your own totals in plain language. Free on iPhone and iPad, with no subscription.',
+      appStore: 'Money Plann on the App Store',
+    },
     ios: {
       badge: 'Now on iPhone & iPad',
-      title: 'Money Plan for iOS',
+      title: 'Money Plann. Talk to your money.',
       description:
         'Track expenses, income, and accounts on the go — with the same AI expense assistant, Sign in with Apple, and your data synced to your account.',
       highlights: {
@@ -88,7 +93,7 @@ export default {
         },
       },
     },
-    footer: 'Money Plan — Simple finance control for everyday life',
+    footer: 'Money Plann — Talk to your money.',
   },
   common: {
     loading: 'Loading...',

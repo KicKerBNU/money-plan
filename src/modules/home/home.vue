@@ -45,6 +45,9 @@ const APP_STORE_URL = 'https://apps.apple.com/us/app/money-plann/id6777957861'
         </span>
 
         <h1 class="animate-fade-up text-5xl font-semibold tracking-tight sm:text-6xl">
+          <span class="mb-3 block text-base font-semibold tracking-wide sm:text-lg" style="color: var(--color-accent)">
+            Money Plann
+          </span>
           {{ t('home.headline') }}
           <span class="headline-gradient bg-clip-text text-transparent">
             {{ t('home.headlineHighlight') }}
@@ -185,6 +188,22 @@ const APP_STORE_URL = 'https://apps.apple.com/us/app/money-plann/id6777957861'
       </div>
     </section>
 
+    <section id="about-the-app" class="relative mx-auto max-w-6xl px-6 pb-20">
+      <div class="theme-card rounded-3xl p-6 backdrop-blur sm:p-8">
+        <h2 class="text-2xl font-semibold sm:text-3xl">{{ t('home.about.title') }}</h2>
+        <p class="theme-muted mt-4 max-w-3xl text-base leading-relaxed">{{ t('home.about.body') }}</p>
+        <a
+          :href="APP_STORE_URL"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-6 inline-flex font-semibold hover:underline"
+          style="color: var(--color-accent)"
+        >
+          {{ t('home.about.appStore') }}
+        </a>
+      </div>
+    </section>
+
     <section class="relative mx-auto max-w-6xl px-6 pb-20">
       <div class="theme-card rounded-3xl p-6 backdrop-blur">
         <h2 class="text-2xl font-semibold">{{ t('home.actions.title') }}</h2>
@@ -269,7 +288,7 @@ const APP_STORE_URL = 'https://apps.apple.com/us/app/money-plann/id6777957861'
               <div class="ios-phone-notch" />
               <div class="px-5 pt-10 pb-6">
                 <p class="text-[10px] font-semibold uppercase tracking-[0.2em] text-teal-300/90">
-                  Money Plan
+                  Money Plann
                 </p>
                 <p class="mt-2 text-xl font-semibold text-white">
                   {{ t('home.headline') }}
