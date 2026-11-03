@@ -100,6 +100,17 @@ const faqs = [
           Contact us for account help, technical issues, or privacy requests. Browse
           common questions about Money Plan below.
         </p>
+        <p class="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:gap-6">
+          <RouterLink to="/login" class="font-semibold underline">Use Money Plann on the web</RouterLink>
+          <a
+            href="https://apps.apple.com/us/app/money-plann/id6777957861"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-semibold underline"
+          >
+            Download Money Plann on the App Store
+          </a>
+        </p>
       </header>
 
       <section

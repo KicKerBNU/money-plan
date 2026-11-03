@@ -192,15 +192,24 @@ const APP_STORE_URL = 'https://apps.apple.com/us/app/money-plann/id6777957861'
       <div class="theme-card rounded-3xl p-6 backdrop-blur sm:p-8">
         <h2 class="text-2xl font-semibold sm:text-3xl">{{ t('home.about.title') }}</h2>
         <p class="theme-muted mt-4 max-w-3xl text-base leading-relaxed">{{ t('home.about.body') }}</p>
-        <a
-          :href="APP_STORE_URL"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="mt-6 inline-flex font-semibold hover:underline"
-          style="color: var(--color-accent)"
-        >
-          {{ t('home.about.appStore') }}
-        </a>
+        <div class="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:gap-6">
+          <RouterLink
+            to="/login"
+            class="inline-flex font-semibold hover:underline"
+            style="color: var(--color-accent)"
+          >
+            {{ t('home.about.webApp') }}
+          </RouterLink>
+          <a
+            :href="APP_STORE_URL"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex font-semibold hover:underline"
+            style="color: var(--color-accent)"
+          >
+            {{ t('home.about.appStore') }}
+          </a>
+        </div>
       </div>
     </section>
 

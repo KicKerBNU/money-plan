@@ -26,19 +26,61 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "Money Plann",
-      "alternateName": "Money Plan",
-      "operatingSystem": "iOS",
-      "applicationCategory": "FinanceApplication",
-      "url": "https://moneyplann.com/",
-      "installUrl": "https://apps.apple.com/us/app/money-plann/id6777957861",
-      "offers": {
-        "@type": "Offer",
-        "price": "0.00",
-        "priceCurrency": "USD"
-      },
-      "description": "Money Plann is a free AI budget and expense tracker that lets you talk to your money."
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "name": "Money Plann",
+          "alternateName": "Money Plan",
+          "operatingSystem": "iOS",
+          "applicationCategory": "FinanceApplication",
+          "url": "https://moneyplann.com/",
+          "installUrl": "https://apps.apple.com/us/app/money-plann/id6777957861",
+          "downloadUrl": "https://apps.apple.com/us/app/money-plann/id6777957861",
+          "isAccessibleForFree": true,
+          "offers": {
+            "@type": "Offer",
+            "price": "0.00",
+            "priceCurrency": "USD"
+          },
+          "description": "Money Plann is a free AI budget and expense tracker that lets you talk to your money. Download it on the App Store for iPhone and iPad.",
+          "potentialAction": {
+            "@type": "DownloadAction",
+            "name": "Download Money Plann on the App Store",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://apps.apple.com/us/app/money-plann/id6777957861",
+              "actionPlatform": "https://schema.org/IOSPlatform"
+            }
+          }
+        },
+        {
+          "@type": "WebApplication",
+          "name": "Money Plann",
+          "alternateName": "Money Plan",
+          "applicationCategory": "FinanceApplication",
+          "browserRequirements": "Requires a modern web browser",
+          "url": "https://moneyplann.com/login",
+          "isAccessibleForFree": true,
+          "offers": {
+            "@type": "Offer",
+            "price": "0.00",
+            "priceCurrency": "USD"
+          },
+          "description": "Use Money Plann in the browser. Sign in and track expenses, income, and accounts. The same account syncs with the iOS app.",
+          "potentialAction": {
+            "@type": "ViewAction",
+            "name": "Use Money Plann on the web",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://moneyplann.com/login",
+              "actionPlatform": [
+                "https://schema.org/DesktopWebPlatform",
+                "https://schema.org/MobileWebPlatform"
+              ]
+            }
+          }
+        }
+      ]
     }
     </script>
   </head>
@@ -47,8 +89,9 @@
       <main>
         <h1>Money Plann. Talk to your money.</h1>
         <h2>About Money Plann. Talk to your money.</h2>
-        <p>Money Plann is a free AI budget and expense tracker that lets you talk to your money. Log expenses, income, and accounts, then ask about your own totals in plain language. Free on iPhone and iPad, with no subscription.</p>
-        <p><a href="https://apps.apple.com/us/app/money-plann/id6777957861">Money Plann on the App Store</a></p>
+        <p>Money Plann is a free AI budget and expense tracker that lets you talk to your money. Log expenses, income, and accounts, then ask about your own totals in plain language. Free on the web and on iPhone and iPad, with no subscription. The same account works in both places.</p>
+        <p><a href="https://moneyplann.com/login">Use Money Plann on the web</a></p>
+        <p><a href="https://apps.apple.com/us/app/money-plann/id6777957861">Download Money Plann on the App Store</a></p>
       </main>
     </div>
     <script type="module" src="/src/main.ts"></script>

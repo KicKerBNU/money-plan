@@ -1,0 +1,23 @@
+# Money Plann
+
+> Money Plann is a free AI budget and expense tracker. Talk to your money. The same account works on the web and on the iOS app. There is no subscription.
+
+## Use Money Plann
+
+- [Use the web app](https://moneyplann.com/login): Sign in with email, Google, or Apple, then track expenses, income, and accounts in the browser.
+- [Download on the App Store](https://apps.apple.com/us/app/money-plann/id6777957861): Money Plann for iPhone and iPad. Requires iOS 17 or later. Free, no subscription.
+
+## Product facts
+
+- Name: Money Plann (also called Money Plan)
+- Tagline: Talk to your money.
+- Category: personal finance, expense tracker, budget
+- Price: free
+- Web app: https://moneyplann.com/login
+- Marketing site: https://moneyplann.com/
+- iOS App Store: https://apps.apple.com/us/app/money-plann/id6777957861
+- Support: https://moneyplann.com/faq
+- Privacy: https://moneyplann.com/privacy
+- Contact: support@moneyplann.com
+
+The assistant answers questions about the expenses and income the signed-in user has logged. It does not connect to a bank.
