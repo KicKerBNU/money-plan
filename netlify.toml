@@ -11,6 +11,15 @@
   command = "npm run build"
   publish = "dist"
 
+# Browser backstop. Inline style attributes stay allowed (style-src-attr).
+# The sha256 is the JSON-LD block in index.html. Sign-in needs Google, Apple,
+# and the Firebase auth domain. The API origin is the Railway production host.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://apis.google.com https://www.gstatic.com https://www.googletagmanager.com 'sha256-nrgJi6ag4Iru+8UCoQZVlMnlJiD0v8XQiBjlRReFnq0='; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data: blob: https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' data:; connect-src 'self' https://money-plan-backend-production.up.railway.app https://*.googleapis.com https://*.google-analytics.com https://*.analytics.google.com https://*.g.doubleclick.net https://www.googletagmanager.com https://accounts.google.com https://appleid.apple.com; frame-src 'self' https://accounts.google.com https://money-plan-23efb.firebaseapp.com https://appleid.apple.com https://www.google.com https://www.gstatic.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; form-action 'self' https://accounts.google.com https://appleid.apple.com https://money-plan-23efb.firebaseapp.com; upgrade-insecure-requests"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
 [[headers]]
   for = "/sw.js"
   [headers.values]
