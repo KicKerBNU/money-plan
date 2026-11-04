@@ -25,3 +25,11 @@ export async function sendExpenseChat(messages: ExpenseChatMessage[], init?: Api
   })
   return response.data
 }
+
+export async function clearExpenseChat(init?: ApiFetchInit) {
+  await apiFetch<void>('/v1/ai/expense-chat', {
+    method: 'DELETE',
+    toast: { silentSuccess: true, silentError: true },
+    ...(init ?? {}),
+  })
+}

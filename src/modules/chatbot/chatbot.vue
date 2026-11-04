@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import FinanceNav from '@/modules/app/finance-nav.vue'
 import FinancePageSkeleton from '@/modules/app/FinancePageSkeleton.vue'
-import { sendExpenseChat, type ExpenseChatMessage } from '@/modules/chatbot/expense-chat.api'
+import { clearExpenseChat, sendExpenseChat, type ExpenseChatMessage } from '@/modules/chatbot/expense-chat.api'
 import {
   grantExpenseChatAIConsent,
   hasExpenseChatAIConsent,
@@ -163,10 +163,16 @@ async function send() {
   }
 }
 
-function clearChat() {
+async function clearChat() {
   if (isSending.value) return
-  messages.value = []
-  errorMessage.value = null
+  try {
+    await clearExpenseChat()
+    messages.value = []
+    errorMessage.value = null
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : t('common.unexpectedError')
+    errorMessage.value = msg
+  }
 }
 
 const showMessageList = computed(() => messages.value.length > 0 || isSending.value)
